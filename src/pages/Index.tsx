@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { CheckCircle, BookOpen, Users, Heart, TrendingUp } from "lucide-react";
+import { CheckCircle, BookOpen, Users, Heart, TrendingUp, Calendar, MessageSquare, UserCheck } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import ChurchHeader from "@/components/ChurchHeader";
 import StatsSection from "@/components/StatsSection";
@@ -17,25 +17,53 @@ const Index = () => {
       icon: <BookOpen className="h-8 w-8" />,
       title: "Trilhas Personalizadas",
       description: "Jornadas de crescimento adaptadas ao seu nível de maturidade espiritual na Monte Hebrom",
-      color: "from-blue-500 to-indigo-600"
+      color: "from-blue-500 to-indigo-600",
+      action: () => navigate('/trilhas')
     },
     {
       icon: <Users className="h-8 w-8" />,
       title: "Mentoria Um-a-Um",
       description: "Conecte-se com mentores qualificados da nossa igreja local",
-      color: "from-purple-500 to-pink-600"
+      color: "from-purple-500 to-pink-600",
+      action: () => navigate('/diagnostico')
     },
     {
       icon: <Heart className="h-8 w-8" />,
       title: "Devocionais Interativos",
       description: "Transforme seu tempo com Deus em uma experiência rica e pessoal",
-      color: "from-emerald-500 to-teal-600"
+      color: "from-emerald-500 to-teal-600",
+      action: () => navigate('/trilhas')
     },
     {
       icon: <TrendingUp className="h-8 w-8" />,
       title: "Integração com a Igreja",
       description: "Fortaleça nossa congregação com acompanhamento e cuidado pastoral",
-      color: "from-orange-500 to-red-600"
+      color: "from-orange-500 to-red-600",
+      action: () => navigate('/membros')
+    }
+  ];
+
+  const churchFeatures = [
+    {
+      icon: <Calendar className="h-8 w-8" />,
+      title: "Agenda da Igreja",
+      description: "Acompanhe todos os eventos, cultos, estudos e atividades da Monte Hebrom",
+      color: "from-blue-500 to-cyan-600",
+      action: () => navigate('/agenda')
+    },
+    {
+      icon: <UserCheck className="h-8 w-8" />,
+      title: "Membros da Igreja",
+      description: "Gerenciamento completo dos membros com relacionamentos e ministérios",
+      color: "from-green-500 to-emerald-600",
+      action: () => navigate('/membros')
+    },
+    {
+      icon: <MessageSquare className="h-8 w-8" />,
+      title: "Comunicação",
+      description: "Feed social para compartilhar momentos e se conectar com a família da fé",
+      color: "from-purple-500 to-violet-600",
+      action: () => navigate('/comunicacao')
     }
   ];
 
@@ -68,6 +96,42 @@ const Index = () => {
                 }`}
                 onMouseEnter={() => setHoveredFeature(index)}
                 onMouseLeave={() => setHoveredFeature(null)}
+                onClick={feature.action}
+              >
+                <div className={`absolute inset-0 bg-gradient-to-br ${feature.color} opacity-0 hover:opacity-10 transition-opacity duration-300`} />
+                <CardHeader className="text-center">
+                  <div className={`mx-auto mb-4 p-3 rounded-full bg-gradient-to-r ${feature.color} text-white w-fit`}>
+                    {feature.icon}
+                  </div>
+                  <CardTitle className="text-xl mb-2">{feature.title}</CardTitle>
+                  <CardDescription className="text-gray-600 leading-relaxed">
+                    {feature.description}
+                  </CardDescription>
+                </CardHeader>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Church Management Features */}
+      <div className="py-24 bg-gradient-to-b from-gray-50 to-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              Gestão da Nossa Igreja
+            </h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              Ferramentas completas para fortalecer a comunhão e organização da Monte Hebrom
+            </p>
+          </div>
+          
+          <div className="grid md:grid-cols-3 gap-8">
+            {churchFeatures.map((feature, index) => (
+              <Card 
+                key={index}
+                className="relative overflow-hidden transition-all duration-500 hover:shadow-2xl hover:-translate-y-2 cursor-pointer"
+                onClick={feature.action}
               >
                 <div className={`absolute inset-0 bg-gradient-to-br ${feature.color} opacity-0 hover:opacity-10 transition-opacity duration-300`} />
                 <CardHeader className="text-center">
@@ -110,6 +174,7 @@ const Index = () => {
               variant="outline" 
               size="lg"
               className="border-2 border-white text-white hover:bg-white hover:text-gray-900 transition-all duration-300"
+              onClick={() => navigate('/membros')}
             >
               Falar com a Liderança
             </Button>
