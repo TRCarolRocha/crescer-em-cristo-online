@@ -17,18 +17,6 @@ const ChurchHeader = () => {
       
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 w-full">
         <div className="text-center">
-          {/* Logo da Igreja - Muito maior */}
-          <div className="mb-16 flex justify-center">
-            <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-purple-600/20 rounded-full blur-2xl scale-110"></div>
-              <img 
-                src="/lovable-uploads/a989c536-6a58-44f9-a982-3a6b3847a288.png" 
-                alt="Igreja Batista Missionária Ministério Monte Hebrom"
-                className="relative h-48 w-48 md:h-64 md:w-64 lg:h-80 lg:w-80 object-contain drop-shadow-2xl"
-              />
-            </div>
-          </div>
-          
           {/* Subtítulo menor e mais sutil */}
           <div className="mb-8">
             <span className="inline-flex items-center gap-2 text-xs md:text-sm font-medium text-blue-600/80 tracking-[0.2em] uppercase">
@@ -38,15 +26,32 @@ const ChurchHeader = () => {
             </span>
           </div>
           
-          {/* Nome da Igreja - Destaque principal */}
-          <h1 className="text-6xl md:text-8xl lg:text-9xl font-black tracking-tight mb-6">
-            <span className="bg-gradient-to-r from-blue-900 via-indigo-800 to-purple-900 bg-clip-text text-transparent block">
-              MONTE
-            </span>
-            <span className="bg-gradient-to-r from-purple-800 via-blue-800 to-indigo-900 bg-clip-text text-transparent block -mt-4">
-              HEBROM
-            </span>
-          </h1>
+          {/* Logo e Nome da Igreja lado a lado */}
+          <div className="mb-8 flex flex-col lg:flex-row items-center justify-center gap-8 lg:gap-12">
+            {/* Logo */}
+            <div className="flex-shrink-0">
+              <div className="relative">
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-purple-600/20 rounded-full blur-2xl scale-110"></div>
+                <img 
+                  src="/lovable-uploads/a989c536-6a58-44f9-a982-3a6b3847a288.png" 
+                  alt="Igreja Batista Missionária Ministério Monte Hebrom"
+                  className="relative h-32 w-32 md:h-40 md:w-40 lg:h-48 lg:w-48 object-contain drop-shadow-2xl"
+                />
+              </div>
+            </div>
+            
+            {/* Nome da Igreja */}
+            <div className="text-center lg:text-left">
+              <h1 className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tight">
+                <span className="bg-gradient-to-r from-blue-900 via-indigo-800 to-purple-900 bg-clip-text text-transparent block">
+                  MONTE
+                </span>
+                <span className="bg-gradient-to-r from-purple-800 via-blue-800 to-indigo-900 bg-clip-text text-transparent block -mt-2 lg:-mt-4">
+                  HEBROM
+                </span>
+              </h1>
+            </div>
+          </div>
           
           {/* Slogan */}
           <div className="mb-12">
