@@ -1,16 +1,14 @@
-
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import UserMenu from "./auth/UserMenu";
-
 const ChurchHeader = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
-
-  return (
-    <div className="relative overflow-hidden bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 min-h-screen flex items-center">
+  const {
+    user
+  } = useAuth();
+  return <div className="relative overflow-hidden bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 min-h-screen flex items-center">
       {/* Background decorative elements */}
       <div className="absolute inset-0">
         <div className="absolute top-20 left-10 w-72 h-72 bg-blue-200/20 rounded-full blur-3xl"></div>
@@ -20,17 +18,9 @@ const ChurchHeader = () => {
 
       {/* User Menu no canto superior direito */}
       <div className="absolute top-6 right-6 z-10">
-        {user ? (
-          <UserMenu />
-        ) : (
-          <Button 
-            variant="outline" 
-            onClick={() => navigate('/auth')}
-            className="bg-white/90 backdrop-blur-sm"
-          >
+        {user ? <UserMenu /> : <Button variant="outline" onClick={() => navigate('/auth')} className="bg-white/90 backdrop-blur-sm">
             Entrar
-          </Button>
-        )}
+          </Button>}
       </div>
       
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 w-full">
@@ -50,11 +40,7 @@ const ChurchHeader = () => {
             <div className="flex-shrink-0">
               <div className="relative">
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-purple-600/20 rounded-full blur-2xl scale-110"></div>
-                <img 
-                  src="/lovable-uploads/a989c536-6a58-44f9-a982-3a6b3847a288.png" 
-                  alt="Igreja Batista Missionária Ministério Monte Hebrom"
-                  className="relative h-32 w-32 md:h-40 md:w-40 lg:h-48 lg:w-48 object-contain drop-shadow-2xl"
-                />
+                <img src="/lovable-uploads/a989c536-6a58-44f9-a982-3a6b3847a288.png" alt="Igreja Batista Missionária Ministério Monte Hebrom" className="relative h-32 w-32 md:h-40 md:w-40 lg:h-48 lg:w-48 object-contain drop-shadow-2xl" />
               </div>
             </div>
             
@@ -76,9 +62,7 @@ const ChurchHeader = () => {
             <p className="text-xl md:text-2xl font-semibold text-blue-800 mb-2">
               Lugar de Refúgio e Aliança
             </p>
-            <p className="text-lg text-gray-600 font-medium">
-              Ibamonte • Rio de Janeiro
-            </p>
+            <p className="text-lg text-gray-600 font-medium">IBAMONTE</p>
           </div>
           
           {/* Descrição mais concisa */}
@@ -94,20 +78,11 @@ const ChurchHeader = () => {
           
           {/* Botões de ação principais */}
           <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-16">
-            <Button 
-              size="lg" 
-              className="group bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:scale-105 px-12 py-6 text-xl font-bold rounded-full border-0"
-              onClick={() => user ? navigate('/diagnostico') : navigate('/auth')}
-            >
+            <Button size="lg" className="group bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:scale-105 px-12 py-6 text-xl font-bold rounded-full border-0" onClick={() => user ? navigate('/diagnostico') : navigate('/auth')}>
               {user ? 'Continuar Jornada' : 'Iniciar Minha Jornada'}
               <ArrowRight className="ml-3 h-6 w-6 group-hover:translate-x-1 transition-transform" />
             </Button>
-            <Button 
-              variant="outline" 
-              size="lg"
-              className="border-3 border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white transition-all duration-300 px-12 py-6 text-xl font-bold rounded-full shadow-xl hover:shadow-2xl bg-white/90 backdrop-blur-sm"
-              onClick={() => user ? navigate('/trilhas') : navigate('/auth')}
-            >
+            <Button variant="outline" size="lg" className="border-3 border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white transition-all duration-300 px-12 py-6 text-xl font-bold rounded-full shadow-xl hover:shadow-2xl bg-white/90 backdrop-blur-sm" onClick={() => user ? navigate('/trilhas') : navigate('/auth')}>
               Conhecer as Trilhas
             </Button>
           </div>
@@ -122,8 +97,6 @@ const ChurchHeader = () => {
           </div>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default ChurchHeader;
