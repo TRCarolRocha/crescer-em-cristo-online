@@ -2,9 +2,12 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import UserMenu from "./auth/UserMenu";
 
 const ChurchHeader = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   return (
     <div className="relative overflow-hidden bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 min-h-screen flex items-center">
@@ -13,6 +16,21 @@ const ChurchHeader = () => {
         <div className="absolute top-20 left-10 w-72 h-72 bg-blue-200/20 rounded-full blur-3xl"></div>
         <div className="absolute bottom-20 right-10 w-96 h-96 bg-purple-200/20 rounded-full blur-3xl"></div>
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-indigo-200/15 rounded-full blur-3xl"></div>
+      </div>
+
+      {/* User Menu no canto superior direito */}
+      <div className="absolute top-6 right-6 z-10">
+        {user ? (
+          <UserMenu />
+        ) : (
+          <Button 
+            variant="outline" 
+            onClick={() => navigate('/auth')}
+            className="bg-white/90 backdrop-blur-sm"
+          >
+            Entrar
+          </Button>
+        )}
       </div>
       
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 w-full">
@@ -79,15 +97,16 @@ const ChurchHeader = () => {
             <Button 
               size="lg" 
               className="group bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:scale-105 px-12 py-6 text-xl font-bold rounded-full border-0"
-              onClick={() => navigate('/diagnostico')}
+              onClick={() => user ? navigate('/diagnostico') : navigate('/auth')}
             >
-              Iniciar Minha Jornada
+              {user ? 'Continuar Jornada' : 'Iniciar Minha Jornada'}
               <ArrowRight className="ml-3 h-6 w-6 group-hover:translate-x-1 transition-transform" />
             </Button>
             <Button 
               variant="outline" 
               size="lg"
               className="border-3 border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white transition-all duration-300 px-12 py-6 text-xl font-bold rounded-full shadow-xl hover:shadow-2xl bg-white/90 backdrop-blur-sm"
+              onClick={() => user ? navigate('/trilhas') : navigate('/auth')}
             >
               Conhecer as Trilhas
             </Button>

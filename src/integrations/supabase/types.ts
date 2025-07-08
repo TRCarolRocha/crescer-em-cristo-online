@@ -14,7 +14,329 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      diagnostics: {
+        Row: {
+          answers: Json
+          completed_at: string | null
+          id: string
+          result: string
+          user_id: string
+        }
+        Insert: {
+          answers: Json
+          completed_at?: string | null
+          id?: string
+          result: string
+          user_id: string
+        }
+        Update: {
+          answers?: Json
+          completed_at?: string | null
+          id?: string
+          result?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      discipleship_tracks: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          difficulty: string | null
+          duration: string | null
+          id: string
+          lessons: number | null
+          level: string
+          title: string
+          topics: string[] | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          difficulty?: string | null
+          duration?: string | null
+          id?: string
+          lessons?: number | null
+          level: string
+          title: string
+          topics?: string[] | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          difficulty?: string | null
+          duration?: string | null
+          id?: string
+          lessons?: number | null
+          level?: string
+          title?: string
+          topics?: string[] | null
+        }
+        Relationships: []
+      }
+      event_registrations: {
+        Row: {
+          event_id: string
+          id: string
+          registered_at: string | null
+          user_id: string
+        }
+        Insert: {
+          event_id: string
+          id?: string
+          registered_at?: string | null
+          user_id: string
+        }
+        Update: {
+          event_id?: string
+          id?: string
+          registered_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_registrations_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      events: {
+        Row: {
+          created_at: string | null
+          created_by: string
+          description: string | null
+          event_date: string
+          event_time: string
+          id: string
+          location: string | null
+          max_participants: number | null
+          organizer: string | null
+          title: string
+          type: string
+        }
+        Insert: {
+          created_at?: string | null
+          created_by: string
+          description?: string | null
+          event_date: string
+          event_time: string
+          id?: string
+          location?: string | null
+          max_participants?: number | null
+          organizer?: string | null
+          title: string
+          type: string
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string
+          description?: string | null
+          event_date?: string
+          event_time?: string
+          id?: string
+          location?: string | null
+          max_participants?: number | null
+          organizer?: string | null
+          title?: string
+          type?: string
+        }
+        Relationships: []
+      }
+      group_members: {
+        Row: {
+          group_id: string
+          id: string
+          joined_at: string | null
+          user_id: string
+        }
+        Insert: {
+          group_id: string
+          id?: string
+          joined_at?: string | null
+          user_id: string
+        }
+        Update: {
+          group_id?: string
+          id?: string
+          joined_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "group_members_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "study_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      message_likes: {
+        Row: {
+          created_at: string | null
+          id: string
+          message_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          message_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          message_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "message_likes_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "messages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      messages: {
+        Row: {
+          author_id: string
+          content: string
+          created_at: string | null
+          group_id: string | null
+          id: string
+          image_url: string | null
+          type: string | null
+        }
+        Insert: {
+          author_id: string
+          content: string
+          created_at?: string | null
+          group_id?: string | null
+          id?: string
+          image_url?: string | null
+          type?: string | null
+        }
+        Update: {
+          author_id?: string
+          content?: string
+          created_at?: string | null
+          group_id?: string | null
+          id?: string
+          image_url?: string | null
+          type?: string | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          address: string | null
+          avatar_url: string | null
+          birth_date: string | null
+          created_at: string | null
+          department: string | null
+          full_name: string | null
+          id: string
+          ministry: string | null
+          phone: string | null
+          role: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          address?: string | null
+          avatar_url?: string | null
+          birth_date?: string | null
+          created_at?: string | null
+          department?: string | null
+          full_name?: string | null
+          id: string
+          ministry?: string | null
+          phone?: string | null
+          role?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          address?: string | null
+          avatar_url?: string | null
+          birth_date?: string | null
+          created_at?: string | null
+          department?: string | null
+          full_name?: string | null
+          id?: string
+          ministry?: string | null
+          phone?: string | null
+          role?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      study_groups: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          leader_id: string
+          max_members: number | null
+          name: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          leader_id: string
+          max_members?: number | null
+          name: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          leader_id?: string
+          max_members?: number | null
+          name?: string
+        }
+        Relationships: []
+      }
+      user_track_progress: {
+        Row: {
+          completed_at: string | null
+          id: string
+          progress: number | null
+          started_at: string | null
+          track_id: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          id?: string
+          progress?: number | null
+          started_at?: string | null
+          track_id: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          id?: string
+          progress?: number | null
+          started_at?: string | null
+          track_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_track_progress_track_id_fkey"
+            columns: ["track_id"]
+            isOneToOne: false
+            referencedRelation: "discipleship_tracks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
