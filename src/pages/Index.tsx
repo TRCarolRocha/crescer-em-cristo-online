@@ -22,10 +22,10 @@ const Index = () => {
     },
     {
       icon: <Users className="h-8 w-8" />,
-      title: "Mentoria Um-a-Um",
-      description: "Conecte-se com mentores qualificados da nossa igreja local",
+      title: "Diagnóstico Espiritual",
+      description: "Descubra seu nível espiritual em 2 minutos e receba recomendações personalizadas",
       color: "from-purple-500 to-pink-600",
-      action: () => navigate('/diagnostico')
+      action: () => navigate('/diagnostico-publico')
     },
     {
       icon: <Heart className="h-8 w-8" />,
@@ -165,9 +165,9 @@ const Index = () => {
             <Button 
               size="lg" 
               className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-300"
-              onClick={() => navigate('/diagnostico')}
+              onClick={() => navigate('/diagnostico-publico')}
             >
-              Começar Meu Diagnóstico
+              🪧 Descobrir Meu Nível Espiritual
               <CheckCircle className="ml-2 h-5 w-5" />
             </Button>
             <Button 

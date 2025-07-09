@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -7,7 +6,8 @@ import { Progress } from '@/components/ui/progress';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { Clock, BookOpen, Users, Star, Play } from 'lucide-react';
+import { Clock, BookOpen, Users, Star, Play, Home } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface Track {
   id: string;
@@ -33,6 +33,7 @@ const Trilhas = () => {
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchTracks();
@@ -149,6 +150,17 @@ const Trilhas = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
       <div className="container mx-auto px-4 py-8">
+        <div className="flex items-center justify-between mb-8">
+          <Button
+            variant="outline"
+            onClick={() => navigate('/')}
+            className="flex items-center gap-2"
+          >
+            <Home className="h-4 w-4" />
+            Voltar para Home
+          </Button>
+        </div>
+
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-900 to-purple-900 bg-clip-text text-transparent mb-4">
             Trilhas de Discipulado
@@ -255,7 +267,7 @@ const Trilhas = () => {
             <p className="text-gray-600 mb-4">
               Entre em sua conta para iniciar as trilhas e acompanhar seu progresso.
             </p>
-            <Button onClick={() => window.location.href = '/auth'}>
+            <Button onClick={() => navigate('/auth')}>
               Fazer Login
             </Button>
           </div>
