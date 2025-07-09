@@ -4,13 +4,52 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { CheckCircle, BookOpen, Users, Heart, TrendingUp, Calendar, MessageSquare, UserCheck } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { useEffect } from "react";
 import ChurchHeader from "@/components/ChurchHeader";
 import StatsSection from "@/components/StatsSection";
 import TestimonialsSection from "@/components/TestimonialsSection";
+import AvisosDestaque from "@/components/AvisosDestaque";
 
 const Index = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [hoveredFeature, setHoveredFeature] = useState<number | null>(null);
+  const [hasCompletedDiagnostic, setHasCompletedDiagnostic] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      checkDiagnosticStatus();
+    }
+  }, [user]);
+
+  const checkDiagnosticStatus = async () => {
+    if (!user) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('diagnostics')
+        .select('id')
+        .eq('user_id', user.id)
+        .limit(1)
+        .single();
+
+      if (data && !error) {
+        setHasCompletedDiagnostic(true);
+      }
+    } catch (error) {
+      console.log('Usuário ainda não fez o diagnóstico');
+    }
+  };
+
+  const handleContinueJourney = () => {
+    if (user && hasCompletedDiagnostic) {
+      navigate('/trilhas');
+    } else {
+      navigate('/diagnostico-publico');
+    }
+  };
 
   const features = [
     {
@@ -36,10 +75,10 @@ const Index = () => {
     },
     {
       icon: <TrendingUp className="h-8 w-8" />,
-      title: "Integração com a Igreja",
-      description: "Fortaleça nossa congregação com acompanhamento e cuidado pastoral",
+      title: "Comunidade da Fé",
+      description: "Conecte-se com outros membros e cresça juntos em comunhão",
       color: "from-orange-500 to-red-600",
-      action: () => navigate('/membros')
+      action: () => navigate('/comunicacao')
     }
   ];
 
@@ -74,6 +113,9 @@ const Index = () => {
 
       {/* Stats Section */}
       <StatsSection />
+
+      {/* Avisos em Destaque */}
+      <AvisosDestaque />
 
       {/* Features Section */}
       <div className="py-24 bg-gradient-to-b from-white to-gray-50">
@@ -149,9 +191,6 @@ const Index = () => {
         </div>
       </div>
 
-      {/* Testimonials Section */}
-      <TestimonialsSection />
-
       {/* CTA Section */}
       <div className="py-24 bg-gradient-to-br from-gray-900 to-gray-800 text-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -159,16 +198,25 @@ const Index = () => {
             Pronto para Crescer na Monte Hebrom?
           </h2>
           <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
-            Faça parte da nossa jornada de discipulado digital e fortaleça sua caminhada cristã junto com nossa igreja
+            Juntos, como corpo de Cristo, vivemos o IDE com paixão, unidade e avivamento.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button 
               size="lg" 
               className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-300"
-              onClick={() => navigate('/diagnostico-publico')}
+              onClick={handleContinueJourney}
             >
-              🪧 Descobrir Meu Nível Espiritual
-              <CheckCircle className="ml-2 h-5 w-5" />
+              {user && hasCompletedDiagnostic ? (
+                <>
+                  📚 Continuar Jornada
+                  <CheckCircle className="ml-2 h-5 w-5" />
+                </>
+              ) : (
+                <>
+                  🪧 Descobrir Meu Nível Espiritual
+                  <CheckCircle className="ml-2 h-5 w-5" />
+                </>
+              )}
             </Button>
             <Button 
               variant="outline" 

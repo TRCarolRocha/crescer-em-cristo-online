@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -6,8 +7,9 @@ import { Progress } from '@/components/ui/progress';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { Clock, BookOpen, Users, Star, Play, Home } from 'lucide-react';
+import { Clock, BookOpen, Users, Star, Play, Home, ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import ConteudoTrilha from '@/components/ConteudoTrilha';
 
 interface Track {
   id: string;
@@ -31,6 +33,7 @@ const Trilhas = () => {
   const [tracks, setTracks] = useState<Track[]>([]);
   const [userProgress, setUserProgress] = useState<UserProgress[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedTrack, setSelectedTrack] = useState<Track | null>(null);
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -117,6 +120,14 @@ const Trilhas = () => {
     }
   };
 
+  const openTrack = (track: Track) => {
+    setSelectedTrack(track);
+    // Iniciar trilha automaticamente se o usuário estiver logado e não tiver iniciado
+    if (user && !getTrackProgress(track.id)) {
+      startTrack(track.id);
+    }
+  };
+
   const getLevelColor = (level: string) => {
     switch (level) {
       case 'novo': return 'bg-green-100 text-green-800';
@@ -143,6 +154,38 @@ const Trilhas = () => {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  if (selectedTrack) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex items-center gap-4 mb-8">
+            <Button
+              variant="outline"
+              onClick={() => setSelectedTrack(null)}
+              className="flex items-center gap-2"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Voltar às Trilhas
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => navigate('/')}
+              className="flex items-center gap-2"
+            >
+              <Home className="h-4 w-4" />
+              Voltar para Home
+            </Button>
+          </div>
+
+          <ConteudoTrilha 
+            trilhaId={selectedTrack.id} 
+            trilhaTitulo={selectedTrack.title}
+          />
+        </div>
       </div>
     );
   }
@@ -233,15 +276,13 @@ const Trilhas = () => {
                   )}
 
                   <Button 
-                    onClick={() => startTrack(track.id)}
-                    disabled={isStarted}
+                    onClick={() => openTrack(track)}
                     className="w-full"
-                    variant={isStarted ? "outline" : "default"}
                   >
                     {isCompleted ? (
                       <>
                         <Star className="h-4 w-4 mr-2" />
-                        Concluída
+                        Revisar Conteúdo
                       </>
                     ) : isStarted ? (
                       <>
