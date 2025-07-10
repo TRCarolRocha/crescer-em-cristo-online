@@ -97,6 +97,101 @@ export type Database = {
           },
         ]
       }
+      devocionais: {
+        Row: {
+          created_at: string
+          data: string
+          id: string
+          pergunta_1: string
+          pergunta_2: string
+          pergunta_3: string
+          referencia: string
+          tema: string
+          texto_central: string
+          updated_at: string
+          versiculo: string
+        }
+        Insert: {
+          created_at?: string
+          data: string
+          id?: string
+          pergunta_1: string
+          pergunta_2: string
+          pergunta_3: string
+          referencia: string
+          tema: string
+          texto_central: string
+          updated_at?: string
+          versiculo: string
+        }
+        Update: {
+          created_at?: string
+          data?: string
+          id?: string
+          pergunta_1?: string
+          pergunta_2?: string
+          pergunta_3?: string
+          referencia?: string
+          tema?: string
+          texto_central?: string
+          updated_at?: string
+          versiculo?: string
+        }
+        Relationships: []
+      }
+      devocional_historico: {
+        Row: {
+          aprendizado: string | null
+          completado: boolean
+          created_at: string
+          devocional_id: string
+          gratidao: string | null
+          id: string
+          oracao: string | null
+          resposta_1: string | null
+          resposta_2: string | null
+          resposta_3: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          aprendizado?: string | null
+          completado?: boolean
+          created_at?: string
+          devocional_id: string
+          gratidao?: string | null
+          id?: string
+          oracao?: string | null
+          resposta_1?: string | null
+          resposta_2?: string | null
+          resposta_3?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          aprendizado?: string | null
+          completado?: boolean
+          created_at?: string
+          devocional_id?: string
+          gratidao?: string | null
+          id?: string
+          oracao?: string | null
+          resposta_1?: string | null
+          resposta_2?: string | null
+          resposta_3?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "devocional_historico_devocional_id_fkey"
+            columns: ["devocional_id"]
+            isOneToOne: false
+            referencedRelation: "devocionais"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       diagnostics: {
         Row: {
           answers: Json

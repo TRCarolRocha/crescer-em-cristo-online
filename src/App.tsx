@@ -12,6 +12,7 @@ import Trilhas from "./pages/Trilhas";
 import Agenda from "./pages/Agenda";
 import Membros from "./pages/Membros";
 import Comunicacao from "./pages/Comunicacao";
+import Devocional from "./pages/Devocional";
 import AuthPage from "./components/auth/AuthPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import NotFound from "./pages/NotFound";
@@ -29,6 +30,11 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/diagnostico-publico" element={<DiagnosticoPublico />} />
+            <Route path="/devocional" element={
+              <ProtectedRoute>
+                <Devocional />
+              </ProtectedRoute>
+            } />
             <Route path="/diagnostico" element={
               <ProtectedRoute>
                 <Diagnostico />

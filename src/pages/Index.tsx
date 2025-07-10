@@ -2,15 +2,14 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { CheckCircle, BookOpen, Users, Heart, TrendingUp, Calendar, MessageSquare, UserCheck } from "lucide-react";
+import { CheckCircle, BookOpen, Users, Heart, TrendingUp, Calendar, MessageSquare, UserCheck, Book } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect } from "react";
 import ChurchHeader from "@/components/ChurchHeader";
-import StatsSection from "@/components/StatsSection";
 import TestimonialsSection from "@/components/TestimonialsSection";
-import AvisosDestaque from "@/components/AvisosDestaque";
+import CarrosselAvisos from "@/components/CarrosselAvisos";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -71,7 +70,7 @@ const Index = () => {
       title: "Devocionais Interativos",
       description: "Transforme seu tempo com Deus em uma experiência rica e pessoal",
       color: "from-emerald-500 to-teal-600",
-      action: () => navigate('/trilhas')
+      action: () => navigate('/devocional')
     },
     {
       icon: <TrendingUp className="h-8 w-8" />,
@@ -111,13 +110,7 @@ const Index = () => {
       {/* Church Header */}
       <ChurchHeader />
 
-      {/* Stats Section */}
-      <StatsSection />
-
-      {/* Avisos em Destaque */}
-      <AvisosDestaque />
-
-      {/* Features Section */}
+      {/* Quatro Pilares do Discipulado - Movido para cima */}
       <div className="py-24 bg-gradient-to-b from-white to-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
@@ -156,6 +149,9 @@ const Index = () => {
         </div>
       </div>
 
+      {/* Carrossel de Avisos */}
+      <CarrosselAvisos />
+
       {/* Church Management Features */}
       <div className="py-24 bg-gradient-to-b from-gray-50 to-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -191,6 +187,9 @@ const Index = () => {
         </div>
       </div>
 
+      {/* Testimonials Section */}
+      <TestimonialsSection />
+
       {/* CTA Section */}
       <div className="py-24 bg-gradient-to-br from-gray-900 to-gray-800 text-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -201,6 +200,14 @@ const Index = () => {
             Juntos, como corpo de Cristo, vivemos o IDE com paixão, unidade e avivamento.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button 
+              size="lg" 
+              className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+              onClick={() => navigate('/devocional')}
+            >
+              <Book className="mr-2 h-5 w-5" />
+              📖 Acessar Devocionais
+            </Button>
             <Button 
               size="lg" 
               className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-300"
