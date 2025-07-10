@@ -8,7 +8,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect } from "react";
 import ChurchHeader from "@/components/ChurchHeader";
-import TestimonialsSection from "@/components/TestimonialsSection";
 import CarrosselAvisos from "@/components/CarrosselAvisos";
 
 const Index = () => {
@@ -110,8 +109,47 @@ const Index = () => {
       {/* Church Header */}
       <ChurchHeader />
 
-      {/* Quatro Pilares do Discipulado - Movido para cima */}
+      {/* Hero Section com botões movidos do rodapé */}
       <div className="py-24 bg-gradient-to-b from-white to-gray-50">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-3xl md:text-4xl font-bold mb-6 text-gray-900">
+            Pronto para Crescer na Monte Hebrom?
+          </h2>
+          <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+            Juntos, como corpo de Cristo, vivemos o IDE com paixão, unidade e avivamento.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button 
+              size="lg" 
+              className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+              onClick={() => navigate('/devocional')}
+            >
+              <Book className="mr-2 h-5 w-5" />
+              📖 Acessar Devocionais
+            </Button>
+            <Button 
+              size="lg" 
+              className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+              onClick={handleContinueJourney}
+            >
+              {user && hasCompletedDiagnostic ? (
+                <>
+                  📚 Continuar Jornada
+                  <CheckCircle className="ml-2 h-5 w-5" />
+                </>
+              ) : (
+                <>
+                  🪧 Descobrir Meu Nível Espiritual
+                  <CheckCircle className="ml-2 h-5 w-5" />
+                </>
+              )}
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* Quatro Pilares do Discipulado */}
+      <div className="py-24 bg-gradient-to-b from-gray-50 to-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
@@ -153,7 +191,7 @@ const Index = () => {
       <CarrosselAvisos />
 
       {/* Church Management Features */}
-      <div className="py-24 bg-gradient-to-b from-gray-50 to-white">
+      <div className="py-24 bg-gradient-to-b from-white to-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
@@ -187,53 +225,22 @@ const Index = () => {
         </div>
       </div>
 
-      {/* Testimonials Section */}
-      <TestimonialsSection />
-
-      {/* CTA Section */}
-      <div className="py-24 bg-gradient-to-br from-gray-900 to-gray-800 text-white">
+      {/* Footer simples apenas com Falar com a Liderança */}
+      <div className="py-16 bg-gradient-to-br from-gray-900 to-gray-800">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-6">
-            Pronto para Crescer na Monte Hebrom?
-          </h2>
-          <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
-            Juntos, como corpo de Cristo, vivemos o IDE com paixão, unidade e avivamento.
+          <h3 className="text-2xl font-bold text-white mb-4">
+            Precisa de Ajuda ou Orientação?
+          </h3>
+          <p className="text-gray-300 mb-8">
+            Nossa liderança está disponível para conversar e apoiar sua jornada espiritual
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button 
-              size="lg" 
-              className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white shadow-lg hover:shadow-xl transition-all duration-300"
-              onClick={() => navigate('/devocional')}
-            >
-              <Book className="mr-2 h-5 w-5" />
-              📖 Acessar Devocionais
-            </Button>
-            <Button 
-              size="lg" 
-              className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-300"
-              onClick={handleContinueJourney}
-            >
-              {user && hasCompletedDiagnostic ? (
-                <>
-                  📚 Continuar Jornada
-                  <CheckCircle className="ml-2 h-5 w-5" />
-                </>
-              ) : (
-                <>
-                  🪧 Descobrir Meu Nível Espiritual
-                  <CheckCircle className="ml-2 h-5 w-5" />
-                </>
-              )}
-            </Button>
-            <Button 
-              variant="outline" 
-              size="lg"
-              className="border-2 border-white text-white hover:bg-white hover:text-gray-900 transition-all duration-300"
-              onClick={() => navigate('/membros')}
-            >
-              Falar com a Liderança
-            </Button>
-          </div>
+          <Button 
+            size="lg"
+            className="bg-white text-gray-900 hover:bg-gray-100 shadow-lg hover:shadow-xl transition-all duration-300 font-semibold px-8 py-4"
+            onClick={() => navigate('/membros')}
+          >
+            💬 Falar com a Liderança
+          </Button>
         </div>
       </div>
     </div>
