@@ -1,8 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
 import { Heart, Plus, Edit } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -54,13 +53,17 @@ const AdminDevocionais = () => {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('pt-BR', {
-      timeZone: 'America/Sao_Paulo',
-      weekday: 'long',
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric'
-    }).replace(/^./, c => c.toUpperCase());
+    try {
+      return new Date(dateString).toLocaleDateString('pt-BR', {
+        timeZone: 'America/Sao_Paulo',
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+      }).replace(/^./, c => c.toUpperCase());
+    } catch (error) {
+      return dateString;
+    }
   };
 
   if (loading) {
@@ -94,6 +97,9 @@ const AdminDevocionais = () => {
                     <h3 className="font-semibold text-lg">{devocional.tema}</h3>
                     <p className="text-gray-600">{devocional.referencia}</p>
                     <p className="text-gray-500 text-sm">{formatDate(devocional.data)}</p>
+                    <p className="text-gray-700 text-sm mt-2 line-clamp-2">
+                      {devocional.texto_central.substring(0, 150)}...
+                    </p>
                   </div>
                 </div>
                 <Button 

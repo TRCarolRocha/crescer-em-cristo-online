@@ -1,11 +1,13 @@
 
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, Plus, Edit, MapPin } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import CreateEventDialog from './CreateEventDialog';
+import EditEventDialog from './EditEventDialog';
 
 interface AgendaEvento {
   id: string;
@@ -21,6 +23,8 @@ interface AgendaEvento {
 const AdminAgenda = () => {
   const [eventos, setEventos] = useState<AgendaEvento[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [editingEvento, setEditingEvento] = useState<AgendaEvento | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -69,7 +73,7 @@ const AdminAgenda = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Gestão da Agenda</h2>
-        <Button>
+        <Button onClick={() => setShowCreateDialog(true)}>
           <Plus className="h-4 w-4 mr-2" />
           Novo Evento
         </Button>
@@ -106,9 +110,13 @@ const AdminAgenda = () => {
                 </div>
                 <div className="flex items-center gap-4">
                   <Badge variant={evento.status ? 'default' : 'secondary'}>
-                    {evento.status ? 'Ativo' : 'Inativo'}
+                    {evento.status ? 'Visível' : 'Oculto'}
                   </Badge>
-                  <Button size="sm" variant="outline">
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    onClick={() => setEditingEvento(evento)}
+                  >
                     <Edit className="h-4 w-4" />
                   </Button>
                 </div>
@@ -117,6 +125,27 @@ const AdminAgenda = () => {
           </Card>
         ))}
       </div>
+
+      {showCreateDialog && (
+        <CreateEventDialog
+          onClose={() => setShowCreateDialog(false)}
+          onSuccess={() => {
+            fetchEventos();
+            setShowCreateDialog(false);
+          }}
+        />
+      )}
+
+      {editingEvento && (
+        <EditEventDialog
+          evento={editingEvento}
+          onClose={() => setEditingEvento(null)}
+          onSuccess={() => {
+            fetchEventos();
+            setEditingEvento(null);
+          }}
+        />
+      )}
     </div>
   );
 };

@@ -17,9 +17,9 @@ const CreateDevocionalDialog: React.FC<CreateDevocionalDialogProps> = ({ onClose
   const [formData, setFormData] = useState({
     data: '',
     tema: '',
-    texto_central: '',
     versiculo: '',
     referencia: '',
+    texto_central: '',
     pergunta_1: '',
     pergunta_2: '',
     pergunta_3: ''
@@ -58,7 +58,7 @@ const CreateDevocionalDialog: React.FC<CreateDevocionalDialogProps> = ({ onClose
 
   return (
     <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Novo Devocional</DialogTitle>
         </DialogHeader>
@@ -85,17 +85,6 @@ const CreateDevocionalDialog: React.FC<CreateDevocionalDialogProps> = ({ onClose
             </div>
           </div>
 
-          <div>
-            <Label htmlFor="texto_central">Texto Central</Label>
-            <Textarea
-              id="texto_central"
-              value={formData.texto_central}
-              onChange={(e) => setFormData({ ...formData, texto_central: e.target.value })}
-              rows={4}
-              required
-            />
-          </div>
-
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label htmlFor="versiculo">Versículo</Label>
@@ -113,15 +102,28 @@ const CreateDevocionalDialog: React.FC<CreateDevocionalDialogProps> = ({ onClose
                 id="referencia"
                 value={formData.referencia}
                 onChange={(e) => setFormData({ ...formData, referencia: e.target.value })}
-                placeholder="ex: João 3:16"
+                placeholder="Ex: João 3:16"
                 required
               />
             </div>
           </div>
 
+          <div>
+            <Label htmlFor="texto_central">Texto Central</Label>
+            <Textarea
+              id="texto_central"
+              value={formData.texto_central}
+              onChange={(e) => setFormData({ ...formData, texto_central: e.target.value })}
+              rows={4}
+              required
+            />
+          </div>
+
           <div className="space-y-4">
+            <h4 className="font-semibold">Perguntas de Reflexão</h4>
+            
             <div>
-              <Label htmlFor="pergunta_1">Pergunta de Reflexão 1</Label>
+              <Label htmlFor="pergunta_1">Pergunta 1</Label>
               <Textarea
                 id="pergunta_1"
                 value={formData.pergunta_1}
@@ -130,8 +132,9 @@ const CreateDevocionalDialog: React.FC<CreateDevocionalDialogProps> = ({ onClose
                 required
               />
             </div>
+
             <div>
-              <Label htmlFor="pergunta_2">Pergunta de Reflexão 2</Label>
+              <Label htmlFor="pergunta_2">Pergunta 2</Label>
               <Textarea
                 id="pergunta_2"
                 value={formData.pergunta_2}
@@ -140,8 +143,9 @@ const CreateDevocionalDialog: React.FC<CreateDevocionalDialogProps> = ({ onClose
                 required
               />
             </div>
+
             <div>
-              <Label htmlFor="pergunta_3">Pergunta de Reflexão 3</Label>
+              <Label htmlFor="pergunta_3">Pergunta 3</Label>
               <Textarea
                 id="pergunta_3"
                 value={formData.pergunta_3}
