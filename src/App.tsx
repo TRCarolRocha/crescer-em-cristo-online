@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -13,8 +12,11 @@ import Agenda from "./pages/Agenda";
 import Membros from "./pages/Membros";
 import Comunicacao from "./pages/Comunicacao";
 import Devocional from "./pages/Devocional";
+import Perfil from "./pages/Perfil";
+import Admin from "./pages/Admin";
 import AuthPage from "./components/auth/AuthPage";
 import ProtectedRoute from "./components/ProtectedRoute";
+import AdminRoute from "./components/AdminRoute";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -34,6 +36,16 @@ const App = () => (
               <ProtectedRoute>
                 <Devocional />
               </ProtectedRoute>
+            } />
+            <Route path="/perfil" element={
+              <ProtectedRoute>
+                <Perfil />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin" element={
+              <AdminRoute>
+                <Admin />
+              </AdminRoute>
             } />
             <Route path="/diagnostico" element={
               <ProtectedRoute>

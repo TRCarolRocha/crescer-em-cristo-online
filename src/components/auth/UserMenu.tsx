@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
@@ -12,11 +12,23 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { LogOut, User, Settings } from 'lucide-react';
+import { LogOut, User, Settings, Shield } from 'lucide-react';
+import { getUserProfile } from '@/utils/adminUtils';
 
 const UserMenu = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const [userProfile, setUserProfile] = useState<any>(null);
+
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      if (user) {
+        const profile = await getUserProfile();
+        setUserProfile(profile);
+      }
+    };
+    fetchUserProfile();
+  }, [user]);
 
   if (!user) return null;
 
@@ -26,7 +38,7 @@ const UserMenu = () => {
   };
 
   const getUserDisplayName = () => {
-    return user.user_metadata?.full_name || user.email?.split('@')[0] || 'Usuário';
+    return userProfile?.full_name || user.user_metadata?.full_name || user.email?.split('@')[0] || 'Usuário';
   };
 
   const getUserInitials = () => {
@@ -34,12 +46,14 @@ const UserMenu = () => {
     return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
   };
 
+  const isAdmin = userProfile?.role === 'admin';
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-10 w-10 rounded-full">
           <Avatar className="h-10 w-10">
-            <AvatarImage src={user.user_metadata?.avatar_url} alt={getUserDisplayName()} />
+            <AvatarImage src={userProfile?.avatar_url || user.user_metadata?.avatar_url} alt={getUserDisplayName()} />
             <AvatarFallback className="bg-gradient-to-r from-blue-500 to-purple-600 text-white">
               {getUserInitials()}
             </AvatarFallback>
@@ -60,6 +74,12 @@ const UserMenu = () => {
           <User className="mr-2 h-4 w-4" />
           <span>Meu Perfil</span>
         </DropdownMenuItem>
+        {isAdmin && (
+          <DropdownMenuItem onClick={() => navigate('/admin')}>
+            <Shield className="mr-2 h-4 w-4" />
+            <span>Painel Admin</span>
+          </DropdownMenuItem>
+        )}
         <DropdownMenuItem>
           <Settings className="mr-2 h-4 w-4" />
           <span>Configurações</span>
