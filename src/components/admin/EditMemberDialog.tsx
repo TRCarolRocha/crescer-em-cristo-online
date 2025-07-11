@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -65,6 +64,25 @@ const EditMemberDialog: React.FC<EditMemberDialogProps> = ({ member, onClose, on
     }
   };
 
+  const addNewTag = async (tagName: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('ministerios_departamentos')
+        .insert([{ nome: tagName }])
+        .select()
+        .single();
+
+      if (error) throw error;
+      
+      // Atualizar a lista local
+      setMinisteriosDepartamentos(prev => [...prev, data]);
+      return data.id;
+    } catch (error) {
+      console.error('Erro ao criar nova tag:', error);
+      return null;
+    }
+  };
+
   const handleTagChange = (tagId: string, checked: boolean) => {
     if (checked) {
       setSelectedTags([...selectedTags, tagId]);
@@ -78,11 +96,28 @@ const EditMemberDialog: React.FC<EditMemberDialogProps> = ({ member, onClose, on
     setLoading(true);
 
     try {
+      // Verificar se departamento ou ministério são novos e criar tags se necessário
+      let updatedTags = [...selectedTags];
+
+      if (formData.department && !ministeriosDepartamentos.find(md => md.nome === formData.department)) {
+        const newTagId = await addNewTag(formData.department);
+        if (newTagId) {
+          updatedTags.push(newTagId);
+        }
+      }
+
+      if (formData.ministry && !ministeriosDepartamentos.find(md => md.nome === formData.ministry)) {
+        const newTagId = await addNewTag(formData.ministry);
+        if (newTagId) {
+          updatedTags.push(newTagId);
+        }
+      }
+
       const { error } = await supabase
         .from('profiles')
         .update({
           ...formData,
-          tags: selectedTags
+          tags: updatedTags
         })
         .eq('id', member.id);
 

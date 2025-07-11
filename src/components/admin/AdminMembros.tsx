@@ -8,6 +8,8 @@ import { Search, Edit, UserX, UserCheck, Plus } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import EditMemberDialog from './EditMemberDialog';
+import TagBadge from '@/components/TagBadge';
+import { getTagColor, getTagName } from '@/utils/tagUtils';
 
 interface Member {
   id: string;
@@ -24,15 +26,22 @@ interface Member {
   updated_at: string;
 }
 
+interface MinisterioDepartamento {
+  id: string;
+  nome: string;
+}
+
 const AdminMembros = () => {
   const [members, setMembers] = useState<Member[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
   const [editingMember, setEditingMember] = useState<Member | null>(null);
+  const [ministeriosDepartamentos, setMinisteriosDepartamentos] = useState<MinisterioDepartamento[]>([]);
   const { toast } = useToast();
 
   useEffect(() => {
     fetchMembers();
+    fetchMinisteriosDepartamentos();
   }, []);
 
   const fetchMembers = async () => {
@@ -53,6 +62,20 @@ const AdminMembros = () => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchMinisteriosDepartamentos = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('ministerios_departamentos')
+        .select('*')
+        .order('nome');
+
+      if (error) throw error;
+      setMinisteriosDepartamentos(data || []);
+    } catch (error) {
+      console.error('Erro ao buscar ministérios:', error);
     }
   };
 
@@ -99,6 +122,29 @@ const AdminMembros = () => {
                     <h3 className="font-semibold text-lg">{member.full_name || 'Nome não informado'}</h3>
                     <p className="text-gray-600">{member.phone || 'Telefone não informado'}</p>
                     <p className="text-gray-500 text-sm">{member.address || 'Endereço não informado'}</p>
+                    
+                    {/* Tags de ministérios/departamentos */}
+                    <div className="mt-2 flex flex-wrap">
+                      {member.department && (
+                        <TagBadge 
+                          tagName={member.department} 
+                          color={getTagColor(member.department)}
+                        />
+                      )}
+                      {member.ministry && (
+                        <TagBadge 
+                          tagName={member.ministry} 
+                          color={getTagColor(member.ministry)}
+                        />
+                      )}
+                      {member.tags?.map((tagId) => (
+                        <TagBadge
+                          key={tagId}
+                          tagName={getTagName(tagId, ministeriosDepartamentos)}
+                          color={getTagColor(getTagName(tagId, ministeriosDepartamentos))}
+                        />
+                      ))}
+                    </div>
                   </div>
                 </div>
                 <div className="flex items-center gap-4">

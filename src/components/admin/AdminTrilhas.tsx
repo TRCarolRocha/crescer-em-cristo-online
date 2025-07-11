@@ -6,6 +6,8 @@ import { Badge } from '@/components/ui/badge';
 import { BookOpen, Plus, Edit } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import CreateTrackDialog from './CreateTrackDialog';
+import EditTrackDialog from './EditTrackDialog';
 
 interface Track {
   id: string;
@@ -20,6 +22,8 @@ interface Track {
 const AdminTrilhas = () => {
   const [tracks, setTracks] = useState<Track[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [editingTrack, setEditingTrack] = useState<Track | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -59,7 +63,7 @@ const AdminTrilhas = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Gestão de Trilhas</h2>
-        <Button>
+        <Button onClick={() => setShowCreateDialog(true)}>
           <Plus className="h-4 w-4 mr-2" />
           Nova Trilha
         </Button>
@@ -84,7 +88,11 @@ const AdminTrilhas = () => {
                     </div>
                   </div>
                 </div>
-                <Button size="sm" variant="outline">
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  onClick={() => setEditingTrack(track)}
+                >
                   <Edit className="h-4 w-4" />
                 </Button>
               </div>
@@ -92,6 +100,27 @@ const AdminTrilhas = () => {
           </Card>
         ))}
       </div>
+
+      {showCreateDialog && (
+        <CreateTrackDialog
+          onClose={() => setShowCreateDialog(false)}
+          onSuccess={() => {
+            fetchTracks();
+            setShowCreateDialog(false);
+          }}
+        />
+      )}
+
+      {editingTrack && (
+        <EditTrackDialog
+          track={editingTrack}
+          onClose={() => setEditingTrack(null)}
+          onSuccess={() => {
+            fetchTracks();
+            setEditingTrack(null);
+          }}
+        />
+      )}
     </div>
   );
 };

@@ -6,6 +6,8 @@ import { Badge } from '@/components/ui/badge';
 import { MessageSquare, Plus, Edit, Eye, EyeOff } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import CreateAvisoDialog from './CreateAvisoDialog';
+import EditAvisoDialog from './EditAvisoDialog';
 
 interface Aviso {
   id: string;
@@ -20,6 +22,8 @@ interface Aviso {
 const AdminAvisos = () => {
   const [avisos, setAvisos] = useState<Aviso[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [editingAviso, setEditingAviso] = useState<Aviso | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -84,7 +88,7 @@ const AdminAvisos = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Gestão de Avisos</h2>
-        <Button>
+        <Button onClick={() => setShowCreateDialog(true)}>
           <Plus className="h-4 w-4 mr-2" />
           Novo Aviso
         </Button>
@@ -111,7 +115,11 @@ const AdminAvisos = () => {
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <Button size="sm" variant="outline">
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    onClick={() => setEditingAviso(aviso)}
+                  >
                     <Edit className="h-4 w-4" />
                   </Button>
                   <Button
@@ -127,6 +135,27 @@ const AdminAvisos = () => {
           </Card>
         ))}
       </div>
+
+      {showCreateDialog && (
+        <CreateAvisoDialog
+          onClose={() => setShowCreateDialog(false)}
+          onSuccess={() => {
+            fetchAvisos();
+            setShowCreateDialog(false);
+          }}
+        />
+      )}
+
+      {editingAviso && (
+        <EditAvisoDialog
+          aviso={editingAviso}
+          onClose={() => setEditingAviso(null)}
+          onSuccess={() => {
+            fetchAvisos();
+            setEditingAviso(null);
+          }}
+        />
+      )}
     </div>
   );
 };

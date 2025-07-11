@@ -6,6 +6,8 @@ import { Badge } from '@/components/ui/badge';
 import { Heart, Plus, Edit } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import CreateDevocionalDialog from './CreateDevocionalDialog';
+import EditDevocionalDialog from './EditDevocionalDialog';
 
 interface Devocional {
   id: string;
@@ -14,11 +16,16 @@ interface Devocional {
   versiculo: string;
   referencia: string;
   texto_central: string;
+  pergunta_1: string;
+  pergunta_2: string;
+  pergunta_3: string;
 }
 
 const AdminDevocionais = () => {
   const [devocionais, setDevocionais] = useState<Devocional[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [editingDevocional, setEditingDevocional] = useState<Devocional | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -46,6 +53,16 @@ const AdminDevocionais = () => {
     }
   };
 
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('pt-BR', {
+      timeZone: 'America/Sao_Paulo',
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    }).replace(/^./, c => c.toUpperCase());
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-8">
@@ -58,7 +75,7 @@ const AdminDevocionais = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Gestão de Devocionais</h2>
-        <Button>
+        <Button onClick={() => setShowCreateDialog(true)}>
           <Plus className="h-4 w-4 mr-2" />
           Novo Devocional
         </Button>
@@ -76,10 +93,14 @@ const AdminDevocionais = () => {
                   <div>
                     <h3 className="font-semibold text-lg">{devocional.tema}</h3>
                     <p className="text-gray-600">{devocional.referencia}</p>
-                    <p className="text-gray-500 text-sm">{new Date(devocional.data).toLocaleDateString('pt-BR')}</p>
+                    <p className="text-gray-500 text-sm">{formatDate(devocional.data)}</p>
                   </div>
                 </div>
-                <Button size="sm" variant="outline">
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  onClick={() => setEditingDevocional(devocional)}
+                >
                   <Edit className="h-4 w-4" />
                 </Button>
               </div>
@@ -87,6 +108,27 @@ const AdminDevocionais = () => {
           </Card>
         ))}
       </div>
+
+      {showCreateDialog && (
+        <CreateDevocionalDialog
+          onClose={() => setShowCreateDialog(false)}
+          onSuccess={() => {
+            fetchDevocionais();
+            setShowCreateDialog(false);
+          }}
+        />
+      )}
+
+      {editingDevocional && (
+        <EditDevocionalDialog
+          devocional={editingDevocional}
+          onClose={() => setEditingDevocional(null)}
+          onSuccess={() => {
+            fetchDevocionais();
+            setEditingDevocional(null);
+          }}
+        />
+      )}
     </div>
   );
 };

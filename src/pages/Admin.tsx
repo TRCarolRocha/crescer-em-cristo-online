@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
@@ -9,6 +8,7 @@ import AdminMembros from '@/components/admin/AdminMembros';
 import AdminTrilhas from '@/components/admin/AdminTrilhas';
 import AdminDevocionais from '@/components/admin/AdminDevocionais';
 import AdminAvisos from '@/components/admin/AdminAvisos';
+import AdminAgenda from '@/components/admin/AdminAgenda';
 
 const Admin = () => {
   const navigate = useNavigate();
@@ -30,7 +30,7 @@ const Admin = () => {
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="membros" className="flex items-center gap-2">
               <Users className="h-4 w-4" />
               Membros
@@ -46,6 +46,10 @@ const Admin = () => {
             <TabsTrigger value="avisos" className="flex items-center gap-2">
               <MessageSquare className="h-4 w-4" />
               Avisos
+            </TabsTrigger>
+            <TabsTrigger value="agenda" className="flex items-center gap-2">
+              <Settings className="h-4 w-4" />
+              Agenda
             </TabsTrigger>
           </TabsList>
 
@@ -63,6 +67,10 @@ const Admin = () => {
 
           <TabsContent value="avisos" className="mt-6">
             <AdminAvisos />
+          </TabsContent>
+
+          <TabsContent value="agenda" className="mt-6">
+            <AdminAgenda />
           </TabsContent>
         </Tabs>
       </div>
