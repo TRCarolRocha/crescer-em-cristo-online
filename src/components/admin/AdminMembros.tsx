@@ -15,11 +15,13 @@ interface Member {
   phone: string;
   address: string;
   role: string;
-  ativo: boolean;
   avatar_url: string;
   birth_date: string;
   department: string;
   ministry: string;
+  tags: string[];
+  created_at: string;
+  updated_at: string;
 }
 
 const AdminMembros = () => {
@@ -51,31 +53,6 @@ const AdminMembros = () => {
       });
     } finally {
       setLoading(false);
-    }
-  };
-
-  const toggleMemberStatus = async (memberId: string, currentStatus: boolean) => {
-    try {
-      const { error } = await supabase
-        .from('profiles')
-        .update({ ativo: !currentStatus })
-        .eq('id', memberId);
-
-      if (error) throw error;
-
-      toast({
-        title: "Sucesso",
-        description: `Membro ${!currentStatus ? 'ativado' : 'inativado'} com sucesso`
-      });
-
-      fetchMembers();
-    } catch (error) {
-      console.error('Erro ao alterar status:', error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível alterar o status do membro",
-        variant: "destructive"
-      });
     }
   };
 
@@ -111,7 +88,7 @@ const AdminMembros = () => {
 
       <div className="grid gap-4">
         {filteredMembers.map((member) => (
-          <Card key={member.id} className={`${!member.ativo ? 'opacity-60' : ''}`}>
+          <Card key={member.id}>
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
@@ -128,9 +105,6 @@ const AdminMembros = () => {
                   <Badge variant={member.role === 'admin' ? 'default' : 'secondary'}>
                     {member.role === 'admin' ? 'Administrador' : 'Membro'}
                   </Badge>
-                  <Badge variant={member.ativo ? 'default' : 'destructive'}>
-                    {member.ativo ? 'Ativo' : 'Inativo'}
-                  </Badge>
                   <div className="flex gap-2">
                     <Button
                       size="sm"
@@ -138,13 +112,6 @@ const AdminMembros = () => {
                       onClick={() => setEditingMember(member)}
                     >
                       <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant={member.ativo ? "destructive" : "default"}
-                      onClick={() => toggleMemberStatus(member.id, member.ativo)}
-                    >
-                      {member.ativo ? <UserX className="h-4 w-4" /> : <UserCheck className="h-4 w-4" />}
                     </Button>
                   </div>
                 </div>

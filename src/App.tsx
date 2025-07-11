@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -5,8 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import Index from "./pages/Index";
-import Diagnostico from "./pages/Diagnostico";
-import DiagnosticoPublico from "./pages/DiagnosticoPublico";
+import DiagnosticoUnificado from "./pages/DiagnosticoUnificado";
 import Trilhas from "./pages/Trilhas";
 import Agenda from "./pages/Agenda";
 import Membros from "./pages/Membros";
@@ -14,6 +14,7 @@ import Comunicacao from "./pages/Comunicacao";
 import Devocional from "./pages/Devocional";
 import Perfil from "./pages/Perfil";
 import Admin from "./pages/Admin";
+import FaleComLideranca from "./pages/FaleComLideranca";
 import AuthPage from "./components/auth/AuthPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminRoute from "./components/AdminRoute";
@@ -31,7 +32,12 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<AuthPage />} />
-            <Route path="/diagnostico-publico" element={<DiagnosticoPublico />} />
+            <Route path="/diagnostico" element={<DiagnosticoUnificado />} />
+            <Route path="/fale-com-lideranca" element={
+              <ProtectedRoute>
+                <FaleComLideranca />
+              </ProtectedRoute>
+            } />
             <Route path="/devocional" element={
               <ProtectedRoute>
                 <Devocional />
@@ -46,11 +52,6 @@ const App = () => (
               <AdminRoute>
                 <Admin />
               </AdminRoute>
-            } />
-            <Route path="/diagnostico" element={
-              <ProtectedRoute>
-                <Diagnostico />
-              </ProtectedRoute>
             } />
             <Route path="/trilhas" element={
               <ProtectedRoute>

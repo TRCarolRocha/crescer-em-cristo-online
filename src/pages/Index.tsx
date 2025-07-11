@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { CheckCircle, BookOpen, Users, Heart, TrendingUp, Calendar, MessageSquare, UserCheck, Book } from "lucide-react";
+import { CheckCircle, BookOpen, Users, Heart, TrendingUp, Calendar, MessageSquare, Book } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -27,11 +27,10 @@ const Index = () => {
     
     try {
       const { data, error } = await supabase
-        .from('diagnostics')
+        .from('diagnosticos')
         .select('id')
         .eq('user_id', user.id)
-        .limit(1)
-        .single();
+        .maybeSingle();
 
       if (data && !error) {
         setHasCompletedDiagnostic(true);
@@ -45,7 +44,7 @@ const Index = () => {
     if (user && hasCompletedDiagnostic) {
       navigate('/trilhas');
     } else {
-      navigate('/diagnostico-publico');
+      navigate('/diagnostico');
     }
   };
 
@@ -62,7 +61,7 @@ const Index = () => {
       title: "Diagnóstico Espiritual",
       description: "Descubra seu nível espiritual em 2 minutos e receba recomendações personalizadas",
       color: "from-purple-500 to-pink-600",
-      action: () => navigate('/diagnostico-publico')
+      action: () => navigate('/diagnostico')
     },
     {
       icon: <Heart className="h-8 w-8" />,
@@ -87,13 +86,6 @@ const Index = () => {
       description: "Acompanhe todos os eventos, cultos, estudos e atividades da Monte Hebrom",
       color: "from-blue-500 to-cyan-600",
       action: () => navigate('/agenda')
-    },
-    {
-      icon: <UserCheck className="h-8 w-8" />,
-      title: "Membros da Igreja",
-      description: "Gerenciamento completo dos membros com relacionamentos e ministérios",
-      color: "from-green-500 to-emerald-600",
-      action: () => navigate('/membros')
     },
     {
       icon: <MessageSquare className="h-8 w-8" />,
@@ -190,7 +182,7 @@ const Index = () => {
       {/* Carrossel de Avisos */}
       <CarrosselAvisos />
 
-      {/* Church Management Features */}
+      {/* Church Management Features - removido "Membros da Igreja" */}
       <div className="py-24 bg-gradient-to-b from-white to-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
@@ -202,7 +194,7 @@ const Index = () => {
             </p>
           </div>
           
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             {churchFeatures.map((feature, index) => (
               <Card 
                 key={index}
@@ -225,7 +217,7 @@ const Index = () => {
         </div>
       </div>
 
-      {/* Footer simples apenas com Falar com a Liderança */}
+      {/* Footer atualizado com "Fale com a Liderança" */}
       <div className="py-16 bg-gradient-to-br from-gray-900 to-gray-800">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h3 className="text-2xl font-bold text-white mb-4">
@@ -237,7 +229,7 @@ const Index = () => {
           <Button 
             size="lg"
             className="bg-white text-gray-900 hover:bg-gray-100 shadow-lg hover:shadow-xl transition-all duration-300 font-semibold px-8 py-4"
-            onClick={() => navigate('/membros')}
+            onClick={() => navigate('/fale-com-lideranca')}
           >
             💬 Falar com a Liderança
           </Button>

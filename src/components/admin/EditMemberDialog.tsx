@@ -1,10 +1,11 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
@@ -14,11 +15,10 @@ interface Member {
   phone: string;
   address: string;
   role: string;
-  ativo: boolean;
-  avatar_url: string;
   birth_date: string;
   department: string;
   ministry: string;
+  tags: string[];
 }
 
 interface EditMemberDialogProps {
@@ -27,18 +27,51 @@ interface EditMemberDialogProps {
   onSuccess: () => void;
 }
 
+interface MinisterioDepartamento {
+  id: string;
+  nome: string;
+}
+
 const EditMemberDialog: React.FC<EditMemberDialogProps> = ({ member, onClose, onSuccess }) => {
   const [formData, setFormData] = useState({
     full_name: member.full_name || '',
     phone: member.phone || '',
     address: member.address || '',
-    role: member.role || 'membro',
+    role: member.role || 'member',
     birth_date: member.birth_date || '',
     department: member.department || '',
     ministry: member.ministry || ''
   });
+  const [selectedTags, setSelectedTags] = useState<string[]>(member.tags || []);
+  const [ministeriosDepartamentos, setMinisteriosDepartamentos] = useState<MinisterioDepartamento[]>([]);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
+
+  useEffect(() => {
+    fetchMinisteriosDepartamentos();
+  }, []);
+
+  const fetchMinisteriosDepartamentos = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('ministerios_departamentos')
+        .select('*')
+        .order('nome');
+
+      if (error) throw error;
+      setMinisteriosDepartamentos(data || []);
+    } catch (error) {
+      console.error('Erro ao buscar ministérios:', error);
+    }
+  };
+
+  const handleTagChange = (tagId: string, checked: boolean) => {
+    if (checked) {
+      setSelectedTags([...selectedTags, tagId]);
+    } else {
+      setSelectedTags(selectedTags.filter(id => id !== tagId));
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,7 +80,10 @@ const EditMemberDialog: React.FC<EditMemberDialogProps> = ({ member, onClose, on
     try {
       const { error } = await supabase
         .from('profiles')
-        .update(formData)
+        .update({
+          ...formData,
+          tags: selectedTags
+        })
         .eq('id', member.id);
 
       if (error) throw error;
@@ -72,7 +108,7 @@ const EditMemberDialog: React.FC<EditMemberDialogProps> = ({ member, onClose, on
 
   return (
     <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Editar Membro</DialogTitle>
         </DialogHeader>
@@ -114,7 +150,7 @@ const EditMemberDialog: React.FC<EditMemberDialogProps> = ({ member, onClose, on
                   <SelectValue placeholder="Selecione a função" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="membro">Membro</SelectItem>
+                  <SelectItem value="member">Membro</SelectItem>
                   <SelectItem value="admin">Administrador</SelectItem>
                 </SelectContent>
               </Select>
@@ -146,6 +182,24 @@ const EditMemberDialog: React.FC<EditMemberDialogProps> = ({ member, onClose, on
                 value={formData.ministry}
                 onChange={(e) => setFormData({ ...formData, ministry: e.target.value })}
               />
+            </div>
+          </div>
+
+          <div>
+            <Label>Tags de Ministério/Departamento</Label>
+            <div className="grid grid-cols-3 gap-2 mt-2">
+              {ministeriosDepartamentos.map((item) => (
+                <div key={item.id} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={`tag-${item.id}`}
+                    checked={selectedTags.includes(item.id)}
+                    onCheckedChange={(checked) => handleTagChange(item.id, checked as boolean)}
+                  />
+                  <Label htmlFor={`tag-${item.id}`} className="text-sm">
+                    {item.nome}
+                  </Label>
+                </div>
+              ))}
             </div>
           </div>
 

@@ -4,11 +4,17 @@ import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useNavigate } from 'react-router-dom';
 import { User, ArrowLeft } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+
+interface MinisterioDepartamento {
+  id: string;
+  nome: string;
+}
 
 const Perfil = () => {
   const navigate = useNavigate();
@@ -24,12 +30,29 @@ const Perfil = () => {
     department: '',
     ministry: ''
   });
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [ministeriosDepartamentos, setMinisteriosDepartamentos] = useState<MinisterioDepartamento[]>([]);
 
   useEffect(() => {
     if (user) {
       fetchProfile();
+      fetchMinisteriosDepartamentos();
     }
   }, [user]);
+
+  const fetchMinisteriosDepartamentos = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('ministerios_departamentos')
+        .select('*')
+        .order('nome');
+
+      if (error) throw error;
+      setMinisteriosDepartamentos(data || []);
+    } catch (error) {
+      console.error('Erro ao buscar ministérios:', error);
+    }
+  };
 
   const fetchProfile = async () => {
     try {
@@ -49,6 +72,7 @@ const Perfil = () => {
         department: data.department || '',
         ministry: data.ministry || ''
       });
+      setSelectedTags(data.tags || []);
     } catch (error) {
       console.error('Erro ao buscar perfil:', error);
       toast({
@@ -61,6 +85,14 @@ const Perfil = () => {
     }
   };
 
+  const handleTagChange = (tagId: string, checked: boolean) => {
+    if (checked) {
+      setSelectedTags([...selectedTags, tagId]);
+    } else {
+      setSelectedTags(selectedTags.filter(id => id !== tagId));
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
@@ -68,7 +100,10 @@ const Perfil = () => {
     try {
       const { error } = await supabase
         .from('profiles')
-        .update(formData)
+        .update({
+          ...formData,
+          tags: selectedTags
+        })
         .eq('id', user?.id);
 
       if (error) throw error;
@@ -181,6 +216,24 @@ const Perfil = () => {
                   onChange={(e) => setFormData({ ...formData, ministry: e.target.value })}
                   placeholder="Ex: Louvor, Ensino, Intercessão"
                 />
+              </div>
+
+              <div>
+                <Label>Tags de Ministério/Departamento</Label>
+                <div className="grid grid-cols-3 gap-2 mt-2">
+                  {ministeriosDepartamentos.map((item) => (
+                    <div key={item.id} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`tag-${item.id}`}
+                        checked={selectedTags.includes(item.id)}
+                        onCheckedChange={(checked) => handleTagChange(item.id, checked as boolean)}
+                      />
+                      <Label htmlFor={`tag-${item.id}`} className="text-sm">
+                        {item.nome}
+                      </Label>
+                    </div>
+                  ))}
+                </div>
               </div>
 
               <div className="flex justify-end">

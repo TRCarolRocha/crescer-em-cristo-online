@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      agenda_eventos: {
+        Row: {
+          criado_em: string | null
+          data_fim: string | null
+          data_inicio: string
+          descricao: string | null
+          id: string
+          local: string | null
+          status: boolean | null
+          titulo: string
+        }
+        Insert: {
+          criado_em?: string | null
+          data_fim?: string | null
+          data_inicio: string
+          descricao?: string | null
+          id?: string
+          local?: string | null
+          status?: boolean | null
+          titulo: string
+        }
+        Update: {
+          criado_em?: string | null
+          data_fim?: string | null
+          data_inicio?: string
+          descricao?: string | null
+          id?: string
+          local?: string | null
+          status?: boolean | null
+          titulo?: string
+        }
+        Relationships: []
+      }
       avisos: {
         Row: {
           ativo: boolean
@@ -192,6 +225,27 @@ export type Database = {
           },
         ]
       }
+      diagnosticos: {
+        Row: {
+          data_resposta: string | null
+          id: string
+          respostas: Json
+          user_id: string | null
+        }
+        Insert: {
+          data_resposta?: string | null
+          id?: string
+          respostas: Json
+          user_id?: string | null
+        }
+        Update: {
+          data_resposta?: string | null
+          id?: string
+          respostas?: Json
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       diagnostics: {
         Row: {
           answers: Json
@@ -352,6 +406,33 @@ export type Database = {
           },
         ]
       }
+      mensagens: {
+        Row: {
+          conteudo: string
+          destinatario_id: string | null
+          enviada_em: string | null
+          id: string
+          lida: boolean | null
+          remetente_id: string
+        }
+        Insert: {
+          conteudo: string
+          destinatario_id?: string | null
+          enviada_em?: string | null
+          id?: string
+          lida?: boolean | null
+          remetente_id: string
+        }
+        Update: {
+          conteudo?: string
+          destinatario_id?: string | null
+          enviada_em?: string | null
+          id?: string
+          lida?: boolean | null
+          remetente_id?: string
+        }
+        Relationships: []
+      }
       message_likes: {
         Row: {
           created_at: string | null
@@ -411,6 +492,21 @@ export type Database = {
         }
         Relationships: []
       }
+      ministerios_departamentos: {
+        Row: {
+          id: string
+          nome: string
+        }
+        Insert: {
+          id?: string
+          nome: string
+        }
+        Update: {
+          id?: string
+          nome?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           address: string | null
@@ -423,6 +519,7 @@ export type Database = {
           ministry: string | null
           phone: string | null
           role: string | null
+          tags: string[] | null
           updated_at: string | null
         }
         Insert: {
@@ -436,6 +533,7 @@ export type Database = {
           ministry?: string | null
           phone?: string | null
           role?: string | null
+          tags?: string[] | null
           updated_at?: string | null
         }
         Update: {
@@ -449,6 +547,7 @@ export type Database = {
           ministry?: string | null
           phone?: string | null
           role?: string | null
+          tags?: string[] | null
           updated_at?: string | null
         }
         Relationships: []
