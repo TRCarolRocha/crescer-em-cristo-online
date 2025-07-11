@@ -78,21 +78,14 @@ const ChurchHeader = () => {
           
           {/* Botões de ação principais */}
           <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-16">
-            <Button size="lg" className="group bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:scale-105 px-12 py-6 text-xl font-bold rounded-full border-0" onClick={() => user ? navigate('/diagnostico') : navigate('/auth')}>
-              {user ? 'Continuar Jornada' : 'Iniciar Minha Jornada'}
-              <ArrowRight className="ml-3 h-6 w-6 group-hover:translate-x-1 transition-transform" />
-            </Button>
-            <Button variant="outline" size="lg" className="border-3 border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white transition-all duration-300 px-12 py-6 text-xl font-bold rounded-full shadow-xl hover:shadow-2xl bg-white/90 backdrop-blur-sm" onClick={() => user ? navigate('/trilhas') : navigate('/auth')}>
-              Conhecer as Trilhas
-            </Button>
+            
+            
           </div>
           
           {/* Scroll indicator */}
           <div className="flex justify-center">
             <div className="animate-bounce">
-              <div className="w-8 h-12 border-3 border-blue-400 rounded-full flex justify-center bg-white/20 backdrop-blur-sm">
-                <div className="w-1.5 h-3 bg-blue-600 rounded-full mt-2 animate-pulse"></div>
-              </div>
+              
             </div>
           </div>
         </div>
