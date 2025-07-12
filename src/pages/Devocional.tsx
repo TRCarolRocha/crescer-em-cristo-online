@@ -180,6 +180,20 @@ const Devocional = () => {
     return Math.round((preenchidos / campos.length) * 100);
   };
 
+  const formatDate = (dateString: string) => {
+    try {
+      return new Date(dateString).toLocaleDateString('pt-BR', {
+        timeZone: 'America/Sao_Paulo',
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      }).replace(/^./, c => c.toUpperCase());
+    } catch (error) {
+      return dateString;
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center">
@@ -245,12 +259,7 @@ const Devocional = () => {
             <div className="flex items-center justify-center gap-2 text-blue-600 mb-2">
               <Calendar className="h-5 w-5" />
               <span className="text-sm font-medium">
-                {new Date(devocional.data).toLocaleDateString('pt-BR', {
-                  weekday: 'long',
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric'
-                })}
+                {formatDate(devocional.data)}
               </span>
             </div>
             <CardTitle className="text-3xl font-bold text-gray-900 mb-2">

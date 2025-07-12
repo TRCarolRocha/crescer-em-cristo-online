@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
-interface Content {
+interface TrackContent {
   id?: string;
   titulo: string;
   descricao: string;
@@ -21,7 +21,7 @@ interface Content {
 }
 
 interface ContentDialogProps {
-  content?: Content;
+  content?: TrackContent;
   trilhaId: string;
   onClose: () => void;
   onSuccess: () => void;
@@ -42,6 +42,16 @@ const ContentDialog: React.FC<ContentDialogProps> = ({ content, trilhaId, onClos
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!trilhaId) {
+      toast({
+        title: "Erro",
+        description: "ID da trilha é obrigatório",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setLoading(true);
 
     try {

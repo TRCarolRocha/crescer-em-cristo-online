@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Plus, Edit, MapPin } from 'lucide-react';
+import { Calendar, Plus, Edit, MapPin, Trash } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import CreateEventDialog from './CreateEventDialog';
@@ -49,6 +49,60 @@ const AdminAgenda = () => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const deleteEvento = async (eventoId: string) => {
+    if (!confirm('Tem certeza que deseja excluir este evento? Esta ação não pode ser desfeita.')) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('agenda_eventos')
+        .delete()
+        .eq('id', eventoId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Sucesso",
+        description: "Evento excluído com sucesso"
+      });
+
+      fetchEventos();
+    } catch (error) {
+      console.error('Erro ao excluir evento:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível excluir o evento",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const toggleEventoStatus = async (eventoId: string, currentStatus: boolean) => {
+    try {
+      const { error } = await supabase
+        .from('agenda_eventos')
+        .update({ status: !currentStatus })
+        .eq('id', eventoId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Sucesso",
+        description: `Evento ${!currentStatus ? 'publicado' : 'despublicado'} com sucesso`
+      });
+
+      fetchEventos();
+    } catch (error) {
+      console.error('Erro ao alterar status:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível alterar o status do evento",
+        variant: "destructive"
+      });
     }
   };
 
@@ -109,21 +163,52 @@ const AdminAgenda = () => {
                   </div>
                 </div>
                 <div className="flex items-center gap-4">
-                  <Badge variant={evento.status ? 'default' : 'secondary'}>
+                  <Badge 
+                    variant={evento.status ? 'default' : 'secondary'}
+                    className="cursor-pointer"
+                    onClick={() => toggleEventoStatus(evento.id, evento.status)}
+                  >
                     {evento.status ? 'Visível' : 'Oculto'}
                   </Badge>
-                  <Button 
-                    size="sm" 
-                    variant="outline"
-                    onClick={() => setEditingEvento(evento)}
-                  >
-                    <Edit className="h-4 w-4" />
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      onClick={() => setEditingEvento(evento)}
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      variant="destructive"
+                      onClick={() => deleteEvento(evento.id)}
+                    >
+                      <Trash className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               </div>
             </CardContent>
           </Card>
         ))}
+
+        {eventos.length === 0 && (
+          <Card>
+            <CardContent className="p-8 text-center">
+              <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                Nenhum evento cadastrado
+              </h3>
+              <p className="text-gray-600 mb-4">
+                Comece criando o primeiro evento da agenda
+              </p>
+              <Button onClick={() => setShowCreateDialog(true)}>
+                <Plus className="h-4 w-4 mr-2" />
+                Criar Primeiro Evento
+              </Button>
+            </CardContent>
+          </Card>
+        )}
       </div>
 
       {showCreateDialog && (

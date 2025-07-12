@@ -1,9 +1,9 @@
 
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { MessageSquare, Plus, Edit, Eye, EyeOff } from 'lucide-react';
+import { MessageSquare, Plus, Edit, Eye, EyeOff, Trash } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import CreateAvisoDialog from './CreateAvisoDialog';
@@ -76,6 +76,35 @@ const AdminAvisos = () => {
     }
   };
 
+  const deleteAviso = async (avisoId: string) => {
+    if (!confirm('Tem certeza que deseja excluir este aviso? Esta ação não pode ser desfeita.')) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('avisos')
+        .delete()
+        .eq('id', avisoId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Sucesso",
+        description: "Aviso excluído com sucesso"
+      });
+
+      fetchAvisos();
+    } catch (error) {
+      console.error('Erro ao excluir aviso:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível excluir o aviso",
+        variant: "destructive"
+      });
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-8">
@@ -128,6 +157,13 @@ const AdminAvisos = () => {
                     onClick={() => toggleAvisoStatus(aviso.id, aviso.ativo)}
                   >
                     {aviso.ativo ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </Button>
+                  <Button 
+                    size="sm" 
+                    variant="destructive"
+                    onClick={() => deleteAviso(aviso.id)}
+                  >
+                    <Trash className="h-4 w-4" />
                   </Button>
                 </div>
               </div>

@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Heart, Plus, Edit } from 'lucide-react';
+import { Heart, Plus, Edit, Trash } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import CreateDevocionalDialog from './CreateDevocionalDialog';
@@ -49,6 +49,35 @@ const AdminDevocionais = () => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const deleteDevocional = async (devocionalId: string) => {
+    if (!confirm('Tem certeza que deseja excluir este devocional? Esta ação não pode ser desfeita.')) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('devocionais')
+        .delete()
+        .eq('id', devocionalId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Sucesso",
+        description: "Devocional excluído com sucesso"
+      });
+
+      fetchDevocionais();
+    } catch (error) {
+      console.error('Erro ao excluir devocional:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível excluir o devocional",
+        variant: "destructive"
+      });
     }
   };
 
@@ -102,13 +131,22 @@ const AdminDevocionais = () => {
                     </p>
                   </div>
                 </div>
-                <Button 
-                  size="sm" 
-                  variant="outline"
-                  onClick={() => setEditingDevocional(devocional)}
-                >
-                  <Edit className="h-4 w-4" />
-                </Button>
+                <div className="flex gap-2">
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    onClick={() => setEditingDevocional(devocional)}
+                  >
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                  <Button 
+                    size="sm" 
+                    variant="destructive"
+                    onClick={() => deleteDevocional(devocional.id)}
+                  >
+                    <Trash className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>
