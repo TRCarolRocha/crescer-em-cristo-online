@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
@@ -28,6 +27,7 @@ interface Content {
   pdf_url?: string;
   video_url?: string;
   texto?: string;
+  trilha_id?: string;
 }
 
 const AdminTrilhas = () => {
