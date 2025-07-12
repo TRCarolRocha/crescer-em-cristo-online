@@ -42,12 +42,30 @@ const EditAvisoDialog: React.FC<EditAvisoDialogProps> = ({ aviso, onClose, onSuc
     setLoading(true);
 
     try {
-      const { error } = await supabase
-        .from('avisos')
-        .update(formData)
-        .eq('id', aviso.id);
+      console.log('Salvando aviso:', aviso.id, 'com dados:', formData);
 
-      if (error) throw error;
+      const updateData = {
+        titulo: formData.titulo,
+        descricao: formData.descricao,
+        categoria: formData.categoria,
+        imagem_url: formData.imagem_url,
+        ativo: formData.ativo,
+        ordem: formData.ordem,
+        updated_at: new Date().toISOString()
+      };
+
+      const { data, error } = await supabase
+        .from('avisos')
+        .update(updateData)
+        .eq('id', aviso.id)
+        .select();
+
+      if (error) {
+        console.error('Erro do Supabase:', error);
+        throw error;
+      }
+
+      console.log('Aviso atualizado com sucesso:', data);
 
       toast({
         title: "Sucesso",

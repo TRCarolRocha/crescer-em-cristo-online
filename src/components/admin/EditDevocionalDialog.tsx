@@ -45,12 +45,32 @@ const EditDevocionalDialog: React.FC<EditDevocionalDialogProps> = ({ devocional,
     setLoading(true);
 
     try {
-      const { error } = await supabase
-        .from('devocionais')
-        .update(formData)
-        .eq('id', devocional.id);
+      console.log('Salvando devocional:', devocional.id, 'com dados:', formData);
 
-      if (error) throw error;
+      const updateData = {
+        data: formData.data,
+        tema: formData.tema,
+        texto_central: formData.texto_central,
+        versiculo: formData.versiculo,
+        referencia: formData.referencia,
+        pergunta_1: formData.pergunta_1,
+        pergunta_2: formData.pergunta_2,
+        pergunta_3: formData.pergunta_3,
+        updated_at: new Date().toISOString()
+      };
+
+      const { data, error } = await supabase
+        .from('devocionais')
+        .update(updateData)
+        .eq('id', devocional.id)
+        .select();
+
+      if (error) {
+        console.error('Erro do Supabase:', error);
+        throw error;
+      }
+
+      console.log('Devocional atualizado com sucesso:', data);
 
       toast({
         title: "Sucesso",
