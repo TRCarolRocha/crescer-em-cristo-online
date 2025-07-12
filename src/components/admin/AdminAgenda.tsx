@@ -5,12 +5,10 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Switch } from '@/components/ui/switch';
-import { Calendar, Plus, Edit, MapPin, Trash, Save, X } from 'lucide-react';
+import { Calendar, Plus, Edit, Trash, Save, X, MapPin, Clock } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import CreateEventDialog from './CreateEventDialog';
-import EditEventDialog from './EditEventDialog';
 
 interface AgendaEvento {
   id: string;
@@ -27,7 +25,6 @@ const AdminAgenda = () => {
   const [eventos, setEventos] = useState<AgendaEvento[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
-  const [editingEvento, setEditingEvento] = useState<AgendaEvento | null>(null);
   const [editingInline, setEditingInline] = useState<string | null>(null);
   const [editData, setEditData] = useState<Partial<AgendaEvento>>({});
   const { toast } = useToast();
@@ -41,7 +38,7 @@ const AdminAgenda = () => {
       const { data, error } = await supabase
         .from('agenda_eventos')
         .select('*')
-        .order('data_inicio', { ascending: false });
+        .order('data_inicio', { ascending: true });
 
       if (error) throw error;
       setEventos(data || []);
@@ -69,19 +66,29 @@ const AdminAgenda = () => {
 
   const handleSaveInline = async (eventoId: string) => {
     try {
-      const { error } = await supabase
-        .from('agenda_eventos')
-        .update({
-          titulo: editData.titulo,
-          descricao: editData.descricao,
-          data_inicio: editData.data_inicio,
-          data_fim: editData.data_fim,
-          local: editData.local,
-          status: editData.status
-        })
-        .eq('id', eventoId);
+      console.log('Salvando evento:', eventoId, 'com dados:', editData);
 
-      if (error) throw error;
+      const updateData = {
+        titulo: editData.titulo,
+        descricao: editData.descricao,
+        data_inicio: editData.data_inicio,
+        data_fim: editData.data_fim,
+        local: editData.local,
+        status: editData.status !== undefined ? editData.status : true
+      };
+
+      const { data, error } = await supabase
+        .from('agenda_eventos')
+        .update(updateData)
+        .eq('id', eventoId)
+        .select();
+
+      if (error) {
+        console.error('Erro do Supabase:', error);
+        throw error;
+      }
+
+      console.log('Evento atualizado com sucesso:', data);
 
       toast({
         title: "Sucesso",
@@ -130,38 +137,30 @@ const AdminAgenda = () => {
     }
   };
 
-  const toggleEventoStatus = async (eventoId: string, currentStatus: boolean) => {
+  const formatDate = (dateString: string) => {
     try {
-      const { error } = await supabase
-        .from('agenda_eventos')
-        .update({ status: !currentStatus })
-        .eq('id', eventoId);
-
-      if (error) throw error;
-
-      toast({
-        title: "Sucesso",
-        description: `Evento ${!currentStatus ? 'publicado' : 'despublicado'} com sucesso`
-      });
-
-      fetchEventos();
+      return new Date(dateString).toLocaleDateString('pt-BR', {
+        timeZone: 'America/Sao_Paulo',
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+      }).replace(/^./, c => c.toUpperCase());
     } catch (error) {
-      console.error('Erro ao alterar status:', error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível alterar o status do evento",
-        variant: "destructive"
-      });
+      return dateString;
     }
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('pt-BR', {
-      timeZone: 'America/Sao_Paulo',
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric'
-    });
+  const formatTime = (dateString: string) => {
+    try {
+      return new Date(dateString).toLocaleTimeString('pt-BR', {
+        timeZone: 'America/Sao_Paulo',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch (error) {
+      return '';
+    }
   };
 
   if (loading) {
@@ -184,25 +183,16 @@ const AdminAgenda = () => {
 
       <div className="grid gap-4">
         {eventos.map((evento) => (
-          <Card key={evento.id}>
+          <Card key={evento.id} className={`${!evento.status ? 'opacity-60' : ''}`}>
             <CardContent className="p-6">
               {editingInline === evento.id ? (
                 <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium mb-1">Título</label>
-                      <Input
-                        value={editData.titulo || ''}
-                        onChange={(e) => setEditData({ ...editData, titulo: e.target.value })}
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium mb-1">Local</label>
-                      <Input
-                        value={editData.local || ''}
-                        onChange={(e) => setEditData({ ...editData, local: e.target.value })}
-                      />
-                    </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Título</label>
+                    <Input
+                      value={editData.titulo || ''}
+                      onChange={(e) => setEditData({ ...editData, titulo: e.target.value })}
+                    />
                   </div>
 
                   <div>
@@ -233,12 +223,12 @@ const AdminAgenda = () => {
                     </div>
                   </div>
 
-                  <div className="flex items-center space-x-2">
-                    <Switch
-                      checked={editData.status || false}
-                      onCheckedChange={(checked) => setEditData({ ...editData, status: checked })}
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Local</label>
+                    <Input
+                      value={editData.local || ''}
+                      onChange={(e) => setEditData({ ...editData, local: e.target.value })}
                     />
-                    <label className="text-sm font-medium">Visível na Home</label>
                   </div>
 
                   <div className="flex gap-2">
@@ -268,77 +258,45 @@ const AdminAgenda = () => {
                       <h3 className="font-semibold text-lg">{evento.titulo}</h3>
                       <p className="text-gray-600">{evento.descricao}</p>
                       <div className="flex items-center gap-4 mt-2 text-sm text-gray-500">
-                        <span>{formatDate(evento.data_inicio)}</span>
-                        {evento.data_fim && evento.data_fim !== evento.data_inicio && (
-                          <>
-                            <span>até</span>
-                            <span>{formatDate(evento.data_fim)}</span>
-                          </>
-                        )}
+                        <div className="flex items-center gap-1">
+                          <Clock className="h-4 w-4" />
+                          <span>{formatDate(evento.data_inicio)}</span>
+                        </div>
                         {evento.local && (
                           <div className="flex items-center gap-1">
-                            <MapPin className="h-3 w-3" />
+                            <MapPin className="h-4 w-4" />
                             <span>{evento.local}</span>
                           </div>
                         )}
                       </div>
+                      <div className="flex gap-2 mt-2">
+                        <Badge variant={evento.status ? 'default' : 'destructive'}>
+                          {evento.status ? 'Ativo' : 'Inativo'}
+                        </Badge>
+                      </div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-4">
-                    <Badge 
-                      variant={evento.status ? 'default' : 'secondary'}
-                      className="cursor-pointer"
-                      onClick={() => toggleEventoStatus(evento.id, evento.status)}
+                  <div className="flex gap-2">
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      onClick={() => handleInlineEdit(evento)}
                     >
-                      {evento.status ? 'Visível' : 'Oculto'}
-                    </Badge>
-                    <div className="flex gap-2">
-                      <Button 
-                        size="sm" 
-                        variant="outline"
-                        onClick={() => handleInlineEdit(evento)}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button 
-                        size="sm" 
-                        variant="outline"
-                        onClick={() => setEditingEvento(evento)}
-                      >
-                        Editar Completo
-                      </Button>
-                      <Button 
-                        size="sm" 
-                        variant="destructive"
-                        onClick={() => deleteEvento(evento.id)}
-                      >
-                        <Trash className="h-4 w-4" />
-                      </Button>
-                    </div>
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      variant="destructive"
+                      onClick={() => deleteEvento(evento.id)}
+                    >
+                      <Trash className="h-4 w-4" />
+                    </Button>
                   </div>
                 </div>
               )}
             </CardContent>
           </Card>
         ))}
-
-        {eventos.length === 0 && (
-          <Card>
-            <CardContent className="p-8 text-center">
-              <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                Nenhum evento cadastrado
-              </h3>
-              <p className="text-gray-600 mb-4">
-                Comece criando o primeiro evento da agenda
-              </p>
-              <Button onClick={() => setShowCreateDialog(true)}>
-                <Plus className="h-4 w-4 mr-2" />
-                Criar Primeiro Evento
-              </Button>
-            </CardContent>
-          </Card>
-        )}
       </div>
 
       {showCreateDialog && (
@@ -347,17 +305,6 @@ const AdminAgenda = () => {
           onSuccess={() => {
             fetchEventos();
             setShowCreateDialog(false);
-          }}
-        />
-      )}
-
-      {editingEvento && (
-        <EditEventDialog
-          evento={editingEvento}
-          onClose={() => setEditingEvento(null)}
-          onSuccess={() => {
-            fetchEventos();
-            setEditingEvento(null);
           }}
         />
       )}

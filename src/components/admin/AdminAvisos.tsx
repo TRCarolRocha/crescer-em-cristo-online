@@ -10,7 +10,6 @@ import { MessageSquare, Plus, Edit, Eye, EyeOff, Trash, Save, X } from 'lucide-r
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import CreateAvisoDialog from './CreateAvisoDialog';
-import EditAvisoDialog from './EditAvisoDialog';
 
 interface Aviso {
   id: string;
@@ -26,7 +25,6 @@ const AdminAvisos = () => {
   const [avisos, setAvisos] = useState<Aviso[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
-  const [editingAviso, setEditingAviso] = useState<Aviso | null>(null);
   const [editingInline, setEditingInline] = useState<string | null>(null);
   const [editData, setEditData] = useState<Partial<Aviso>>({});
   const { toast } = useToast();
@@ -68,20 +66,30 @@ const AdminAvisos = () => {
 
   const handleSaveInline = async (avisoId: string) => {
     try {
-      const { error } = await supabase
-        .from('avisos')
-        .update({
-          titulo: editData.titulo,
-          descricao: editData.descricao,
-          categoria: editData.categoria,
-          imagem_url: editData.imagem_url,
-          ativo: editData.ativo,
-          ordem: editData.ordem,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', avisoId);
+      console.log('Salvando aviso:', avisoId, 'com dados:', editData);
 
-      if (error) throw error;
+      const updateData = {
+        titulo: editData.titulo,
+        descricao: editData.descricao,
+        categoria: editData.categoria,
+        imagem_url: editData.imagem_url,
+        ativo: editData.ativo,
+        ordem: editData.ordem,
+        updated_at: new Date().toISOString()
+      };
+
+      const { data, error } = await supabase
+        .from('avisos')
+        .update(updateData)
+        .eq('id', avisoId)
+        .select();
+
+      if (error) {
+        console.error('Erro do Supabase:', error);
+        throw error;
+      }
+
+      console.log('Aviso atualizado com sucesso:', data);
 
       toast({
         title: "Sucesso",
@@ -283,13 +291,6 @@ const AdminAvisos = () => {
                     </Button>
                     <Button 
                       size="sm" 
-                      variant="outline"
-                      onClick={() => setEditingAviso(aviso)}
-                    >
-                      Editar Completo
-                    </Button>
-                    <Button 
-                      size="sm" 
                       variant="destructive"
                       onClick={() => deleteAviso(aviso.id)}
                     >
@@ -309,17 +310,6 @@ const AdminAvisos = () => {
           onSuccess={() => {
             fetchAvisos();
             setShowCreateDialog(false);
-          }}
-        />
-      )}
-
-      {editingAviso && (
-        <EditAvisoDialog
-          aviso={editingAviso}
-          onClose={() => setEditingAviso(null)}
-          onSuccess={() => {
-            fetchAvisos();
-            setEditingAviso(null);
           }}
         />
       )}

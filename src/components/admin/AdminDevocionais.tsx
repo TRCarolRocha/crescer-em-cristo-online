@@ -8,7 +8,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import CreateDevocionalDialog from './CreateDevocionalDialog';
-import EditDevocionalDialog from './EditDevocionalDialog';
 
 interface Devocional {
   id: string;
@@ -26,7 +25,6 @@ const AdminDevocionais = () => {
   const [devocionais, setDevocionais] = useState<Devocional[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
-  const [editingDevocional, setEditingDevocional] = useState<Devocional | null>(null);
   const [editingInline, setEditingInline] = useState<string | null>(null);
   const [editData, setEditData] = useState<Partial<Devocional>>({});
   const { toast } = useToast();
@@ -68,22 +66,32 @@ const AdminDevocionais = () => {
 
   const handleSaveInline = async (devocionalId: string) => {
     try {
-      const { error } = await supabase
-        .from('devocionais')
-        .update({
-          tema: editData.tema,
-          data: editData.data,
-          versiculo: editData.versiculo,
-          referencia: editData.referencia,
-          texto_central: editData.texto_central,
-          pergunta_1: editData.pergunta_1,
-          pergunta_2: editData.pergunta_2,
-          pergunta_3: editData.pergunta_3,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', devocionalId);
+      console.log('Salvando devocional:', devocionalId, 'com dados:', editData);
 
-      if (error) throw error;
+      const updateData = {
+        tema: editData.tema,
+        data: editData.data,
+        versiculo: editData.versiculo,
+        referencia: editData.referencia,
+        texto_central: editData.texto_central,
+        pergunta_1: editData.pergunta_1,
+        pergunta_2: editData.pergunta_2,
+        pergunta_3: editData.pergunta_3,
+        updated_at: new Date().toISOString()
+      };
+
+      const { data, error } = await supabase
+        .from('devocionais')
+        .update(updateData)
+        .eq('id', devocionalId)
+        .select();
+
+      if (error) {
+        console.error('Erro do Supabase:', error);
+        throw error;
+      }
+
+      console.log('Devocional atualizado com sucesso:', data);
 
       toast({
         title: "Sucesso",
@@ -134,7 +142,7 @@ const AdminDevocionais = () => {
 
   const formatDate = (dateString: string) => {
     try {
-      return new Date(dateString).toLocaleDateString('pt-BR', {
+      return new Date(dateString + 'T12:00:00').toLocaleDateString('pt-BR', {
         timeZone: 'America/Sao_Paulo',
         weekday: 'long',
         day: 'numeric',
@@ -279,13 +287,6 @@ const AdminDevocionais = () => {
                     </Button>
                     <Button 
                       size="sm" 
-                      variant="outline"
-                      onClick={() => setEditingDevocional(devocional)}
-                    >
-                      Editar Completo
-                    </Button>
-                    <Button 
-                      size="sm" 
                       variant="destructive"
                       onClick={() => deleteDevocional(devocional.id)}
                     >
@@ -305,17 +306,6 @@ const AdminDevocionais = () => {
           onSuccess={() => {
             fetchDevocionais();
             setShowCreateDialog(false);
-          }}
-        />
-      )}
-
-      {editingDevocional && (
-        <EditDevocionalDialog
-          devocional={editingDevocional}
-          onClose={() => setEditingDevocional(null)}
-          onSuccess={() => {
-            fetchDevocionais();
-            setEditingDevocional(null);
           }}
         />
       )}

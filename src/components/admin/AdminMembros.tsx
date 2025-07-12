@@ -8,8 +8,7 @@ import { Search, Edit, Save, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import EditMemberDialog from './EditMemberDialog';
-import TagBadge from '@/components/TagBadge';
-import { getTagColor, getTagName } from '@/utils/tagUtils';
+import { getTagName } from '@/utils/tagUtils';
 
 interface Member {
   id: string;
@@ -93,19 +92,29 @@ const AdminMembros = () => {
 
   const handleSaveInline = async (memberId: string) => {
     try {
-      const { error } = await supabase
-        .from('profiles')
-        .update({
-          full_name: editData.full_name,
-          phone: editData.phone,
-          address: editData.address,
-          department: editData.department,
-          ministry: editData.ministry,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', memberId);
+      console.log('Salvando membro:', memberId, 'com dados:', editData);
 
-      if (error) throw error;
+      const updateData = {
+        full_name: editData.full_name,
+        phone: editData.phone,
+        address: editData.address,
+        department: editData.department,
+        ministry: editData.ministry,
+        updated_at: new Date().toISOString()
+      };
+
+      const { data, error } = await supabase
+        .from('profiles')
+        .update(updateData)
+        .eq('id', memberId)
+        .select();
+
+      if (error) {
+        console.error('Erro do Supabase:', error);
+        throw error;
+      }
+
+      console.log('Membro atualizado com sucesso:', data);
 
       toast({
         title: "Sucesso",
@@ -114,7 +123,7 @@ const AdminMembros = () => {
 
       setEditingInline(null);
       setEditData({});
-      await fetchMembers(); // Recarregar dados
+      await fetchMembers();
     } catch (error) {
       console.error('Erro ao salvar membro:', error);
       toast({
@@ -126,7 +135,6 @@ const AdminMembros = () => {
   };
 
   const generateTagColor = (tagName: string) => {
-    // Gerar cor baseada em hash do nome
     let hash = 0;
     for (let i = 0; i < tagName.length; i++) {
       hash = tagName.charCodeAt(i) + ((hash << 5) - hash);
@@ -218,7 +226,6 @@ const AdminMembros = () => {
                         <p className="text-gray-600">{member.phone || 'Telefone não informado'}</p>
                         <p className="text-gray-500 text-sm">{member.address || 'Endereço não informado'}</p>
                         
-                        {/* Tags de ministérios/departamentos */}
                         <div className="mt-2 flex flex-wrap gap-1">
                           {member.department && (
                             <Badge className={generateTagColor(member.department)}>
@@ -269,22 +276,13 @@ const AdminMembros = () => {
                         </Button>
                       </>
                     ) : (
-                      <>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleInlineEdit(member)}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => setEditingMember(member)}
-                        >
-                          Editar Completo
-                        </Button>
-                      </>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleInlineEdit(member)}
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
                     )}
                   </div>
                 </div>
