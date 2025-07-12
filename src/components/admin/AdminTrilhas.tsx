@@ -28,6 +28,7 @@ interface Content {
   pdf_url?: string;
   video_url?: string;
   texto?: string;
+  trilha_id: string;
 }
 
 const AdminTrilhas = () => {
@@ -109,7 +110,7 @@ const AdminTrilhas = () => {
         description: "Conteúdo excluído com sucesso"
       });
 
-      fetchContents(trilhaId);
+      await fetchContents(trilhaId);
     } catch (error) {
       console.error('Erro ao excluir conteúdo:', error);
       toast({
@@ -255,8 +256,8 @@ const AdminTrilhas = () => {
       {showCreateDialog && (
         <CreateTrackDialog
           onClose={() => setShowCreateDialog(false)}
-          onSuccess={() => {
-            fetchTracks();
+          onSuccess={async () => {
+            await fetchTracks();
             setShowCreateDialog(false);
           }}
         />
@@ -266,8 +267,8 @@ const AdminTrilhas = () => {
         <EditTrackDialog
           track={editingTrack}
           onClose={() => setEditingTrack(null)}
-          onSuccess={() => {
-            fetchTracks();
+          onSuccess={async () => {
+            await fetchTracks();
             setEditingTrack(null);
           }}
         />
@@ -278,8 +279,8 @@ const AdminTrilhas = () => {
           content={contentDialog.content}
           trilhaId={contentDialog.trilhaId}
           onClose={() => setContentDialog({ show: false, trilhaId: '' })}
-          onSuccess={() => {
-            fetchContents(contentDialog.trilhaId);
+          onSuccess={async () => {
+            await fetchContents(contentDialog.trilhaId);
             setContentDialog({ show: false, trilhaId: '' });
           }}
         />
