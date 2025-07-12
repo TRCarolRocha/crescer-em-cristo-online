@@ -20,7 +20,7 @@ interface Track {
   difficulty: string;
 }
 
-interface TrackContent {
+interface Content {
   id: string;
   titulo: string;
   descricao: string;
@@ -28,19 +28,18 @@ interface TrackContent {
   pdf_url?: string;
   video_url?: string;
   texto?: string;
-  trilha_id: string;
 }
 
 const AdminTrilhas = () => {
   const [tracks, setTracks] = useState<Track[]>([]);
-  const [contents, setContents] = useState<{[key: string]: TrackContent[]}>({});
+  const [contents, setContents] = useState<{[key: string]: Content[]}>({});
   const [loading, setLoading] = useState(true);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [editingTrack, setEditingTrack] = useState<Track | null>(null);
   const [contentDialog, setContentDialog] = useState<{
     show: boolean;
     trilhaId: string;
-    content?: TrackContent;
+    content?: Content;
   }>({ show: false, trilhaId: '' });
   const [expandedTrack, setExpandedTrack] = useState<string | null>(null);
   const { toast } = useToast();
@@ -121,51 +120,13 @@ const AdminTrilhas = () => {
     }
   };
 
-  const deleteTrack = async (trackId: string) => {
-    if (!confirm('Tem certeza que deseja excluir esta trilha? Esta ação não pode ser desfeita.')) {
-      return;
-    }
-
-    try {
-      // First delete all contents
-      const { error: contentsError } = await supabase
-        .from('conteudos')
-        .delete()
-        .eq('trilha_id', trackId);
-
-      if (contentsError) throw contentsError;
-
-      // Then delete the track
-      const { error } = await supabase
-        .from('discipleship_tracks')
-        .delete()
-        .eq('id', trackId);
-
-      if (error) throw error;
-
-      toast({
-        title: "Sucesso",
-        description: "Trilha excluída com sucesso"
-      });
-
-      fetchTracks();
-    } catch (error) {
-      console.error('Erro ao excluir trilha:', error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível excluir a trilha",
-        variant: "destructive"
-      });
-    }
-  };
-
-  const getContentIcon = (content: TrackContent) => {
+  const getContentIcon = (content: Content) => {
     if (content.video_url) return <Video className="h-4 w-4" />;
     if (content.pdf_url) return <File className="h-4 w-4" />;
     return <FileText className="h-4 w-4" />;
   };
 
-  const getContentType = (content: TrackContent) => {
+  const getContentType = (content: Content) => {
     if (content.video_url) return 'Vídeo';
     if (content.pdf_url) return 'PDF';
     return 'Texto';
@@ -215,13 +176,6 @@ const AdminTrilhas = () => {
                     onClick={() => setEditingTrack(track)}
                   >
                     <Edit className="h-4 w-4" />
-                  </Button>
-                  <Button 
-                    size="sm" 
-                    variant="destructive"
-                    onClick={() => deleteTrack(track.id)}
-                  >
-                    <Trash className="h-4 w-4" />
                   </Button>
                   <Button
                     size="sm"

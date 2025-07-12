@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -75,6 +74,7 @@ const EditMemberDialog: React.FC<EditMemberDialogProps> = ({ member, onClose, on
 
       if (error) throw error;
       
+      // Atualizar a lista local
       setMinisteriosDepartamentos(prev => [...prev, data]);
       return data.id;
     } catch (error) {
@@ -96,8 +96,6 @@ const EditMemberDialog: React.FC<EditMemberDialogProps> = ({ member, onClose, on
     setLoading(true);
 
     try {
-      console.log('Salvando membro:', member.id, 'com dados:', formData, 'e tags:', selectedTags);
-      
       // Verificar se departamento ou ministério são novos e criar tags se necessário
       let updatedTags = [...selectedTags];
 
@@ -115,33 +113,15 @@ const EditMemberDialog: React.FC<EditMemberDialogProps> = ({ member, onClose, on
         }
       }
 
-      // Fazer o update com os dados corretos
-      const updateData = {
-        full_name: formData.full_name,
-        phone: formData.phone,
-        address: formData.address,
-        role: formData.role,
-        birth_date: formData.birth_date,
-        department: formData.department,
-        ministry: formData.ministry,
-        tags: updatedTags,
-        updated_at: new Date().toISOString()
-      };
-
-      console.log('Update data:', updateData);
-
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('profiles')
-        .update(updateData)
-        .eq('id', member.id)
-        .select();
+        .update({
+          ...formData,
+          tags: updatedTags
+        })
+        .eq('id', member.id);
 
-      if (error) {
-        console.error('Erro do Supabase:', error);
-        throw error;
-      }
-
-      console.log('Dados atualizados com sucesso:', data);
+      if (error) throw error;
 
       toast({
         title: "Sucesso",

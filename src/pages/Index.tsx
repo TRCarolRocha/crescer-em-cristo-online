@@ -1,211 +1,240 @@
 
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Calendar, MapPin, Users, BookOpen, Heart, MessageSquare, Phone, Mail, Clock, Star } from "lucide-react";
-import ChurchHeader from "@/components/ChurchHeader";
-import StatsSection from "@/components/StatsSection";
-import TestimonialsSection from "@/components/TestimonialsSection";
-import CarrosselAvisos from "@/components/CarrosselAvisos";
-import AvisosDestaque from "@/components/AvisosDestaque";
+import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { CheckCircle, BookOpen, Users, Heart, TrendingUp, Calendar, MessageSquare, Book } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { useEffect } from "react";
+import ChurchHeader from "@/components/ChurchHeader";
+import CarrosselAvisos from "@/components/CarrosselAvisos";
 
 const Index = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [upcomingEvents, setUpcomingEvents] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [hoveredFeature, setHoveredFeature] = useState<number | null>(null);
+  const [hasCompletedDiagnostic, setHasCompletedDiagnostic] = useState(false);
 
   useEffect(() => {
-    fetchUpcomingEvents();
-  }, []);
+    if (user) {
+      checkDiagnosticStatus();
+    }
+  }, [user]);
 
-  const fetchUpcomingEvents = async () => {
+  const checkDiagnosticStatus = async () => {
+    if (!user) return;
+    
     try {
-      const today = new Date().toISOString().split('T')[0];
-      
       const { data, error } = await supabase
-        .from('agenda_eventos')
-        .select('*')
-        .gte('data_inicio', today)
-        .eq('status', true)
-        .order('data_inicio', { ascending: true })
-        .limit(3);
+        .from('diagnosticos')
+        .select('id')
+        .eq('user_id', user.id)
+        .maybeSingle();
 
-      if (error) throw error;
-      setUpcomingEvents(data || []);
+      if (data && !error) {
+        setHasCompletedDiagnostic(true);
+      }
     } catch (error) {
-      console.error('Erro ao buscar eventos:', error);
-    } finally {
-      setLoading(false);
+      console.log('Usuário ainda não fez o diagnóstico');
     }
   };
 
-  const formatDate = (dateString) => {
-    try {
-      return new Date(dateString).toLocaleDateString('pt-BR', {
-        timeZone: 'America/Sao_Paulo',
-        weekday: 'short',
-        day: 'numeric',
-        month: 'short'
-      });
-    } catch (error) {
-      return dateString;
+  const handleContinueJourney = () => {
+    if (user && hasCompletedDiagnostic) {
+      navigate('/trilhas');
+    } else {
+      navigate('/diagnostico');
     }
   };
+
+  const features = [
+    {
+      icon: <BookOpen className="h-8 w-8" />,
+      title: "Trilhas Personalizadas",
+      description: "Jornadas de crescimento adaptadas ao seu nível de maturidade espiritual na Monte Hebrom",
+      color: "from-blue-500 to-indigo-600",
+      action: () => navigate('/trilhas')
+    },
+    {
+      icon: <Users className="h-8 w-8" />,
+      title: "Diagnóstico Espiritual",
+      description: "Descubra seu nível espiritual em 2 minutos e receba recomendações personalizadas",
+      color: "from-purple-500 to-pink-600",
+      action: () => navigate('/diagnostico')
+    },
+    {
+      icon: <Heart className="h-8 w-8" />,
+      title: "Devocionais Interativos",
+      description: "Transforme seu tempo com Deus em uma experiência rica e pessoal",
+      color: "from-emerald-500 to-teal-600",
+      action: () => navigate('/devocional')
+    },
+    {
+      icon: <TrendingUp className="h-8 w-8" />,
+      title: "Comunidade da Fé",
+      description: "Conecte-se com outros membros e cresça juntos em comunhão",
+      color: "from-orange-500 to-red-600",
+      action: () => navigate('/comunicacao')
+    }
+  ];
+
+  const churchFeatures = [
+    {
+      icon: <Calendar className="h-8 w-8" />,
+      title: "Agenda da Igreja",
+      description: "Acompanhe todos os eventos, cultos, estudos e atividades da Monte Hebrom",
+      color: "from-blue-500 to-cyan-600",
+      action: () => navigate('/agenda')
+    },
+    {
+      icon: <MessageSquare className="h-8 w-8" />,
+      title: "Comunicação",
+      description: "Feed social para compartilhar momentos e se conectar com a família da fé",
+      color: "from-purple-500 to-violet-600",
+      action: () => navigate('/comunicacao')
+    }
+  ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
+      {/* Church Header */}
       <ChurchHeader />
-      
-      <main className="container mx-auto px-4 py-8 space-y-12">
-        {/* Avisos em Carrossel */}
-        <section>
-          <CarrosselAvisos />
-        </section>
 
-        {/* Avisos em Destaque */}
-        <section>
-          <AvisosDestaque />
-        </section>
-
-        {/* Seção de Ações Rápidas */}
-        <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer group" onClick={() => navigate('/devocional')}>
-            <CardContent className="p-6 text-center">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 flex items-center justify-center text-white mx-auto mb-4 group-hover:scale-110 transition-transform">
-                <Heart className="h-6 w-6" />
-              </div>
-              <h3 className="font-semibold text-lg mb-2">Devocional Diário</h3>
-              <p className="text-gray-600 text-sm">Momento de reflexão e crescimento espiritual</p>
-            </CardContent>
-          </Card>
-
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer group" onClick={() => navigate('/trilhas')}>
-            <CardContent className="p-6 text-center">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-r from-green-500 to-blue-600 flex items-center justify-center text-white mx-auto mb-4 group-hover:scale-110 transition-transform">
-                <BookOpen className="h-6 w-6" />
-              </div>
-              <h3 className="font-semibold text-lg mb-2">Trilhas de Discipulado</h3>
-              <p className="text-gray-600 text-sm">Caminhos estruturados para seu crescimento</p>
-            </CardContent>
-          </Card>
-
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer group" onClick={() => navigate('/diagnostico')}>
-            <CardContent className="p-6 text-center">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-r from-yellow-500 to-orange-600 flex items-center justify-center text-white mx-auto mb-4 group-hover:scale-110 transition-transform">
-                <Star className="h-6 w-6" />
-              </div>
-              <h3 className="font-semibold text-lg mb-2">Diagnóstico Espiritual</h3>
-              <p className="text-gray-600 text-sm">Descubra seu momento espiritual atual</p>
-            </CardContent>
-          </Card>
-
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer group" onClick={() => navigate('/fale-com-lideranca')}>
-            <CardContent className="p-6 text-center">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 flex items-center justify-center text-white mx-auto mb-4 group-hover:scale-110 transition-transform">
-                <MessageSquare className="h-6 w-6" />
-              </div>
-              <h3 className="font-semibold text-lg mb-2">Fale com a Liderança</h3>
-              <p className="text-gray-600 text-sm">Entre em contato conosco</p>
-            </CardContent>
-          </Card>
-        </section>
-
-        {/* Agenda da Igreja */}
-        <section>
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-900 to-purple-900 bg-clip-text text-transparent">
-              Agenda da Igreja
-            </h2>
-            <Button variant="outline" onClick={() => navigate('/agenda')}>
-              Ver Agenda Completa
+      {/* Hero Section com botões movidos do rodapé */}
+      <div className="py-24 bg-gradient-to-b from-white to-gray-50">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-3xl md:text-4xl font-bold mb-6 text-gray-900">
+            Pronto para Crescer na Monte Hebrom?
+          </h2>
+          <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+            Juntos, como corpo de Cristo, vivemos o IDE com paixão, unidade e avivamento.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button 
+              size="lg" 
+              className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+              onClick={() => navigate('/devocional')}
+            >
+              <Book className="mr-2 h-5 w-5" />
+              📖 Acessar Devocionais
+            </Button>
+            <Button 
+              size="lg" 
+              className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+              onClick={handleContinueJourney}
+            >
+              {user && hasCompletedDiagnostic ? (
+                <>
+                  📚 Continuar Jornada
+                  <CheckCircle className="ml-2 h-5 w-5" />
+                </>
+              ) : (
+                <>
+                  🪧 Descobrir Meu Nível Espiritual
+                  <CheckCircle className="ml-2 h-5 w-5" />
+                </>
+              )}
             </Button>
           </div>
+        </div>
+      </div>
+
+      {/* Quatro Pilares do Discipulado */}
+      <div className="py-24 bg-gradient-to-b from-gray-50 to-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              Quatro Pilares do Nosso Discipulado
+            </h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              Nossa plataforma foi cuidadosamente projetada para nutrir cada aspecto da jornada cristã em nossa igreja
+            </p>
+          </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {!loading && upcomingEvents.length > 0 ? (
-              upcomingEvents.map((event) => (
-                <Card key={event.id} className="hover:shadow-lg transition-shadow">
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <Badge variant="outline" className="text-blue-600 border-blue-600">
-                        {formatDate(event.data_inicio)}
-                      </Badge>
-                    </div>
-                    <CardTitle className="text-xl">{event.titulo}</CardTitle>
-                    <CardDescription>{event.descricao}</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-2 text-sm text-gray-600">
-                      {event.local && (
-                        <div className="flex items-center gap-2">
-                          <MapPin className="h-4 w-4" />
-                          <span>{event.local}</span>
-                        </div>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              ))
-            ) : (
-              <div className="col-span-full text-center py-8">
-                <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-600">Nenhum evento programado no momento</p>
-              </div>
-            )}
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {features.map((feature, index) => (
+              <Card 
+                key={index}
+                className={`relative overflow-hidden transition-all duration-500 hover:shadow-2xl hover:-translate-y-2 cursor-pointer ${
+                  hoveredFeature === index ? 'scale-105' : ''
+                }`}
+                onMouseEnter={() => setHoveredFeature(index)}
+                onMouseLeave={() => setHoveredFeature(null)}
+                onClick={feature.action}
+              >
+                <div className={`absolute inset-0 bg-gradient-to-br ${feature.color} opacity-0 hover:opacity-10 transition-opacity duration-300`} />
+                <CardHeader className="text-center">
+                  <div className={`mx-auto mb-4 p-3 rounded-full bg-gradient-to-r ${feature.color} text-white w-fit`}>
+                    {feature.icon}
+                  </div>
+                  <CardTitle className="text-xl mb-2">{feature.title}</CardTitle>
+                  <CardDescription className="text-gray-600 leading-relaxed">
+                    {feature.description}
+                  </CardDescription>
+                </CardHeader>
+              </Card>
+            ))}
           </div>
-        </section>
+        </div>
+      </div>
 
-        {/* Estatísticas */}
-        <StatsSection />
+      {/* Carrossel de Avisos */}
+      <CarrosselAvisos />
 
-        {/* Testemunhos */}
-        <TestimonialsSection />
-
-        {/* Contato */}
-        <section className="bg-white/80 rounded-2xl p-8">
-          <h2 className="text-3xl font-bold text-center mb-8 bg-gradient-to-r from-blue-900 to-purple-900 bg-clip-text text-transparent">
-            Entre em Contato
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="space-y-4">
-              <div className="flex items-center gap-3">
-                <Phone className="h-5 w-5 text-blue-600" />
-                <span>(21) 99999-9999</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <Mail className="h-5 w-5 text-blue-600" />
-                <span>contato@montehebrom.com.br</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <MapPin className="h-5 w-5 text-blue-600" />
-                <span>Rua das Flores, 123 - Ibamonte, RJ</span>
-              </div>
-            </div>
-            <div className="space-y-4">
-              <h3 className="font-semibold text-lg">Horários de Culto</h3>
-              <div className="space-y-2 text-gray-600">
-                <div className="flex items-center gap-3">
-                  <Clock className="h-4 w-4" />
-                  <span>Domingo: 9h e 19h</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Clock className="h-4 w-4" />
-                  <span>Quarta-feira: 19h30</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Clock className="h-4 w-4" />
-                  <span>Sexta-feira: 19h30</span>
-                </div>
-              </div>
-            </div>
+      {/* Church Management Features - removido "Membros da Igreja" */}
+      <div className="py-24 bg-gradient-to-b from-white to-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              Gestão da Nossa Igreja
+            </h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              Ferramentas completas para fortalecer a comunhão e organização da Monte Hebrom
+            </p>
           </div>
-        </section>
-      </main>
+          
+          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            {churchFeatures.map((feature, index) => (
+              <Card 
+                key={index}
+                className="relative overflow-hidden transition-all duration-500 hover:shadow-2xl hover:-translate-y-2 cursor-pointer"
+                onClick={feature.action}
+              >
+                <div className={`absolute inset-0 bg-gradient-to-br ${feature.color} opacity-0 hover:opacity-10 transition-opacity duration-300`} />
+                <CardHeader className="text-center">
+                  <div className={`mx-auto mb-4 p-3 rounded-full bg-gradient-to-r ${feature.color} text-white w-fit`}>
+                    {feature.icon}
+                  </div>
+                  <CardTitle className="text-xl mb-2">{feature.title}</CardTitle>
+                  <CardDescription className="text-gray-600 leading-relaxed">
+                    {feature.description}
+                  </CardDescription>
+                </CardHeader>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Footer atualizado com "Fale com a Liderança" */}
+      <div className="py-16 bg-gradient-to-br from-gray-900 to-gray-800">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h3 className="text-2xl font-bold text-white mb-4">
+            Precisa de Ajuda ou Orientação?
+          </h3>
+          <p className="text-gray-300 mb-8">
+            Nossa liderança está disponível para conversar e apoiar sua jornada espiritual
+          </p>
+          <Button 
+            size="lg"
+            className="bg-white text-gray-900 hover:bg-gray-100 shadow-lg hover:shadow-xl transition-all duration-300 font-semibold px-8 py-4"
+            onClick={() => navigate('/fale-com-lideranca')}
+          >
+            💬 Falar com a Liderança
+          </Button>
+        </div>
+      </div>
     </div>
   );
 };
