@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { CheckCircle, BookOpen, Users, Heart, TrendingUp, Calendar, MessageSquare, Book } from "lucide-react";
+import { CheckCircle, BookOpen, Users, Heart, TrendingUp, Calendar, Book } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -86,13 +86,6 @@ const Index = () => {
       description: "Acompanhe todos os eventos, cultos, estudos e atividades da Monte Hebrom",
       color: "from-blue-500 to-cyan-600",
       action: () => navigate('/agenda')
-    },
-    {
-      icon: <MessageSquare className="h-8 w-8" />,
-      title: "Comunicação",
-      description: "Feed social para compartilhar momentos e se conectar com a família da fé",
-      color: "from-purple-500 to-violet-600",
-      action: () => navigate('/comunicacao')
     }
   ];
 
@@ -182,7 +175,7 @@ const Index = () => {
       {/* Carrossel de Avisos */}
       <CarrosselAvisos />
 
-      {/* Church Management Features - removido "Membros da Igreja" */}
+      {/* Church Management Features - apenas agenda */}
       <div className="py-24 bg-gradient-to-b from-white to-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
@@ -194,7 +187,7 @@ const Index = () => {
             </p>
           </div>
           
-          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+          <div className="grid md:grid-cols-1 gap-8 max-w-2xl mx-auto">
             {churchFeatures.map((feature, index) => (
               <Card 
                 key={index}

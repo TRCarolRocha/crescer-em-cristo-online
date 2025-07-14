@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Plus, Edit, MapPin } from 'lucide-react';
+import { Calendar, Plus, Edit, MapPin, Trash2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import CreateEventDialog from './CreateEventDialog';
@@ -25,6 +25,7 @@ const AdminAgenda = () => {
   const [loading, setLoading] = useState(true);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [editingEvento, setEditingEvento] = useState<AgendaEvento | null>(null);
+  const [deleting, setDeleting] = useState<string | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -52,8 +53,38 @@ const AdminAgenda = () => {
     }
   };
 
+  const handleDeleteEvento = async (eventoId: string) => {
+    if (!confirm('Tem certeza que deseja excluir este evento?')) return;
+
+    setDeleting(eventoId);
+    try {
+      const { error } = await supabase
+        .from('agenda_eventos')
+        .delete()
+        .eq('id', eventoId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Sucesso",
+        description: "Evento excluído com sucesso"
+      });
+
+      await fetchEventos();
+    } catch (error) {
+      console.error('Erro ao excluir evento:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível excluir o evento",
+        variant: "destructive"
+      });
+    } finally {
+      setDeleting(null);
+    }
+  };
+
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('pt-BR', {
+    return new Date(dateString + 'T00:00:00').toLocaleDateString('pt-BR', {
       timeZone: 'America/Sao_Paulo',
       day: 'numeric',
       month: 'short',
@@ -119,6 +150,18 @@ const AdminAgenda = () => {
                   >
                     <Edit className="h-4 w-4" />
                   </Button>
+                  <Button 
+                    size="sm" 
+                    variant="destructive"
+                    onClick={() => handleDeleteEvento(evento.id)}
+                    disabled={deleting === evento.id}
+                  >
+                    {deleting === evento.id ? (
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    ) : (
+                      <Trash2 className="h-4 w-4" />
+                    )}
+                  </Button>
                 </div>
               </div>
             </CardContent>
@@ -129,8 +172,8 @@ const AdminAgenda = () => {
       {showCreateDialog && (
         <CreateEventDialog
           onClose={() => setShowCreateDialog(false)}
-          onSuccess={() => {
-            fetchEventos();
+          onSuccess={async () => {
+            await fetchEventos();
             setShowCreateDialog(false);
           }}
         />
@@ -140,8 +183,8 @@ const AdminAgenda = () => {
         <EditEventDialog
           evento={editingEvento}
           onClose={() => setEditingEvento(null)}
-          onSuccess={() => {
-            fetchEventos();
+          onSuccess={async () => {
+            await fetchEventos();
             setEditingEvento(null);
           }}
         />

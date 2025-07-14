@@ -1,74 +1,80 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Calendar, Clock, MapPin, Users, Plus } from "lucide-react";
+import { Calendar, Clock, MapPin, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+
+interface AgendaEvento {
+  id: string;
+  titulo: string;
+  descricao: string;
+  data_inicio: string;
+  data_fim: string | null;
+  local: string | null;
+  status: boolean;
+}
 
 const Agenda = () => {
   const navigate = useNavigate();
-  const [selectedDate, setSelectedDate] = useState(new Date());
+  const { toast } = useToast();
+  const [eventos, setEventos] = useState<AgendaEvento[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const eventos = [
-    {
-      id: 1,
-      titulo: "Culto de Domingo",
-      data: "2024-01-07",
-      hora: "10:00",
-      local: "Templo Principal",
-      tipo: "culto",
-      descricao: "Culto dominical com pregação e adoração",
-      responsavel: "Pastor João"
-    },
-    {
-      id: 2,
-      titulo: "Ensaio do Coral",
-      data: "2024-01-08",
-      hora: "19:30",
-      local: "Sala de Música",
-      tipo: "ensaio",
-      descricao: "Ensaio para apresentação do próximo domingo",
-      responsavel: "Ministério de Música"
-    },
-    {
-      id: 3,
-      titulo: "Estudo Bíblico",
-      data: "2024-01-09",
-      hora: "19:00",
-      local: "Sala de Estudos",
-      tipo: "estudo",
-      descricao: "Estudo do livro de Romanos - Capítulo 8",
-      responsavel: "Pastor Auxiliar"
-    },
-    {
-      id: 4,
-      titulo: "Evangelismo no Bairro",
-      data: "2024-01-10",
-      hora: "14:00",
-      local: "Praça Central",
-      tipo: "evangelismo",
-      descricao: "Ação evangelística com distribuição de folhetos",
-      responsavel: "Ministério de Evangelismo"
-    },
-    {
-      id: 5,
-      titulo: "Confraternização dos Jovens",
-      data: "2024-01-12",
-      hora: "18:00",
-      local: "Salão Social",
-      tipo: "comunhao",
-      descricao: "Noite de jogos e comunhão entre os jovens",
-      responsavel: "Ministério de Jovens"
+  useEffect(() => {
+    fetchEventos();
+  }, []);
+
+  const fetchEventos = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('agenda_eventos')
+        .select('*')
+        .eq('status', true)
+        .order('data_inicio', { ascending: true });
+
+      if (error) throw error;
+      setEventos(data || []);
+    } catch (error) {
+      console.error('Erro ao carregar eventos:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível carregar os eventos",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
     }
-  ];
-
-  const tipoColors = {
-    culto: "bg-blue-100 text-blue-800",
-    ensaio: "bg-purple-100 text-purple-800",
-    estudo: "bg-green-100 text-green-800",
-    evangelismo: "bg-orange-100 text-orange-800",
-    comunhao: "bg-pink-100 text-pink-800"
   };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString + 'T00:00:00').toLocaleDateString('pt-BR', {
+      timeZone: 'America/Sao_Paulo',
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    });
+  };
+
+  const getEventTypeColor = (titulo: string) => {
+    const tituloLower = titulo.toLowerCase();
+    if (tituloLower.includes('culto')) return "bg-blue-100 text-blue-800";
+    if (tituloLower.includes('ensaio')) return "bg-purple-100 text-purple-800";
+    if (tituloLower.includes('estudo')) return "bg-green-100 text-green-800";
+    if (tituloLower.includes('evangelismo')) return "bg-orange-100 text-orange-800";
+    return "bg-pink-100 text-pink-800";
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
@@ -79,104 +85,92 @@ const Agenda = () => {
             <h1 className="text-3xl font-bold text-gray-900">Agenda da Igreja</h1>
             <p className="text-gray-600 mt-2">Programações e eventos da Monte Hebrom</p>
           </div>
-          <div className="flex gap-4">
-            <Button onClick={() => navigate('/')} variant="outline">
-              Voltar ao Início
-            </Button>
-            <Button className="bg-blue-600 hover:bg-blue-700">
-              <Plus className="h-4 w-4 mr-2" />
-              Novo Evento
-            </Button>
-          </div>
+          <Button onClick={() => navigate('/')} variant="outline">
+            Voltar ao Início
+          </Button>
         </div>
 
-        {/* Calendário e Eventos */}
-        <div className="grid lg:grid-cols-3 gap-8">
-          {/* Lista de Eventos */}
-          <div className="lg:col-span-2 space-y-4">
-            <h2 className="text-xl font-semibold text-gray-800 mb-4">Próximos Eventos</h2>
-            {eventos.map((evento) => (
+        {/* Lista de Eventos */}
+        <div className="space-y-4">
+          <h2 className="text-xl font-semibold text-gray-800 mb-4">Próximos Eventos</h2>
+          
+          {eventos.length === 0 ? (
+            <Card className="text-center p-8">
+              <CardContent>
+                <Calendar className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  Nenhum evento programado
+                </h3>
+                <p className="text-gray-600">
+                  Novos eventos serão exibidos aqui quando forem adicionados.
+                </p>
+              </CardContent>
+            </Card>
+          ) : (
+            eventos.map((evento) => (
               <Card key={evento.id} className="hover:shadow-lg transition-shadow">
                 <CardContent className="p-6">
                   <div className="flex justify-between items-start mb-4">
                     <div>
                       <h3 className="text-lg font-semibold text-gray-900">{evento.titulo}</h3>
-                      <p className="text-gray-600 text-sm mt-1">{evento.descricao}</p>
+                      {evento.descricao && (
+                        <p className="text-gray-600 text-sm mt-1">{evento.descricao}</p>
+                      )}
                     </div>
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${tipoColors[evento.tipo as keyof typeof tipoColors]}`}>
-                      {evento.tipo}
+                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${getEventTypeColor(evento.titulo)}`}>
+                      Evento
                     </span>
                   </div>
                   
-                  <div className="grid grid-cols-2 gap-4 text-sm text-gray-600">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
                     <div className="flex items-center">
                       <Calendar className="h-4 w-4 mr-2 text-blue-600" />
-                      {new Date(evento.data).toLocaleDateString('pt-BR', { 
-                        weekday: 'long', 
-                        day: 'numeric', 
-                        month: 'long' 
-                      })}
+                      {formatDate(evento.data_inicio)}
+                      {evento.data_fim && evento.data_fim !== evento.data_inicio && (
+                        <span className="ml-2">até {formatDate(evento.data_fim)}</span>
+                      )}
                     </div>
-                    <div className="flex items-center">
-                      <Clock className="h-4 w-4 mr-2 text-green-600" />
-                      {evento.hora}
-                    </div>
-                    <div className="flex items-center">
-                      <MapPin className="h-4 w-4 mr-2 text-red-600" />
-                      {evento.local}
-                    </div>
-                    <div className="flex items-center">
-                      <Users className="h-4 w-4 mr-2 text-purple-600" />
-                      {evento.responsavel}
-                    </div>
+                    {evento.local && (
+                      <div className="flex items-center">
+                        <MapPin className="h-4 w-4 mr-2 text-red-600" />
+                        {evento.local}
+                      </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>
-            ))}
-          </div>
-
-          {/* Sidebar com Filtros */}
-          <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Filtrar por Tipo</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                {Object.entries(tipoColors).map(([tipo, color]) => (
-                  <div key={tipo} className="flex items-center space-x-2">
-                    <input type="checkbox" id={tipo} className="rounded" />
-                    <label htmlFor={tipo} className="text-sm capitalize">{tipo}</label>
-                    <span className={`px-2 py-1 rounded text-xs ${color}`}>
-                      {eventos.filter(e => e.tipo === tipo).length}
-                    </span>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Estatísticas do Mês</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">Total de Eventos</span>
-                    <span className="font-semibold">{eventos.length}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">Cultos</span>
-                    <span className="font-semibold">{eventos.filter(e => e.tipo === 'culto').length}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">Estudos</span>
-                    <span className="font-semibold">{eventos.filter(e => e.tipo === 'estudo').length}</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+            ))
+          )}
         </div>
+
+        {/* Estatísticas */}
+        {eventos.length > 0 && (
+          <Card className="mt-8">
+            <CardHeader>
+              <CardTitle>Estatísticas do Mês</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-600">Total de Eventos</span>
+                  <span className="font-semibold">{eventos.length}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-600">Cultos</span>
+                  <span className="font-semibold">
+                    {eventos.filter(e => e.titulo.toLowerCase().includes('culto')).length}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-600">Estudos</span>
+                  <span className="font-semibold">
+                    {eventos.filter(e => e.titulo.toLowerCase().includes('estudo')).length}
+                  </span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   );

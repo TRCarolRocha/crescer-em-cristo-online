@@ -60,11 +60,19 @@ const Devocional = () => {
 
   const fetchDevocionalDoDia = async () => {
     try {
+      // Corrigir data usando timezone brasileiro
+      const hoje = new Date();
+      const hojeFormatado = hoje.toLocaleDateString('pt-BR', {
+        timeZone: 'America/Sao_Paulo'
+      }).split('/').reverse().join('-');
+      
+      console.log('Buscando devocional para:', hojeFormatado);
+
       // Buscar devocional de hoje
       const { data: devocionalData, error: devocionalError } = await supabase
         .from('devocionais')
         .select('*')
-        .eq('data', new Date().toISOString().split('T')[0])
+        .eq('data', hojeFormatado)
         .single();
 
       if (devocionalError && devocionalError.code !== 'PGRST116') {
@@ -245,11 +253,12 @@ const Devocional = () => {
             <div className="flex items-center justify-center gap-2 text-blue-600 mb-2">
               <Calendar className="h-5 w-5" />
               <span className="text-sm font-medium">
-                {new Date(devocional.data).toLocaleDateString('pt-BR', {
+                {new Date(devocional.data + 'T00:00:00').toLocaleDateString('pt-BR', {
                   weekday: 'long',
                   year: 'numeric',
                   month: 'long',
-                  day: 'numeric'
+                  day: 'numeric',
+                  timeZone: 'America/Sao_Paulo'
                 })}
               </span>
             </div>
