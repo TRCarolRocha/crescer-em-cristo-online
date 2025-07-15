@@ -70,13 +70,19 @@ const EditMemberDialog: React.FC<EditMemberDialogProps> = ({
         tags: selectedTags
       });
 
+      // Preparar os dados, convertendo string vazia para null na data de nascimento
+      const updateData = {
+        ...formData,
+        birth_date: formData.birth_date.trim() === '' ? null : formData.birth_date,
+        tags: selectedTags,
+        updated_at: new Date().toISOString()
+      };
+
+      console.log('Dados preparados para atualização:', updateData);
+
       const { error } = await supabase
         .from('profiles')
-        .update({
-          ...formData,
-          tags: selectedTags,
-          updated_at: new Date().toISOString()
-        })
+        .update(updateData)
         .eq('id', member.id);
 
       if (error) {
@@ -160,6 +166,7 @@ const EditMemberDialog: React.FC<EditMemberDialogProps> = ({
                 value={formData.birth_date}
                 onChange={(e) => setFormData({ ...formData, birth_date: e.target.value })}
               />
+              <p className="text-xs text-gray-500 mt-1">Deixe em branco se não souber a data</p>
             </div>
           </div>
 
