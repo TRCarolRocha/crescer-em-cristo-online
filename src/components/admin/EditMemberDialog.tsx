@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -20,18 +21,24 @@ interface Member {
   tags: string[];
 }
 
-interface EditMemberDialogProps {
-  member: Member;
-  onClose: () => void;
-  onSuccess: () => void;
-}
-
 interface MinisterioDepartamento {
   id: string;
   nome: string;
 }
 
-const EditMemberDialog: React.FC<EditMemberDialogProps> = ({ member, onClose, onSuccess }) => {
+interface EditMemberDialogProps {
+  member: Member;
+  ministeriosDepartamentos: MinisterioDepartamento[];
+  onClose: () => void;
+  onSuccess: () => void;
+}
+
+const EditMemberDialog: React.FC<EditMemberDialogProps> = ({ 
+  member, 
+  ministeriosDepartamentos, 
+  onClose, 
+  onSuccess 
+}) => {
   const [formData, setFormData] = useState({
     full_name: member.full_name || '',
     phone: member.phone || '',
@@ -42,46 +49,8 @@ const EditMemberDialog: React.FC<EditMemberDialogProps> = ({ member, onClose, on
     ministry: member.ministry || ''
   });
   const [selectedTags, setSelectedTags] = useState<string[]>(member.tags || []);
-  const [ministeriosDepartamentos, setMinisteriosDepartamentos] = useState<MinisterioDepartamento[]>([]);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
-
-  useEffect(() => {
-    fetchMinisteriosDepartamentos();
-  }, []);
-
-  const fetchMinisteriosDepartamentos = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('ministerios_departamentos')
-        .select('*')
-        .order('nome');
-
-      if (error) throw error;
-      setMinisteriosDepartamentos(data || []);
-    } catch (error) {
-      console.error('Erro ao buscar ministérios:', error);
-    }
-  };
-
-  const addNewTag = async (tagName: string) => {
-    try {
-      const { data, error } = await supabase
-        .from('ministerios_departamentos')
-        .insert([{ nome: tagName }])
-        .select()
-        .single();
-
-      if (error) throw error;
-      
-      // Atualizar a lista local
-      setMinisteriosDepartamentos(prev => [...prev, data]);
-      return data.id;
-    } catch (error) {
-      console.error('Erro ao criar nova tag:', error);
-      return null;
-    }
-  };
 
   const handleTagChange = (tagId: string, checked: boolean) => {
     if (checked) {
@@ -96,33 +65,26 @@ const EditMemberDialog: React.FC<EditMemberDialogProps> = ({ member, onClose, on
     setLoading(true);
 
     try {
-      // Verificar se departamento ou ministério são novos e criar tags se necessário
-      let updatedTags = [...selectedTags];
-
-      if (formData.department && !ministeriosDepartamentos.find(md => md.nome === formData.department)) {
-        const newTagId = await addNewTag(formData.department);
-        if (newTagId) {
-          updatedTags.push(newTagId);
-        }
-      }
-
-      if (formData.ministry && !ministeriosDepartamentos.find(md => md.nome === formData.ministry)) {
-        const newTagId = await addNewTag(formData.ministry);
-        if (newTagId) {
-          updatedTags.push(newTagId);
-        }
-      }
+      console.log('Salvando dados do membro:', {
+        ...formData,
+        tags: selectedTags
+      });
 
       const { error } = await supabase
         .from('profiles')
         .update({
           ...formData,
-          tags: updatedTags
+          tags: selectedTags,
+          updated_at: new Date().toISOString()
         })
         .eq('id', member.id);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Erro detalhado ao atualizar membro:', error);
+        throw error;
+      }
 
+      console.log('Membro atualizado com sucesso');
       toast({
         title: "Sucesso",
         description: "Membro atualizado com sucesso"
@@ -133,7 +95,7 @@ const EditMemberDialog: React.FC<EditMemberDialogProps> = ({ member, onClose, on
       console.error('Erro ao atualizar membro:', error);
       toast({
         title: "Erro",
-        description: "Não foi possível atualizar o membro",
+        description: `Não foi possível atualizar o membro: ${error.message || 'Erro desconhecido'}`,
         variant: "destructive"
       });
     } finally {
@@ -208,6 +170,7 @@ const EditMemberDialog: React.FC<EditMemberDialogProps> = ({ member, onClose, on
                 id="department"
                 value={formData.department}
                 onChange={(e) => setFormData({ ...formData, department: e.target.value })}
+                placeholder="Ex: Diaconia, Louvor, etc."
               />
             </div>
             <div>
@@ -216,27 +179,30 @@ const EditMemberDialog: React.FC<EditMemberDialogProps> = ({ member, onClose, on
                 id="ministry"
                 value={formData.ministry}
                 onChange={(e) => setFormData({ ...formData, ministry: e.target.value })}
+                placeholder="Ex: Música, Ensino, etc."
               />
             </div>
           </div>
 
-          <div>
-            <Label>Tags de Ministério/Departamento</Label>
-            <div className="grid grid-cols-3 gap-2 mt-2">
-              {ministeriosDepartamentos.map((item) => (
-                <div key={item.id} className="flex items-center space-x-2">
-                  <Checkbox
-                    id={`tag-${item.id}`}
-                    checked={selectedTags.includes(item.id)}
-                    onCheckedChange={(checked) => handleTagChange(item.id, checked as boolean)}
-                  />
-                  <Label htmlFor={`tag-${item.id}`} className="text-sm">
-                    {item.nome}
-                  </Label>
-                </div>
-              ))}
+          {ministeriosDepartamentos.length > 0 && (
+            <div>
+              <Label>Tags de Ministério/Departamento</Label>
+              <div className="grid grid-cols-3 gap-2 mt-2 max-h-40 overflow-y-auto">
+                {ministeriosDepartamentos.map((item) => (
+                  <div key={item.id} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`tag-${item.id}`}
+                      checked={selectedTags.includes(item.id)}
+                      onCheckedChange={(checked) => handleTagChange(item.id, checked as boolean)}
+                    />
+                    <Label htmlFor={`tag-${item.id}`} className="text-sm">
+                      {item.nome}
+                    </Label>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
           <DialogFooter>
             <Button type="button" variant="outline" onClick={onClose}>

@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Heart, Plus, Edit } from 'lucide-react';
+import { Heart, Plus, Edit, Trash } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import CreateDevocionalDialog from './CreateDevocionalDialog';
@@ -38,17 +38,50 @@ const AdminDevocionais = () => {
         .select('*')
         .order('data', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Erro detalhado ao buscar devocionais:', error);
+        throw error;
+      }
+      
+      console.log('Devocionais carregados:', data);
       setDevocionais(data || []);
     } catch (error) {
       console.error('Erro ao buscar devocionais:', error);
       toast({
         title: "Erro",
-        description: "Não foi possível carregar os devocionais",
+        description: `Não foi possível carregar os devocionais: ${error.message}`,
         variant: "destructive"
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const deleteDevocional = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('devocionais')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        console.error('Erro ao excluir devocional:', error);
+        throw error;
+      }
+
+      toast({
+        title: "Sucesso",
+        description: "Devocional excluído com sucesso"
+      });
+
+      fetchDevocionais();
+    } catch (error) {
+      console.error('Erro ao excluir devocional:', error);
+      toast({
+        title: "Erro",
+        description: `Não foi possível excluir o devocional: ${error.message}`,
+        variant: "destructive"
+      });
     }
   };
 
@@ -102,13 +135,26 @@ const AdminDevocionais = () => {
                     </p>
                   </div>
                 </div>
-                <Button 
-                  size="sm" 
-                  variant="outline"
-                  onClick={() => setEditingDevocional(devocional)}
-                >
-                  <Edit className="h-4 w-4" />
-                </Button>
+                <div className="flex gap-2">
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    onClick={() => setEditingDevocional(devocional)}
+                  >
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                  <Button 
+                    size="sm" 
+                    variant="destructive"
+                    onClick={() => {
+                      if (confirm('Tem certeza que deseja excluir este devocional?')) {
+                        deleteDevocional(devocional.id);
+                      }
+                    }}
+                  >
+                    <Trash className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>

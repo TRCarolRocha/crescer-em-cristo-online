@@ -56,13 +56,18 @@ const AdminTrilhas = () => {
         .select('*')
         .order('title');
 
-      if (error) throw error;
+      if (error) {
+        console.error('Erro detalhado ao buscar trilhas:', error);
+        throw error;
+      }
+      
+      console.log('Trilhas carregadas:', data);
       setTracks(data || []);
     } catch (error) {
       console.error('Erro ao buscar trilhas:', error);
       toast({
         title: "Erro",
-        description: "Não foi possível carregar as trilhas",
+        description: `Não foi possível carregar as trilhas: ${error.message}`,
         variant: "destructive"
       });
     } finally {
@@ -78,10 +83,54 @@ const AdminTrilhas = () => {
         .eq('trilha_id', trilhaId)
         .order('ordem');
 
-      if (error) throw error;
+      if (error) {
+        console.error('Erro ao buscar conteúdos:', error);
+        throw error;
+      }
+      
       setContents(prev => ({ ...prev, [trilhaId]: data || [] }));
     } catch (error) {
       console.error('Erro ao buscar conteúdos:', error);
+    }
+  };
+
+  const deleteTrack = async (id: string) => {
+    try {
+      // Primeiro excluir os conteúdos relacionados
+      const { error: contentsError } = await supabase
+        .from('conteudos')
+        .delete()
+        .eq('trilha_id', id);
+
+      if (contentsError) {
+        console.error('Erro ao excluir conteúdos:', contentsError);
+        throw contentsError;
+      }
+
+      // Depois excluir a trilha
+      const { error } = await supabase
+        .from('discipleship_tracks')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        console.error('Erro ao excluir trilha:', error);
+        throw error;
+      }
+
+      toast({
+        title: "Sucesso",
+        description: "Trilha e seus conteúdos foram excluídos com sucesso"
+      });
+
+      fetchTracks();
+    } catch (error) {
+      console.error('Erro ao excluir trilha:', error);
+      toast({
+        title: "Erro",
+        description: `Não foi possível excluir a trilha: ${error.message}`,
+        variant: "destructive"
+      });
     }
   };
 
@@ -103,7 +152,10 @@ const AdminTrilhas = () => {
         .delete()
         .eq('id', contentId);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Erro ao excluir conteúdo:', error);
+        throw error;
+      }
 
       toast({
         title: "Sucesso",
@@ -115,7 +167,7 @@ const AdminTrilhas = () => {
       console.error('Erro ao excluir conteúdo:', error);
       toast({
         title: "Erro",
-        description: "Não foi possível excluir o conteúdo",
+        description: `Não foi possível excluir o conteúdo: ${error.message}`,
         variant: "destructive"
       });
     }
@@ -178,6 +230,17 @@ const AdminTrilhas = () => {
                   >
                     <Edit className="h-4 w-4" />
                   </Button>
+                  <Button 
+                    size="sm" 
+                    variant="destructive"
+                    onClick={() => {
+                      if (confirm('Tem certeza que deseja excluir esta trilha? Todos os conteúdos relacionados também serão excluídos.')) {
+                        deleteTrack(track.id);
+                      }
+                    }}
+                  >
+                    <Trash className="h-4 w-4" />
+                  </Button>
                   <Button
                     size="sm"
                     variant="outline"
@@ -232,7 +295,11 @@ const AdminTrilhas = () => {
                           <Button
                             size="sm"
                             variant="ghost"
-                            onClick={() => deleteContent(content.id, track.id)}
+                            onClick={() => {
+                              if (confirm('Tem certeza que deseja excluir este conteúdo?')) {
+                                deleteContent(content.id, track.id);
+                              }
+                            }}
                           >
                             <Trash className="h-3 w-3" />
                           </Button>

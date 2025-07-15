@@ -51,13 +51,18 @@ const AdminMembros = () => {
         .select('*')
         .order('full_name');
 
-      if (error) throw error;
+      if (error) {
+        console.error('Erro detalhado ao buscar membros:', error);
+        throw error;
+      }
+      
+      console.log('Membros carregados:', data);
       setMembers(data || []);
     } catch (error) {
       console.error('Erro ao buscar membros:', error);
       toast({
         title: "Erro",
-        description: "Não foi possível carregar os membros",
+        description: `Não foi possível carregar os membros: ${error.message}`,
         variant: "destructive"
       });
     } finally {
@@ -72,7 +77,12 @@ const AdminMembros = () => {
         .select('*')
         .order('nome');
 
-      if (error) throw error;
+      if (error) {
+        console.error('Erro ao buscar ministérios:', error);
+        return;
+      }
+      
+      console.log('Ministérios/Departamentos carregados:', data);
       setMinisteriosDepartamentos(data || []);
     } catch (error) {
       console.error('Erro ao buscar ministérios:', error);
@@ -83,6 +93,11 @@ const AdminMembros = () => {
     member.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     member.role?.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const getTagNameById = (tagId: string) => {
+    const tag = ministeriosDepartamentos.find(md => md.id === tagId);
+    return tag ? tag.nome : tagId;
+  };
 
   if (loading) {
     return (
@@ -124,24 +139,24 @@ const AdminMembros = () => {
                     <p className="text-gray-500 text-sm">{member.address || 'Endereço não informado'}</p>
                     
                     {/* Tags de ministérios/departamentos */}
-                    <div className="mt-2 flex flex-wrap">
+                    <div className="mt-2 flex flex-wrap gap-1">
                       {member.department && (
                         <TagBadge 
                           tagName={member.department} 
                           color={getTagColor(member.department)}
                         />
                       )}
-                      {member.ministry && (
+                      {member.ministry && member.ministry !== member.department && (
                         <TagBadge 
                           tagName={member.ministry} 
                           color={getTagColor(member.ministry)}
                         />
                       )}
-                      {member.tags?.map((tagId) => (
+                      {member.tags && member.tags.length > 0 && member.tags.map((tagId) => (
                         <TagBadge
                           key={tagId}
-                          tagName={getTagName(tagId, ministeriosDepartamentos)}
-                          color={getTagColor(getTagName(tagId, ministeriosDepartamentos))}
+                          tagName={getTagNameById(tagId)}
+                          color={getTagColor(getTagNameById(tagId))}
                         />
                       ))}
                     </div>
@@ -170,6 +185,7 @@ const AdminMembros = () => {
       {editingMember && (
         <EditMemberDialog
           member={editingMember}
+          ministeriosDepartamentos={ministeriosDepartamentos}
           onClose={() => setEditingMember(null)}
           onSuccess={() => {
             fetchMembers();

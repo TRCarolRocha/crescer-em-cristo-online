@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { MessageSquare, Plus, Edit, Eye, EyeOff } from 'lucide-react';
+import { MessageSquare, Plus, Edit, Eye, EyeOff, Trash } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import CreateAvisoDialog from './CreateAvisoDialog';
@@ -37,13 +37,18 @@ const AdminAvisos = () => {
         .select('*')
         .order('ordem');
 
-      if (error) throw error;
+      if (error) {
+        console.error('Erro detalhado ao buscar avisos:', error);
+        throw error;
+      }
+      
+      console.log('Avisos carregados:', data);
       setAvisos(data || []);
     } catch (error) {
       console.error('Erro ao buscar avisos:', error);
       toast({
         title: "Erro",
-        description: "Não foi possível carregar os avisos",
+        description: `Não foi possível carregar os avisos: ${error.message}`,
         variant: "destructive"
       });
     } finally {
@@ -58,7 +63,10 @@ const AdminAvisos = () => {
         .update({ ativo: !currentStatus })
         .eq('id', avisoId);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Erro ao alterar status:', error);
+        throw error;
+      }
 
       toast({
         title: "Sucesso",
@@ -70,7 +78,35 @@ const AdminAvisos = () => {
       console.error('Erro ao alterar status:', error);
       toast({
         title: "Erro",
-        description: "Não foi possível alterar o status do aviso",
+        description: `Não foi possível alterar o status do aviso: ${error.message}`,
+        variant: "destructive"
+      });
+    }
+  };
+
+  const deleteAviso = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('avisos')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        console.error('Erro ao excluir aviso:', error);
+        throw error;
+      }
+
+      toast({
+        title: "Sucesso",
+        description: "Aviso excluído com sucesso"
+      });
+
+      fetchAvisos();
+    } catch (error) {
+      console.error('Erro ao excluir aviso:', error);
+      toast({
+        title: "Erro",
+        description: `Não foi possível excluir o aviso: ${error.message}`,
         variant: "destructive"
       });
     }
@@ -128,6 +164,17 @@ const AdminAvisos = () => {
                     onClick={() => toggleAvisoStatus(aviso.id, aviso.ativo)}
                   >
                     {aviso.ativo ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </Button>
+                  <Button 
+                    size="sm" 
+                    variant="destructive"
+                    onClick={() => {
+                      if (confirm('Tem certeza que deseja excluir este aviso?')) {
+                        deleteAviso(aviso.id);
+                      }
+                    }}
+                  >
+                    <Trash className="h-4 w-4" />
                   </Button>
                 </div>
               </div>
