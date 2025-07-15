@@ -1,8 +1,10 @@
+
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import UserMenu from "./auth/UserMenu";
+
 const ChurchHeader = () => {
   const navigate = useNavigate();
   const {
@@ -25,13 +27,31 @@ const ChurchHeader = () => {
       
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 w-full">
         <div className="text-center">
-          {/* Subtítulo menor e mais sutil */}
+          {/* Subtítulo moderno e elegante */}
           <div className="mb-8">
-            <span className="inline-flex items-center gap-2 text-xs md:text-sm font-medium text-blue-600/80 tracking-[0.2em] uppercase">
-              <Sparkles className="h-3 w-3" />
-              Igreja Batista Missionária
-              <Sparkles className="h-3 w-3" />
-            </span>
+            <div className="relative inline-flex items-center justify-center">
+              {/* Background decorativo sutil */}
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-600/5 via-purple-600/5 to-blue-600/5 rounded-full blur-xl scale-110"></div>
+              
+              {/* Container principal com borda elegante */}
+              <div className="relative bg-white/70 backdrop-blur-sm border border-blue-200/30 rounded-full px-8 py-3 shadow-lg">
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center">
+                    <Sparkles className="h-4 w-4 text-blue-600 animate-pulse" />
+                    <div className="ml-2 w-8 h-px bg-gradient-to-r from-blue-600 to-purple-600"></div>
+                  </div>
+                  
+                  <span className="text-sm md:text-base font-semibold text-blue-900 tracking-[0.15em] uppercase bg-gradient-to-r from-blue-700 to-purple-700 bg-clip-text text-transparent">
+                    Igreja Batista Missionária Ministério
+                  </span>
+                  
+                  <div className="flex items-center">
+                    <div className="w-8 h-px bg-gradient-to-r from-purple-600 to-blue-600"></div>
+                    <Sparkles className="h-4 w-4 text-purple-600 animate-pulse ml-2" />
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
           
           {/* Logo e Nome da Igreja lado a lado */}
@@ -92,4 +112,5 @@ const ChurchHeader = () => {
       </div>
     </div>;
 };
+
 export default ChurchHeader;
