@@ -3,21 +3,34 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { Heart, MessageCircle, Share2, Send, Users } from "lucide-react";
+import { Heart, MessageCircle, Share2, Send, Users, Image as ImageIcon } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import TagBadge from "@/components/TagBadge";
+import CommentSection from "@/components/CommentSection";
+import ImageUpload from "@/components/ImageUpload";
 
 interface Message {
   id: string;
   content: string;
   author_id: string;
   created_at: string;
+  image_url: string | null;
   profiles: {
     full_name: string;
     avatar_url: string | null;
+    tags: string[] | null;
   } | null;
+  likes_count: number;
+  comments_count: number;
+  user_has_liked: boolean;
+}
+
+interface TagInfo {
+  id: string;
+  nome: string;
 }
 
 const Comunicacao = () => {
@@ -25,22 +38,37 @@ const Comunicacao = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [novoPost, setNovoPost] = useState("");
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
+  const [tagsInfo, setTagsInfo] = useState<TagInfo[]>([]);
   const [loading, setLoading] = useState(true);
   const [posting, setPosting] = useState(false);
 
   useEffect(() => {
     if (user) {
       fetchMessages();
+      fetchTagsInfo();
     }
   }, [user]);
 
+  const fetchTagsInfo = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('ministerios_departamentos')
+        .select('id, nome');
+
+      if (error) throw error;
+      setTagsInfo(data || []);
+    } catch (error) {
+      console.error('Erro ao carregar informações das tags:', error);
+    }
+  };
+
   const fetchMessages = async () => {
     try {
-      // Buscar mensagens
       const { data: messagesData, error: messagesError } = await supabase
         .from('messages')
-        .select('id, content, author_id, created_at')
+        .select('id, content, author_id, created_at, image_url')
         .order('created_at', { ascending: false })
         .limit(20);
 
@@ -51,18 +79,45 @@ const Comunicacao = () => {
         const authorIds = [...new Set(messagesData.map(msg => msg.author_id))];
         const { data: profilesData, error: profilesError } = await supabase
           .from('profiles')
-          .select('id, full_name, avatar_url')
+          .select('id, full_name, avatar_url, tags')
           .in('id', authorIds);
 
         if (profilesError) throw profilesError;
 
-        // Combinar dados
-        const messagesWithProfiles = messagesData.map(message => ({
-          ...message,
-          profiles: profilesData?.find(profile => profile.id === message.author_id) || null
-        }));
+        // Buscar curtidas e comentários para cada mensagem
+        const messageIds = messagesData.map(msg => msg.id);
+        
+        const { data: likesData, error: likesError } = await supabase
+          .from('message_likes')
+          .select('message_id, user_id')
+          .in('message_id', messageIds);
 
-        setMessages(messagesWithProfiles);
+        if (likesError) throw likesError;
+
+        const { data: commentsData, error: commentsError } = await supabase
+          .from('message_comments')
+          .select('message_id')
+          .in('message_id', messageIds);
+
+        if (commentsError) throw commentsError;
+
+        // Processar dados das mensagens
+        const messagesWithData = messagesData.map(message => {
+          const profile = profilesData?.find(profile => profile.id === message.author_id);
+          const messageLikes = likesData?.filter(like => like.message_id === message.id) || [];
+          const messageComments = commentsData?.filter(comment => comment.message_id === message.id) || [];
+          const userHasLiked = messageLikes.some(like => like.user_id === user?.id);
+
+          return {
+            ...message,
+            profiles: profile || null,
+            likes_count: messageLikes.length,
+            comments_count: messageComments.length,
+            user_has_liked: userHasLiked
+          };
+        });
+
+        setMessages(messagesWithData);
       } else {
         setMessages([]);
       }
@@ -79,21 +134,23 @@ const Comunicacao = () => {
   };
 
   const handleSubmitPost = async () => {
-    if (!novoPost.trim() || !user) return;
+    if ((!novoPost.trim() && !selectedImage) || !user) return;
 
     setPosting(true);
     try {
       const { error } = await supabase
         .from('messages')
         .insert({
-          content: novoPost.trim(),
+          content: novoPost.trim() || '',
           author_id: user.id,
-          type: 'post'
+          type: 'post',
+          image_url: selectedImage
         });
 
       if (error) throw error;
 
       setNovoPost("");
+      setSelectedImage(null);
       await fetchMessages();
       
       toast({
@@ -112,6 +169,56 @@ const Comunicacao = () => {
     }
   };
 
+  const handleLikeToggle = async (messageId: string, currentlyLiked: boolean) => {
+    if (!user) return;
+
+    try {
+      if (currentlyLiked) {
+        const { error } = await supabase
+          .from('message_likes')
+          .delete()
+          .eq('message_id', messageId)
+          .eq('user_id', user.id);
+
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from('message_likes')
+          .insert({
+            message_id: messageId,
+            user_id: user.id
+          });
+
+        if (error) throw error;
+      }
+
+      // Atualizar estado local
+      setMessages(prev => prev.map(msg => {
+        if (msg.id === messageId) {
+          return {
+            ...msg,
+            likes_count: currentlyLiked ? msg.likes_count - 1 : msg.likes_count + 1,
+            user_has_liked: !currentlyLiked
+          };
+        }
+        return msg;
+      }));
+
+    } catch (error) {
+      console.error('Erro ao curtir/descurtir:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível processar a curtida.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const getTagName = (tagId: string) => {
+    const tag = tagsInfo.find(t => t.id === tagId);
+    return tag?.nome || tagId;
+  };
+
   const formatTimeAgo = (dateString: string) => {
     const now = new Date();
     const date = new Date(dateString);
@@ -124,6 +231,12 @@ const Comunicacao = () => {
     if (diffInDays < 7) return `há ${diffInDays} dia${diffInDays > 1 ? 's' : ''}`;
     
     return date.toLocaleDateString('pt-BR');
+  };
+
+  const updateCommentsCount = (messageId: string, newCount: number) => {
+    setMessages(prev => prev.map(msg => 
+      msg.id === messageId ? { ...msg, comments_count: newCount } : msg
+    ));
   };
 
   if (!user) {
@@ -199,10 +312,17 @@ const Comunicacao = () => {
                 onChange={(e) => setNovoPost(e.target.value)}
                 className="min-h-[100px]"
               />
+              
+              <ImageUpload
+                onImageUploaded={setSelectedImage}
+                selectedImage={selectedImage}
+                onRemoveImage={() => setSelectedImage(null)}
+              />
+              
               <div className="flex justify-end">
                 <Button 
                   onClick={handleSubmitPost}
-                  disabled={!novoPost.trim() || posting}
+                  disabled={(!novoPost.trim() && !selectedImage) || posting}
                   className="bg-blue-600 hover:bg-blue-700 flex items-center gap-2"
                 >
                   <Send className="h-4 w-4" />
@@ -241,7 +361,7 @@ const Comunicacao = () => {
                       {message.profiles?.full_name?.charAt(0) || 'U'}
                     </div>
                     <div className="flex-1">
-                      <div className="flex items-center space-x-2">
+                      <div className="flex items-center space-x-2 mb-1">
                         <h4 className="font-semibold text-gray-900">
                           {message.profiles?.full_name || 'Usuário'}
                         </h4>
@@ -249,26 +369,66 @@ const Comunicacao = () => {
                           Membro
                         </span>
                       </div>
+                      
+                      {/* Tags do usuário */}
+                      {message.profiles?.tags && message.profiles.tags.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mb-1">
+                          {message.profiles.tags.map((tagId) => (
+                            <TagBadge
+                              key={tagId}
+                              tagName={getTagName(tagId)}
+                              size="sm"
+                              color="#10B981"
+                            />
+                          ))}
+                        </div>
+                      )}
+                      
                       <p className="text-xs text-gray-500">{formatTimeAgo(message.created_at)}</p>
                     </div>
                   </div>
 
                   {/* Conteúdo do Post */}
                   <div className="mb-4">
-                    <p className="text-gray-700 leading-relaxed">{message.content}</p>
+                    {message.content && (
+                      <p className="text-gray-700 leading-relaxed mb-3">{message.content}</p>
+                    )}
+                    
+                    {/* Imagem do post */}
+                    {message.image_url && (
+                      <div className="rounded-lg overflow-hidden">
+                        <img
+                          src={message.image_url}
+                          alt="Imagem do post"
+                          className="w-full max-h-96 object-cover"
+                        />
+                      </div>
+                    )}
                   </div>
 
                   {/* Ações do Post */}
                   <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                    <div className="flex items-center space-x-4">
-                      <button className="flex items-center space-x-2 text-gray-500 hover:text-red-500 transition-colors">
-                        <Heart className="h-4 w-4" />
-                        <span className="text-sm">Curtir</span>
+                    <div className="flex items-center space-x-6">
+                      <button 
+                        onClick={() => handleLikeToggle(message.id, message.user_has_liked)}
+                        className={`flex items-center space-x-2 transition-colors ${
+                          message.user_has_liked 
+                            ? 'text-red-500' 
+                            : 'text-gray-500 hover:text-red-500'
+                        }`}
+                      >
+                        <Heart className={`h-4 w-4 ${message.user_has_liked ? 'fill-current' : ''}`} />
+                        <span className="text-sm">
+                          {message.likes_count > 0 ? message.likes_count : 'Curtir'}
+                        </span>
                       </button>
-                      <button className="flex items-center space-x-2 text-gray-500 hover:text-blue-500 transition-colors">
-                        <MessageCircle className="h-4 w-4" />
-                        <span className="text-sm">Comentar</span>
-                      </button>
+                      
+                      <CommentSection
+                        messageId={message.id}
+                        commentsCount={message.comments_count}
+                        onCommentsCountChange={(newCount) => updateCommentsCount(message.id, newCount)}
+                      />
+                      
                       <button className="flex items-center space-x-2 text-gray-500 hover:text-green-500 transition-colors">
                         <Share2 className="h-4 w-4" />
                         <span className="text-sm">Compartilhar</span>
