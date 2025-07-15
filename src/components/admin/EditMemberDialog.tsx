@@ -70,10 +70,15 @@ const EditMemberDialog: React.FC<EditMemberDialogProps> = ({
         tags: selectedTags
       });
 
-      // Preparar os dados, convertendo string vazia para null na data de nascimento
+      // Preparar os dados, garantindo que campos vazios sejam tratados corretamente
       const updateData = {
-        ...formData,
-        birth_date: formData.birth_date.trim() === '' ? null : formData.birth_date,
+        full_name: formData.full_name.trim() || null,
+        phone: formData.phone.trim() || null,
+        address: formData.address.trim() || null,
+        role: formData.role,
+        birth_date: formData.birth_date && formData.birth_date.trim() !== '' ? formData.birth_date : null,
+        department: formData.department.trim() || null,
+        ministry: formData.ministry.trim() || null,
         tags: selectedTags,
         updated_at: new Date().toISOString()
       };
@@ -177,7 +182,7 @@ const EditMemberDialog: React.FC<EditMemberDialogProps> = ({
                 id="department"
                 value={formData.department}
                 onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-                placeholder="Ex: Diaconia, Louvor, etc."
+                placeholder="Ex: Diaconia, Louvor, Suporte, etc."
               />
             </div>
             <div>

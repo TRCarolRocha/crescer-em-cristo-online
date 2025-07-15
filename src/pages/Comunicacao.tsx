@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -11,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import TagBadge from "@/components/TagBadge";
 import CommentSection from "@/components/CommentSection";
 import ImageUpload from "@/components/ImageUpload";
+import { getTagColor } from "@/utils/tagUtils";
 
 interface Message {
   id: string;
@@ -22,6 +22,9 @@ interface Message {
     full_name: string;
     avatar_url: string | null;
     tags: string[] | null;
+    department: string | null;
+    ministry: string | null;
+    role: string | null;
   } | null;
   likes_count: number;
   comments_count: number;
@@ -79,7 +82,7 @@ const Comunicacao = () => {
         const authorIds = [...new Set(messagesData.map(msg => msg.author_id))];
         const { data: profilesData, error: profilesError } = await supabase
           .from('profiles')
-          .select('id, full_name, avatar_url, tags')
+          .select('id, full_name, avatar_url, tags, department, ministry, role')
           .in('id', authorIds);
 
         if (profilesError) throw profilesError;
@@ -214,9 +217,20 @@ const Comunicacao = () => {
     }
   };
 
-  const getTagName = (tagId: string) => {
+  const getTagNameById = (tagId: string) => {
     const tag = tagsInfo.find(t => t.id === tagId);
     return tag?.nome || tagId;
+  };
+
+  const getRoleDisplayName = (role: string) => {
+    switch (role) {
+      case 'admin':
+        return 'Administrador';
+      case 'member':
+        return 'Membro';
+      default:
+        return 'Membro';
+    }
   };
 
   const formatTimeAgo = (dateString: string) => {
@@ -365,24 +379,49 @@ const Comunicacao = () => {
                         <h4 className="font-semibold text-gray-900">
                           {message.profiles?.full_name || 'Usuário'}
                         </h4>
-                        <span className="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded-full">
-                          Membro
-                        </span>
                       </div>
                       
-                      {/* Tags do usuário */}
-                      {message.profiles?.tags && message.profiles.tags.length > 0 && (
-                        <div className="flex flex-wrap gap-1 mb-1">
-                          {message.profiles.tags.map((tagId) => (
-                            <TagBadge
-                              key={tagId}
-                              tagName={getTagName(tagId)}
-                              size="sm"
-                              color="#10B981"
-                            />
-                          ))}
-                        </div>
-                      )}
+                      {/* Tags do usuário - Nova lógica implementada */}
+                      <div className="flex flex-wrap gap-1 mb-1">
+                        {/* Mostrar department se existe */}
+                        {message.profiles?.department && (
+                          <TagBadge
+                            tagName={message.profiles.department}
+                            color={getTagColor(message.profiles.department)}
+                            size="sm"
+                          />
+                        )}
+                        
+                        {/* Mostrar ministry se existe e é diferente de department */}
+                        {message.profiles?.ministry && 
+                         message.profiles.ministry !== message.profiles.department && (
+                          <TagBadge
+                            tagName={message.profiles.ministry}
+                            color={getTagColor(message.profiles.ministry)}
+                            size="sm"
+                          />
+                        )}
+                        
+                        {/* Mostrar tags da tabela ministerios_departamentos se existirem */}
+                        {message.profiles?.tags && message.profiles.tags.length > 0 && 
+                         message.profiles.tags.map((tagId) => (
+                          <TagBadge
+                            key={tagId}
+                            tagName={getTagNameById(tagId)}
+                            color={getTagColor(getTagNameById(tagId))}
+                            size="sm"
+                          />
+                        ))}
+                        
+                        {/* Mostrar role se nenhuma das opções anteriores existir */}
+                        {!message.profiles?.department && 
+                         !message.profiles?.ministry && 
+                         (!message.profiles?.tags || message.profiles.tags.length === 0) && (
+                          <span className="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded-full">
+                            {getRoleDisplayName(message.profiles?.role || 'member')}
+                          </span>
+                        )}
+                      </div>
                       
                       <p className="text-xs text-gray-500">{formatTimeAgo(message.created_at)}</p>
                     </div>
