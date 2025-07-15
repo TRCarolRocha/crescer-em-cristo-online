@@ -37,23 +37,35 @@ const Comunicacao = () => {
 
   const fetchMessages = async () => {
     try {
-      const { data, error } = await supabase
+      // Buscar mensagens
+      const { data: messagesData, error: messagesError } = await supabase
         .from('messages')
-        .select(`
-          id,
-          content,
-          author_id,
-          created_at,
-          profiles:author_id (
-            full_name,
-            avatar_url
-          )
-        `)
+        .select('id, content, author_id, created_at')
         .order('created_at', { ascending: false })
         .limit(20);
 
-      if (error) throw error;
-      setMessages(data || []);
+      if (messagesError) throw messagesError;
+
+      if (messagesData && messagesData.length > 0) {
+        // Buscar perfis dos autores
+        const authorIds = [...new Set(messagesData.map(msg => msg.author_id))];
+        const { data: profilesData, error: profilesError } = await supabase
+          .from('profiles')
+          .select('id, full_name, avatar_url')
+          .in('id', authorIds);
+
+        if (profilesError) throw profilesError;
+
+        // Combinar dados
+        const messagesWithProfiles = messagesData.map(message => ({
+          ...message,
+          profiles: profilesData?.find(profile => profile.id === message.author_id) || null
+        }));
+
+        setMessages(messagesWithProfiles);
+      } else {
+        setMessages([]);
+      }
     } catch (error) {
       console.error('Erro ao carregar mensagens:', error);
       toast({
