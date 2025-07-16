@@ -1,8 +1,7 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { CheckCircle, BookOpen, Users, Heart, TrendingUp, Calendar, Book } from "lucide-react";
+import { CheckCircle, BookOpen, Users, Heart, TrendingUp, Calendar, Book, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -94,27 +93,30 @@ const Index = () => {
       {/* Church Header */}
       <ChurchHeader />
 
-      {/* Hero Section com botões movidos do rodapé */}
-      <div className="py-24 bg-gradient-to-b from-white to-gray-50">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-6 text-gray-900">
+      {/* Hero Section com transição mais suave */}
+      <div className="py-16 bg-gradient-to-b from-indigo-100/50 to-white relative">
+        {/* Elemento de transição visual */}
+        <div className="absolute top-0 left-0 right-0 h-16 bg-gradient-to-b from-indigo-100 to-transparent"></div>
+        
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative">
+          <h2 className="text-3xl md:text-4xl font-bold font-playfair mb-6 text-gray-900">
             Pronto para Crescer na Monte Hebrom?
           </h2>
-          <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+          <p className="text-xl font-inter text-gray-600 mb-8 max-w-2xl mx-auto">
             Juntos, como corpo de Cristo, vivemos o IDE com paixão, unidade e avivamento.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button 
               size="lg" 
-              className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+              className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 font-inter font-semibold"
               onClick={() => navigate('/devocional')}
             >
-              <Book className="mr-2 h-5 w-5" />
+              <ArrowRight className="mr-2 h-5 w-5 rotate-90" />
               📖 Acessar Devocionais
             </Button>
             <Button 
               size="lg" 
-              className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+              className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 font-inter font-semibold"
               onClick={handleContinueJourney}
             >
               {user && hasCompletedDiagnostic ? (
@@ -134,13 +136,13 @@ const Index = () => {
       </div>
 
       {/* Quatro Pilares do Discipulado */}
-      <div className="py-24 bg-gradient-to-b from-gray-50 to-white">
+      <div className="py-20 bg-gradient-to-b from-white to-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold font-playfair text-gray-900 mb-4">
               Quatro Pilares do Nosso Discipulado
             </h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            <p className="text-xl font-inter text-gray-600 max-w-2xl mx-auto">
               Nossa plataforma foi cuidadosamente projetada para nutrir cada aspecto da jornada cristã em nossa igreja
             </p>
           </div>
@@ -175,14 +177,14 @@ const Index = () => {
       {/* Carrossel de Avisos */}
       <CarrosselAvisos />
 
-      {/* Church Management Features - apenas agenda */}
-      <div className="py-24 bg-gradient-to-b from-white to-gray-50">
+      {/* Church Management Features */}
+      <div className="py-20 bg-gradient-to-b from-white to-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold font-playfair text-gray-900 mb-4">
               Gestão da Nossa Igreja
             </h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            <p className="text-xl font-inter text-gray-600 max-w-2xl mx-auto">
               Ferramentas completas para fortalecer a comunhão e organização da Monte Hebrom
             </p>
           </div>
@@ -210,18 +212,18 @@ const Index = () => {
         </div>
       </div>
 
-      {/* Footer atualizado com "Fale com a Liderança" */}
+      {/* Footer */}
       <div className="py-16 bg-gradient-to-br from-gray-900 to-gray-800">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h3 className="text-2xl font-bold text-white mb-4">
+          <h3 className="text-2xl font-bold font-playfair text-white mb-4">
             Precisa de Ajuda ou Orientação?
           </h3>
-          <p className="text-gray-300 mb-8">
+          <p className="text-gray-300 font-inter mb-8">
             Nossa liderança está disponível para conversar e apoiar sua jornada espiritual
           </p>
           <Button 
             size="lg"
-            className="bg-white text-gray-900 hover:bg-gray-100 shadow-lg hover:shadow-xl transition-all duration-300 font-semibold px-8 py-4"
+            className="bg-white text-gray-900 hover:bg-gray-100 shadow-lg hover:shadow-xl transition-all duration-300 font-inter font-semibold px-8 py-4"
             onClick={() => navigate('/fale-com-lideranca')}
           >
             💬 Falar com a Liderança
