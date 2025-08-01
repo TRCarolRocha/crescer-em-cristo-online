@@ -3,7 +3,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { Heart, Users, ArrowRight, MessageCircle } from 'lucide-react';
+import { Heart, Users, ArrowRight } from 'lucide-react';
 
 const ChurchHeader = () => {
   const { user } = useAuth();
@@ -19,9 +19,15 @@ const ChurchHeader = () => {
 
   return (
     <div className="relative min-h-[60vh] md:min-h-[65vh] bg-gradient-to-br from-blue-900 via-blue-800 to-purple-900 flex items-center justify-center overflow-hidden">
-      {/* Background Pattern */}
+      {/* Background Pattern - Pure CSS Solution */}
       <div className="absolute inset-0 bg-black/20"></div>
-      <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=\"60\" height=\"60\" viewBox=\"0 0 60 60\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cg fill=\"none\" fill-rule=\"evenodd\"%3E%3Cg fill=\"%23ffffff\" fill-opacity=\"0.03\"%3E%3Ccircle cx=\"30\" cy=\"30\" r=\"2\"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-40"></div>
+      <div className="absolute inset-0 opacity-30"
+           style={{
+             backgroundImage: `radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.1) 2px, transparent 2px),
+                              radial-gradient(circle at 75% 75%, rgba(255, 255, 255, 0.05) 1px, transparent 1px)`,
+             backgroundSize: '60px 60px, 40px 40px'
+           }}>
+      </div>
       
       {/* Floating Elements */}
       <div className="absolute top-20 left-10 w-2 h-2 bg-white/20 rounded-full animate-bounce delay-100"></div>
@@ -31,7 +37,7 @@ const ChurchHeader = () => {
       <div className="relative z-10 text-center px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto animate-fade-in">
         {/* Church Name */}
         <div className="mb-4 sm:mb-6">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-white mb-2 sm:mb-4 leading-tight tracking-tight font-display">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-white mb-2 sm:mb-4 leading-tight tracking-tight font-sans">
             Monte Hebrom
           </h1>
           <div className="flex items-center justify-center gap-2 mb-3 sm:mb-4">
