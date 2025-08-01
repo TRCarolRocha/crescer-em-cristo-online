@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instanciate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "12.2.3 (519615d)"
+    PostgrestVersion: "12.2.12 (cd3cf9e)"
   }
   public: {
     Tables: {
@@ -134,7 +134,6 @@ export type Database = {
         Row: {
           created_at: string
           data: string
-          data_exibicao: string | null
           id: string
           pergunta_1: string
           pergunta_2: string
@@ -148,7 +147,6 @@ export type Database = {
         Insert: {
           created_at?: string
           data: string
-          data_exibicao?: string | null
           id?: string
           pergunta_1: string
           pergunta_2: string
@@ -162,7 +160,6 @@ export type Database = {
         Update: {
           created_at?: string
           data?: string
-          data_exibicao?: string | null
           id?: string
           pergunta_1?: string
           pergunta_2?: string
@@ -227,6 +224,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      devocional_stats: {
+        Row: {
+          created_at: string
+          id: string
+          melhor_streak: number
+          streak_atual: number
+          total_completados: number
+          ultimo_devocional: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          melhor_streak?: number
+          streak_atual?: number
+          total_completados?: number
+          ultimo_devocional?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          melhor_streak?: number
+          streak_atual?: number
+          total_completados?: number
+          ultimo_devocional?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       diagnosticos: {
         Row: {
@@ -539,6 +569,33 @@ export type Database = {
         Update: {
           id?: string
           nome?: string
+        }
+        Relationships: []
+      }
+      notification_settings: {
+        Row: {
+          created_at: string
+          email_notifications: boolean
+          id: string
+          notification_time: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email_notifications?: boolean
+          id?: string
+          notification_time?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email_notifications?: boolean
+          id?: string
+          notification_time?: string
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }

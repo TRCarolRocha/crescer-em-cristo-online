@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -6,9 +5,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Progress } from '@/components/ui/progress';
-import { Calendar, BookOpen, Heart, CheckCircle, ArrowLeft } from 'lucide-react';
+import { Calendar, BookOpen, Heart, CheckCircle, ArrowLeft, TrendingUp } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
+import DevocionalDashboard from '@/components/devocional/DevocionalDashboard';
 
 interface Devocional {
   id: string;
@@ -34,11 +34,18 @@ interface DevocionalHistorico {
   completado: boolean;
 }
 
+interface DevocionalStats {
+  streak_atual: number;
+  melhor_streak: number;
+  total_completados: number;
+}
+
 const Devocional = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [devocional, setDevocional] = useState<Devocional | null>(null);
+  const [stats, setStats] = useState<DevocionalStats | null>(null);
   const [historico, setHistorico] = useState<DevocionalHistorico>({
     devocional_id: '',
     resposta_1: '',
@@ -51,12 +58,30 @@ const Devocional = () => {
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [showDashboard, setShowDashboard] = useState(false);
 
   useEffect(() => {
     if (user) {
       fetchDevocionalDoDia();
+      fetchStats();
     }
   }, [user]);
+
+  const fetchStats = async () => {
+    try {
+      const { data } = await supabase
+        .from('devocional_stats')
+        .select('streak_atual, melhor_streak, total_completados')
+        .eq('user_id', user.id)
+        .single();
+
+      if (data) {
+        setStats(data);
+      }
+    } catch (error) {
+      console.error('Erro ao buscar estatísticas:', error);
+    }
+  };
 
   const fetchDevocionalDoDia = async () => {
     try {
@@ -155,6 +180,9 @@ const Devocional = () => {
         title: "Progresso salvo!",
         description: "Suas reflexões foram salvas com sucesso."
       });
+      
+      // Atualizar estatísticas
+      await fetchStats();
     } catch (error) {
       console.error('Erro ao salvar:', error);
       toast({
@@ -192,6 +220,31 @@ const Devocional = () => {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  if (showDashboard) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-4">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex items-center justify-between mb-6">
+            <Button 
+              onClick={() => setShowDashboard(false)} 
+              variant="ghost"
+            >
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Voltar ao Devocional
+            </Button>
+            <Button 
+              onClick={() => navigate('/')} 
+              variant="outline"
+            >
+              Home
+            </Button>
+          </div>
+          <DevocionalDashboard />
+        </div>
       </div>
     );
   }
@@ -239,6 +292,14 @@ const Devocional = () => {
           </Button>
           
           <div className="flex items-center gap-4">
+            <Button
+              onClick={() => setShowDashboard(true)}
+              variant="outline"
+              size="sm"
+            >
+              <TrendingUp className="mr-2 h-4 w-4" />
+              Meu Progresso
+            </Button>
             <div className="text-right">
               <div className="text-sm text-gray-600">Progresso</div>
               <div className="font-semibold">{progresso}%</div>
@@ -246,6 +307,30 @@ const Devocional = () => {
             <Progress value={progresso} className="w-24" />
           </div>
         </div>
+
+        {/* Estatísticas Rápidas */}
+        {stats && (
+          <div className="grid grid-cols-3 gap-4 mb-6">
+            <Card>
+              <CardContent className="p-4 text-center">
+                <div className="text-lg font-bold text-orange-600">{stats.streak_atual}</div>
+                <div className="text-xs text-gray-600">Dias Consecutivos</div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4 text-center">
+                <div className="text-lg font-bold text-yellow-600">{stats.melhor_streak}</div>
+                <div className="text-xs text-gray-600">Melhor Sequência</div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4 text-center">
+                <div className="text-lg font-bold text-blue-600">{stats.total_completados}</div>
+                <div className="text-xs text-gray-600">Total Completos</div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
 
         {/* Header do Devocional */}
         <Card className="mb-6">
