@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -34,14 +35,15 @@ const DevocionalDashboard = () => {
 
   const fetchDevocionalStats = async () => {
     try {
+      // Use raw query to avoid TypeScript issues with table name
       const { data, error } = await supabase
-        .from('devocional_stats')
+        .from('devocional_stats' as any)
         .select('*')
         .eq('user_id', user.id)
         .single();
 
       if (data) {
-        setStats(data);
+        setStats(data as DevocionalStats);
       }
     } catch (error) {
       console.error('Erro ao buscar estatísticas:', error);

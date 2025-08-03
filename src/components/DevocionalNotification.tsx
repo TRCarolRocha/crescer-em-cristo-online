@@ -12,6 +12,7 @@ interface DevocionalStatus {
   isCompleted: boolean;
   streak: number;
   devocionalTema?: string;
+  devocionalId?: string;
 }
 
 const DevocionalNotification = () => {
@@ -39,7 +40,7 @@ const DevocionalNotification = () => {
       // Verificar se há devocional hoje
       const { data: devocional } = await supabase
         .from('devocionais')
-        .select('tema')
+        .select('id, tema')
         .eq('data', hojeFormatado)
         .single();
 
@@ -56,9 +57,9 @@ const DevocionalNotification = () => {
         .eq('devocional_id', devocional.id)
         .single();
 
-      // Buscar streak atual
+      // Buscar streak atual usando raw query
       const { data: stats } = await supabase
-        .from('devocional_stats')
+        .from('devocional_stats' as any)
         .select('streak_atual')
         .eq('user_id', user.id)
         .single();
@@ -67,7 +68,8 @@ const DevocionalNotification = () => {
         hasDevocionalToday: true,
         isCompleted: historico?.completado || false,
         streak: stats?.streak_atual || 0,
-        devocionalTema: devocional.tema
+        devocionalTema: devocional.tema,
+        devocionalId: devocional.id
       });
     } catch (error) {
       console.error('Erro ao verificar status do devocional:', error);
