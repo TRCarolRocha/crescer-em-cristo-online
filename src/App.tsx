@@ -12,6 +12,7 @@ import Agenda from "./pages/Agenda";
 import Membros from "./pages/Membros";
 import Comunicacao from "./pages/Comunicacao";
 import Devocional from "./pages/Devocional";
+import HistoricoDevocional from "./pages/HistoricoDevocional";
 import Perfil from "./pages/Perfil";
 import Admin from "./pages/Admin";
 import FaleComLideranca from "./pages/FaleComLideranca";
@@ -41,6 +42,11 @@ const App = () => (
             <Route path="/devocional" element={
               <ProtectedRoute>
                 <Devocional />
+              </ProtectedRoute>
+            } />
+            <Route path="/historico-devocional" element={
+              <ProtectedRoute>
+                <HistoricoDevocional />
               </ProtectedRoute>
             } />
             <Route path="/perfil" element={

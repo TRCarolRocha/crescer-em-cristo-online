@@ -1,13 +1,17 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { CheckCircle, BookOpen, Users, Heart, TrendingUp, Calendar, Book, ArrowRight } from "lucide-react";
+import { CheckCircle, BookOpen, Users, Heart, TrendingUp, Calendar, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect } from "react";
 import ChurchHeader from "@/components/ChurchHeader";
 import CarrosselAvisos from "@/components/CarrosselAvisos";
+import DevocionalNotification from "@/components/DevocionalNotification";
+import DevocionalDashboard from "@/components/DevocionalDashboard";
+import BirthdaySection from "@/components/BirthdaySection";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -94,60 +98,80 @@ const Index = () => {
       <ChurchHeader />
 
       {/* Hero Section com transição mais suave */}
-      <div className="py-16 bg-gradient-to-b from-indigo-100/50 to-white relative">
+      <div className="py-12 sm:py-16 bg-gradient-to-b from-indigo-100/50 to-white relative">
         {/* Elemento de transição visual */}
-        <div className="absolute top-0 left-0 right-0 h-16 bg-gradient-to-b from-indigo-100 to-transparent"></div>
+        <div className="absolute top-0 left-0 right-0 h-12 sm:h-16 bg-gradient-to-b from-indigo-100 to-transparent"></div>
         
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative">
-          <h2 className="text-3xl md:text-4xl font-bold font-playfair mb-6 text-gray-900">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold font-playfair mb-4 sm:mb-6 text-gray-900">
             Pronto para Crescer na Monte Hebrom?
           </h2>
-          <p className="text-xl font-inter text-gray-600 mb-8 max-w-2xl mx-auto">
+          <p className="text-lg sm:text-xl font-inter text-gray-600 mb-6 sm:mb-8 max-w-2xl mx-auto">
             Juntos, como corpo de Cristo, vivemos o IDE com paixão, unidade e avivamento.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center mb-8">
             <Button 
               size="lg" 
-              className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 font-inter font-semibold"
-              onClick={() => navigate('/devocional')}
-            >
-              <ArrowRight className="mr-2 h-5 w-5 rotate-90" />
-              📖 Acessar Devocionais
-            </Button>
-            <Button 
-              size="lg" 
-              className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 font-inter font-semibold"
+              className="w-full sm:w-auto bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 font-inter font-semibold px-6 sm:px-8"
               onClick={handleContinueJourney}
             >
               {user && hasCompletedDiagnostic ? (
                 <>
                   📚 Continuar Jornada
-                  <CheckCircle className="ml-2 h-5 w-5" />
+                  <CheckCircle className="ml-2 h-4 sm:h-5 w-4 sm:w-5" />
                 </>
               ) : (
                 <>
                   🪧 Descobrir Meu Nível Espiritual
-                  <CheckCircle className="ml-2 h-5 w-5" />
+                  <CheckCircle className="ml-2 h-4 sm:h-5 w-4 sm:w-5" />
                 </>
               )}
             </Button>
           </div>
+
+          {/* Seção de notificações e dashboards para usuários logados */}
+          {user && (
+            <div className="max-w-4xl mx-auto mb-8">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Coluna principal - Notificações */}
+                <div className="lg:col-span-2 space-y-4">
+                  <DevocionalNotification />
+                </div>
+                
+                {/* Sidebar - Dashboard e Aniversários */}
+                <div className="space-y-4">
+                  <BirthdaySection />
+                </div>
+              </div>
+              
+              {/* Dashboard completo */}
+              <div className="mt-6">
+                <DevocionalDashboard />
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
+      {/* Carrossel de Avisos - Movido para cima */}
+      <div className="py-8 sm:py-12">
+        <CarrosselAvisos />
+      </div>
+
       {/* Quatro Pilares do Discipulado */}
-      <div className="py-20 bg-gradient-to-b from-white to-gray-50">
+      <div className="py-16 sm:py-20 bg-gradient-to-b from-white to-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold font-playfair text-gray-900 mb-4">
+          <div className="text-center mb-12 sm:mb-16">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold font-playfair text-gray-900 mb-4">
               Quatro Pilares do Nosso Discipulado
             </h2>
-            <p className="text-xl font-inter text-gray-600 max-w-2xl mx-auto">
+            <p className="text-lg sm:text-xl font-inter text-gray-600 max-w-2xl mx-auto">
               Nossa plataforma foi cuidadosamente projetada para nutrir cada aspecto da jornada cristã em nossa igreja
             </p>
           </div>
           
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
             {features.map((feature, index) => (
               <Card 
                 key={index}
@@ -163,8 +187,8 @@ const Index = () => {
                   <div className={`mx-auto mb-4 p-3 rounded-full bg-gradient-to-r ${feature.color} text-white w-fit`}>
                     {feature.icon}
                   </div>
-                  <CardTitle className="text-xl mb-2">{feature.title}</CardTitle>
-                  <CardDescription className="text-gray-600 leading-relaxed">
+                  <CardTitle className="text-lg sm:text-xl mb-2">{feature.title}</CardTitle>
+                  <CardDescription className="text-gray-600 leading-relaxed text-sm sm:text-base">
                     {feature.description}
                   </CardDescription>
                 </CardHeader>
@@ -174,22 +198,19 @@ const Index = () => {
         </div>
       </div>
 
-      {/* Carrossel de Avisos */}
-      <CarrosselAvisos />
-
       {/* Church Management Features */}
-      <div className="py-20 bg-gradient-to-b from-white to-gray-50">
+      <div className="py-16 sm:py-20 bg-gradient-to-b from-white to-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold font-playfair text-gray-900 mb-4">
+          <div className="text-center mb-12 sm:mb-16">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold font-playfair text-gray-900 mb-4">
               Gestão da Nossa Igreja
             </h2>
-            <p className="text-xl font-inter text-gray-600 max-w-2xl mx-auto">
+            <p className="text-lg sm:text-xl font-inter text-gray-600 max-w-2xl mx-auto">
               Ferramentas completas para fortalecer a comunhão e organização da Monte Hebrom
             </p>
           </div>
           
-          <div className="grid md:grid-cols-1 gap-8 max-w-2xl mx-auto">
+          <div className="grid md:grid-cols-1 gap-6 sm:gap-8 max-w-2xl mx-auto">
             {churchFeatures.map((feature, index) => (
               <Card 
                 key={index}
@@ -201,8 +222,8 @@ const Index = () => {
                   <div className={`mx-auto mb-4 p-3 rounded-full bg-gradient-to-r ${feature.color} text-white w-fit`}>
                     {feature.icon}
                   </div>
-                  <CardTitle className="text-xl mb-2">{feature.title}</CardTitle>
-                  <CardDescription className="text-gray-600 leading-relaxed">
+                  <CardTitle className="text-lg sm:text-xl mb-2">{feature.title}</CardTitle>
+                  <CardDescription className="text-gray-600 leading-relaxed text-sm sm:text-base">
                     {feature.description}
                   </CardDescription>
                 </CardHeader>
@@ -213,17 +234,17 @@ const Index = () => {
       </div>
 
       {/* Footer */}
-      <div className="py-16 bg-gradient-to-br from-gray-900 to-gray-800">
+      <div className="py-12 sm:py-16 bg-gradient-to-br from-gray-900 to-gray-800">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h3 className="text-2xl font-bold font-playfair text-white mb-4">
+          <h3 className="text-xl sm:text-2xl font-bold font-playfair text-white mb-4">
             Precisa de Ajuda ou Orientação?
           </h3>
-          <p className="text-gray-300 font-inter mb-8">
+          <p className="text-gray-300 font-inter mb-6 sm:mb-8">
             Nossa liderança está disponível para conversar e apoiar sua jornada espiritual
           </p>
           <Button 
             size="lg"
-            className="bg-white text-gray-900 hover:bg-gray-100 shadow-lg hover:shadow-xl transition-all duration-300 font-inter font-semibold px-8 py-4"
+            className="w-full sm:w-auto bg-white text-gray-900 hover:bg-gray-100 shadow-lg hover:shadow-xl transition-all duration-300 font-inter font-semibold px-6 sm:px-8 py-3 sm:py-4"
             onClick={() => navigate('/fale-com-lideranca')}
           >
             💬 Falar com a Liderança
