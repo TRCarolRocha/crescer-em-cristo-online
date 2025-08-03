@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -80,18 +79,18 @@ const DevocionalNotification = () => {
   }
 
   return (
-    <Card className="bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200 shadow-lg animate-fade-in">
-      <CardContent className="p-4">
+    <Card className="bg-white/80 backdrop-blur-sm border-blue-200 shadow-lg">
+      <CardContent className="p-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-              <BookOpen className="h-6 w-6 text-white" />
+            <div className="w-14 h-14 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+              <BookOpen className="h-7 w-7 text-white" />
             </div>
             <div className="flex-1">
-              <h3 className="font-semibold text-gray-900 mb-1">
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">
                 📖 Devocional de Hoje Disponível!
               </h3>
-              <p className="text-sm text-gray-600 mb-2">
+              <p className="text-gray-700 mb-2">
                 Continue sua jornada espiritual. Já são{' '}
                 <span className="font-semibold text-blue-600">
                   {stats?.total_completados || 0} devocionais
@@ -99,20 +98,20 @@ const DevocionalNotification = () => {
                 completados!
               </p>
               {stats && stats.streak_atual > 0 && (
-                <div className="flex items-center gap-2 text-xs text-orange-600">
+                <div className="flex items-center gap-2 text-orange-600">
                   <Flame className="h-4 w-4" />
-                  <span className="font-medium">
+                  <span className="font-medium text-sm">
                     {stats.streak_atual} dias consecutivos
                   </span>
                 </div>
               )}
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <Button
               onClick={() => navigate('/devocional')}
-              size="sm"
-              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+              size="lg"
+              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 px-6"
             >
               <Calendar className="mr-2 h-4 w-4" />
               Fazer Agora
