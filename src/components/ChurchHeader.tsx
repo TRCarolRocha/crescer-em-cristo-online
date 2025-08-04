@@ -63,8 +63,8 @@ const ChurchHeader = () => {
             </div>
           </div>
           
-          {/* Logo e Nome da Igreja lado a lado com logo aumentada */}
-          <div className="mb-10 sm:mb-14 flex flex-col lg:flex-row items-center justify-center gap-8 sm:gap-10 lg:gap-16">
+          {/* Logo e Nome da Igreja lado a lado com gap reduzido */}
+          <div className="mb-10 sm:mb-14 flex flex-col lg:flex-row items-center justify-center gap-4 sm:gap-6 lg:gap-8">
             {/* Logo com tamanho aumentado e proporção melhorada */}
             <div className="flex-shrink-0">
               <div className="relative">
@@ -72,7 +72,7 @@ const ChurchHeader = () => {
                 <img 
                   src="/lovable-uploads/a989c536-6a58-44f9-a982-3a6b3847a288.png" 
                   alt="Igreja Batista Missionária Ministério Monte Hebrom" 
-                  className="relative h-32 w-32 sm:h-40 sm:w-40 md:h-52 md:w-52 lg:h-60 lg:w-60 xl:h-64 xl:w-64 object-contain drop-shadow-2xl transition-transform duration-500 hover:scale-105" 
+                  className="relative h-40 w-40 sm:h-48 sm:w-48 md:h-60 md:w-60 lg:h-72 lg:w-72 xl:h-80 xl:w-80 object-contain drop-shadow-2xl transition-transform duration-500 hover:scale-105" 
                 />
               </div>
             </div>

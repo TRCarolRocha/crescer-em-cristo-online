@@ -81,7 +81,8 @@ const DevocionalNotification = () => {
         .from('devocional_historico')
         .select('*')
         .eq('user_id', user.id)
-        .eq('data_completado', hoje);
+        .gte('created_at', hoje)
+        .lt('created_at', new Date(Date.now() + 86400000).toISOString().split('T')[0]);
 
       if (historicoError) {
         console.error('Erro ao verificar histórico:', historicoError);

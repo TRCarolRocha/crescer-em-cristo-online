@@ -53,11 +53,12 @@ const DevocionalDashboard = () => {
       } else {
         // Processar dados reais quando disponíveis
         const completados = data?.length || 0;
+        const ultimoDevocional = data && data.length > 0 ? data[0].created_at : null;
         setStats({
           streak_atual: 3, // Calcular streak atual
           melhor_streak: 7, // Calcular melhor streak
           total_completados: completados,
-          ultimo_devocional: data?.[0]?.data_completado || null
+          ultimo_devocional: ultimoDevocional
         });
       }
     } catch (error) {
