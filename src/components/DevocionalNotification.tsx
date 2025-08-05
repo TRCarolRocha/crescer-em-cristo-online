@@ -1,27 +1,25 @@
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { BookOpen, X, Calendar } from 'lucide-react';
+import { BookOpen, Calendar } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
-interface DevocionalHoje {
-  id?: string;
+interface DevocionalData {
+  id: string;
   tema: string;
-  data?: string;
+  data: string;
 }
 
-interface UserStats {
-  streak_atual: number;
-  ja_fez_hoje: boolean;
+interface DevocionalNotificationProps {
+  className?: string;
 }
 
-const DevocionalNotification = () => {
-  const [devocionalHoje, setDevocionalHoje] = useState<DevocionalHoje | null>(null);
-  const [userStats, setUserStats] = useState<UserStats>({ streak_atual: 0, ja_fez_hoje: false });
-  const [isVisible, setIsVisible] = useState(true);
+const DevocionalNotification = ({ className = '' }: DevocionalNotificationProps) => {
+  const [devocionalHoje, setDevocionalHoje] = useState<DevocionalData | null>(null);
+  const [jaRealizado, setJaRealizado] = useState(false);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -29,130 +27,116 @@ const DevocionalNotification = () => {
   useEffect(() => {
     if (user?.id) {
       fetchDevocionalHoje();
-      fetchUserStats();
     }
   }, [user]);
 
   const fetchDevocionalHoje = async () => {
+    if (!user?.id) return;
+
     try {
       const hoje = new Date().toISOString().split('T')[0];
-      
-      const { data, error } = await supabase
-        .from('devocionais')
-        .select('id, tema')
-        .eq('data', hoje)
-        .eq('ativo', true)
-        .single();
 
-      if (error) {
-        console.log('Nenhum devocional encontrado para hoje:', error);
-        // Fallback com devocional mock para desenvolvimento
-        setDevocionalHoje({
-          tema: "Confiando em Deus em Tempos Difíceis",
-          data: hoje
-        });
-      } else if (data) {
-        setDevocionalHoje({
-          id: data.id,
-          tema: data.tema,
-          data: hoje
-        });
+      // Buscar devocional de hoje
+      const { data: devocionalData, error: devocionalError } = await supabase
+        .from('devocionais')
+        .select('id, tema, data')
+        .eq('data', hoje)
+        .maybeSingle();
+
+      if (devocionalError) {
+        console.error('Erro ao buscar devocional:', devocionalError);
+        setLoading(false);
+        return;
+      }
+
+      setDevocionalHoje(devocionalData);
+
+      // Se existe devocional de hoje, verificar se já foi realizado
+      if (devocionalData) {
+        const { data: historicoData, error: historicoError } = await supabase
+          .from('devocional_historico')
+          .select('id')
+          .eq('user_id', user.id)
+          .eq('devocional_id', devocionalData.id)
+          .eq('completado', true)
+          .maybeSingle();
+
+        if (historicoError) {
+          console.error('Erro ao verificar histórico:', historicoError);
+        } else {
+          setJaRealizado(!!historicoData);
+        }
       }
     } catch (error) {
       console.error('Erro ao buscar devocional de hoje:', error);
-      // Fallback com devocional mock
-      setDevocionalHoje({
-        tema: "Confiando em Deus em Tempos Difíceis",
-        data: new Date().toISOString().split('T')[0]
-      });
     } finally {
       setLoading(false);
     }
   };
 
-  const fetchUserStats = async () => {
-    if (!user?.id) return;
+  if (!user || loading) return null;
 
-    try {
-      // Verificar se já fez o devocional hoje
-      const hoje = new Date().toISOString().split('T')[0];
-      
-      const { data: historicoData, error: historicoError } = await supabase
-        .from('devocional_historico')
-        .select('*')
-        .eq('user_id', user.id)
-        .gte('created_at', hoje)
-        .lt('created_at', new Date(Date.now() + 86400000).toISOString().split('T')[0]);
+  if (!devocionalHoje) {
+    return (
+      <Card className={`border-yellow-200 bg-yellow-50 ${className}`}>
+        <CardContent className="p-4">
+          <div className="flex items-center gap-3">
+            <Calendar className="h-5 w-5 text-yellow-600" />
+            <div>
+              <p className="text-sm font-medium text-yellow-800">
+                Nenhum devocional disponível para hoje
+              </p>
+              <p className="text-xs text-yellow-600">
+                Aguarde a publicação do devocional diário
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
-      if (historicoError) {
-        console.error('Erro ao verificar histórico:', historicoError);
-      }
-
-      const jaFezHoje = historicoData && historicoData.length > 0;
-
-      // Mock de stats para desenvolvimento
-      setUserStats({
-        streak_atual: 3,
-        ja_fez_hoje: jaFezHoje || false
-      });
-
-    } catch (error) {
-      console.error('Erro ao buscar estatísticas do usuário:', error);
-      setUserStats({ streak_atual: 0, ja_fez_hoje: false });
-    }
-  };
-
-  const handleFecharNotificacao = () => {
-    setIsVisible(false);
-  };
-
-  const handleIrParaDevocional = () => {
-    navigate('/devocional');
-  };
-
-  // Não mostrar se não há usuário, não há devocional, ou usuário já fez hoje, ou não está visível
-  if (!user || !devocionalHoje || userStats.ja_fez_hoje || !isVisible || loading) {
-    return null;
+  if (jaRealizado) {
+    return (
+      <Card className={`border-green-200 bg-green-50 ${className}`}>
+        <CardContent className="p-4">
+          <div className="flex items-center gap-3">
+            <BookOpen className="h-5 w-5 text-green-600" />
+            <div>
+              <p className="text-sm font-medium text-green-800">
+                Parabéns! Você já fez seu devocional de hoje
+              </p>
+              <p className="text-xs text-green-600">
+                {devocionalHoje.tema}
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
   }
 
   return (
-    <Card className="bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 shadow-lg mb-6">
+    <Card className={`border-blue-200 bg-blue-50 ${className}`}>
       <CardContent className="p-4">
-        <div className="flex items-start justify-between">
-          <div className="flex items-start space-x-3">
-            <div className="bg-white/20 rounded-full p-2">
-              <BookOpen className="h-5 w-5" />
-            </div>
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 flex-1">
+            <BookOpen className="h-5 w-5 text-blue-600" />
             <div className="flex-1">
-              <h3 className="font-semibold text-lg mb-1">Devocional de Hoje</h3>
-              <p className="text-blue-100 mb-3">{devocionalHoje.tema}</p>
-              
-              <div className="flex items-center gap-4 text-sm text-blue-100 mb-3">
-                <div className="flex items-center gap-1">
-                  <Calendar className="h-4 w-4" />
-                  {new Date().toLocaleDateString('pt-BR')}
-                </div>
-                <div className="flex items-center gap-1">
-                  🔥 Sequência: {userStats.streak_atual} dias
-                </div>
-              </div>
-              
-              <Button 
-                onClick={handleIrParaDevocional}
-                className="bg-white text-blue-600 hover:bg-blue-50 font-semibold"
-                size="sm"
-              >
-                Fazer Agora
-              </Button>
+              <p className="text-sm font-medium text-blue-800">
+                Seu devocional de hoje está disponível!
+              </p>
+              <p className="text-xs text-blue-600">
+                {devocionalHoje.tema}
+              </p>
             </div>
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleFecharNotificacao}
-            className="text-white/80 hover:text-white hover:bg-white/20 p-1 h-auto"
+          <Button 
+            size="sm" 
+            onClick={() => navigate('/devocional')}
+            className="bg-blue-600 hover:bg-blue-700 text-white"
           >
-            <X className="h-4 w-4" />
+            Começar
           </Button>
         </div>
       </CardContent>

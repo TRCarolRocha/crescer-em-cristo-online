@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instanciate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "12.2.3 (519615d)"
+    PostgrestVersion: "12.2.12 (cd3cf9e)"
   }
   public: {
     Tables: {
@@ -83,6 +83,47 @@ export type Database = {
         }
         Relationships: []
       }
+      content_questions: {
+        Row: {
+          content_id: string | null
+          correct_answer: string | null
+          created_at: string | null
+          id: string
+          options: Json | null
+          ordem: number | null
+          question: string
+          question_type: string | null
+        }
+        Insert: {
+          content_id?: string | null
+          correct_answer?: string | null
+          created_at?: string | null
+          id?: string
+          options?: Json | null
+          ordem?: number | null
+          question: string
+          question_type?: string | null
+        }
+        Update: {
+          content_id?: string | null
+          correct_answer?: string | null
+          created_at?: string | null
+          id?: string
+          options?: Json | null
+          ordem?: number | null
+          question?: string
+          question_type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_questions_content_id_fkey"
+            columns: ["content_id"]
+            isOneToOne: false
+            referencedRelation: "conteudos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       conteudos: {
         Row: {
           created_at: string
@@ -134,7 +175,6 @@ export type Database = {
         Row: {
           created_at: string
           data: string
-          data_exibicao: string | null
           id: string
           pergunta_1: string
           pergunta_2: string
@@ -148,7 +188,6 @@ export type Database = {
         Insert: {
           created_at?: string
           data: string
-          data_exibicao?: string | null
           id?: string
           pergunta_1: string
           pergunta_2: string
@@ -162,7 +201,6 @@ export type Database = {
         Update: {
           created_at?: string
           data?: string
-          data_exibicao?: string | null
           id?: string
           pergunta_1?: string
           pergunta_2?: string
@@ -227,6 +265,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      devocional_stats: {
+        Row: {
+          created_at: string
+          id: string
+          melhor_streak: number
+          streak_atual: number
+          total_completados: number
+          ultimo_devocional: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          melhor_streak?: number
+          streak_atual?: number
+          total_completados?: number
+          ultimo_devocional?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          melhor_streak?: number
+          streak_atual?: number
+          total_completados?: number
+          ultimo_devocional?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       diagnosticos: {
         Row: {
@@ -542,6 +613,33 @@ export type Database = {
         }
         Relationships: []
       }
+      notification_settings: {
+        Row: {
+          created_at: string
+          email_notifications: boolean
+          id: string
+          notification_time: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email_notifications?: boolean
+          id?: string
+          notification_time?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email_notifications?: boolean
+          id?: string
+          notification_time?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           address: string | null
@@ -613,6 +711,94 @@ export type Database = {
           name?: string
         }
         Relationships: []
+      }
+      user_content_progress: {
+        Row: {
+          answered_questions: boolean | null
+          completed: boolean | null
+          completed_at: string | null
+          content_id: string | null
+          created_at: string | null
+          downloaded_pdf: boolean | null
+          id: string
+          read_text: boolean | null
+          time_spent: number | null
+          updated_at: string | null
+          user_id: string
+          watched_video: boolean | null
+        }
+        Insert: {
+          answered_questions?: boolean | null
+          completed?: boolean | null
+          completed_at?: string | null
+          content_id?: string | null
+          created_at?: string | null
+          downloaded_pdf?: boolean | null
+          id?: string
+          read_text?: boolean | null
+          time_spent?: number | null
+          updated_at?: string | null
+          user_id: string
+          watched_video?: boolean | null
+        }
+        Update: {
+          answered_questions?: boolean | null
+          completed?: boolean | null
+          completed_at?: string | null
+          content_id?: string | null
+          created_at?: string | null
+          downloaded_pdf?: boolean | null
+          id?: string
+          read_text?: boolean | null
+          time_spent?: number | null
+          updated_at?: string | null
+          user_id?: string
+          watched_video?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_content_progress_content_id_fkey"
+            columns: ["content_id"]
+            isOneToOne: false
+            referencedRelation: "conteudos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_question_responses: {
+        Row: {
+          answered_at: string | null
+          id: string
+          is_correct: boolean | null
+          question_id: string | null
+          response: string
+          user_id: string
+        }
+        Insert: {
+          answered_at?: string | null
+          id?: string
+          is_correct?: boolean | null
+          question_id?: string | null
+          response: string
+          user_id: string
+        }
+        Update: {
+          answered_at?: string | null
+          id?: string
+          is_correct?: boolean | null
+          question_id?: string | null
+          response?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_question_responses_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "content_questions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_track_progress: {
         Row: {

@@ -1,18 +1,16 @@
 
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Progress } from '@/components/ui/progress';
-import { Calendar, BookOpen, Heart, CheckCircle, ArrowLeft } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { Label } from '@/components/ui/label';
+import { BookOpen, CheckCircle, Calendar } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 
-interface Devocional {
+interface DevocionalData {
   id: string;
-  data: string;
   tema: string;
   versiculo: string;
   referencia: string;
@@ -20,91 +18,75 @@ interface Devocional {
   pergunta_1: string;
   pergunta_2: string;
   pergunta_3: string;
-}
-
-interface DevocionalHistorico {
-  id?: string;
-  devocional_id: string;
-  resposta_1: string;
-  resposta_2: string;
-  resposta_3: string;
-  oracao: string;
-  gratidao: string;
-  aprendizado: string;
-  completado: boolean;
+  data: string;
 }
 
 const Devocional = () => {
-  const { user } = useAuth();
-  const navigate = useNavigate();
-  const { toast } = useToast();
-  const [devocional, setDevocional] = useState<Devocional | null>(null);
-  const [historico, setHistorico] = useState<DevocionalHistorico>({
-    devocional_id: '',
+  const [devocional, setDevocional] = useState<DevocionalData | null>(null);
+  const [respostas, setRespostas] = useState({
     resposta_1: '',
     resposta_2: '',
     resposta_3: '',
     oracao: '',
     gratidao: '',
-    aprendizado: '',
-    completado: false
+    aprendizado: ''
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [jaRealizado, setJaRealizado] = useState(false);
+  const { user } = useAuth();
+  const { toast } = useToast();
 
   useEffect(() => {
-    if (user) {
-      fetchDevocionalDoDia();
+    if (user?.id) {
+      fetchDevocionalHoje();
     }
   }, [user]);
 
-  const fetchDevocionalDoDia = async () => {
-    try {
-      // Corrigir data usando timezone brasileiro
-      const hoje = new Date();
-      const hojeFormatado = hoje.toLocaleDateString('pt-BR', {
-        timeZone: 'America/Sao_Paulo'
-      }).split('/').reverse().join('-');
-      
-      console.log('Buscando devocional para:', hojeFormatado);
+  const fetchDevocionalHoje = async () => {
+    if (!user?.id) return;
 
-      // Buscar devocional de hoje
-      const { data: devocionalData, error: devocionalError } = await supabase
+    try {
+      const hoje = new Date().toISOString().split('T')[0];
+
+      const { data, error } = await supabase
         .from('devocionais')
         .select('*')
-        .eq('data', hojeFormatado)
-        .single();
+        .eq('data', hoje)
+        .maybeSingle();
 
-      if (devocionalError && devocionalError.code !== 'PGRST116') {
-        throw devocionalError;
-      }
+      if (error) throw error;
 
-      if (devocionalData) {
-        setDevocional(devocionalData);
-
-        // Buscar histórico do usuário para este devocional
-        const { data: historicoData, error: historicoError } = await supabase
+      if (data) {
+        setDevocional(data);
+        
+        // Verificar se já foi realizado
+        const { data: historico } = await supabase
           .from('devocional_historico')
           .select('*')
           .eq('user_id', user.id)
-          .eq('devocional_id', devocionalData.id)
+          .eq('devocional_id', data.id)
           .maybeSingle();
 
-        if (historicoError && historicoError.code !== 'PGRST116') {
-          throw historicoError;
-        }
-
-        if (historicoData) {
-          setHistorico(historicoData);
-        } else {
-          setHistorico(prev => ({ ...prev, devocional_id: devocionalData.id }));
+        if (historico) {
+          setJaRealizado(historico.completado);
+          if (historico.completado) {
+            setRespostas({
+              resposta_1: historico.resposta_1 || '',
+              resposta_2: historico.resposta_2 || '',
+              resposta_3: historico.resposta_3 || '',
+              oracao: historico.oracao || '',
+              gratidao: historico.gratidao || '',
+              aprendizado: historico.aprendizado || ''
+            });
+          }
         }
       }
     } catch (error) {
       console.error('Erro ao carregar devocional:', error);
       toast({
         title: "Erro",
-        description: "Não foi possível carregar o devocional de hoje.",
+        description: "Não foi possível carregar o devocional de hoje",
         variant: "destructive"
       });
     } finally {
@@ -112,54 +94,34 @@ const Devocional = () => {
     }
   };
 
-  const handleInputChange = (field: keyof DevocionalHistorico, value: string) => {
-    setHistorico(prev => ({ ...prev, [field]: value }));
-  };
-
-  const salvarProgresso = async () => {
-    if (!user || !devocional) return;
+  const handleSalvar = async () => {
+    if (!devocional || !user?.id) return;
 
     setSaving(true);
     try {
-      const dataToSave = {
-        user_id: user.id,
-        devocional_id: devocional.id,
-        resposta_1: historico.resposta_1,
-        resposta_2: historico.resposta_2,
-        resposta_3: historico.resposta_3,
-        oracao: historico.oracao,
-        gratidao: historico.gratidao,
-        aprendizado: historico.aprendizado,
-        completado: historico.completado
-      };
+      const { error } = await supabase
+        .from('devocional_historico')
+        .upsert({
+          user_id: user.id,
+          devocional_id: devocional.id,
+          completado: true,
+          ...respostas
+        }, {
+          onConflict: 'user_id,devocional_id'
+        });
 
-      if (historico.id) {
-        const { error } = await supabase
-          .from('devocional_historico')
-          .update(dataToSave)
-          .eq('id', historico.id);
+      if (error) throw error;
 
-        if (error) throw error;
-      } else {
-        const { data, error } = await supabase
-          .from('devocional_historico')
-          .insert(dataToSave)
-          .select()
-          .single();
-
-        if (error) throw error;
-        setHistorico(prev => ({ ...prev, id: data.id }));
-      }
-
+      setJaRealizado(true);
       toast({
-        title: "Progresso salvo!",
-        description: "Suas reflexões foram salvas com sucesso."
+        title: "Parabéns!",
+        description: "Seu devocional foi salvo com sucesso!"
       });
     } catch (error) {
-      console.error('Erro ao salvar:', error);
+      console.error('Erro ao salvar devocional:', error);
       toast({
         title: "Erro",
-        description: "Não foi possível salvar o progresso.",
+        description: "Não foi possível salvar o devocional",
         variant: "destructive"
       });
     } finally {
@@ -167,239 +129,209 @@ const Devocional = () => {
     }
   };
 
-  const marcarComoCompleto = async () => {
-    const novoStatus = !historico.completado;
-    setHistorico(prev => ({ ...prev, completado: novoStatus }));
-    
-    // Salvar automaticamente quando marcar como completo
-    setTimeout(() => salvarProgresso(), 100);
-
-    if (novoStatus) {
-      toast({
-        title: "Parabéns! 🎉",
-        description: "Devocional concluído com sucesso!"
-      });
-    }
-  };
-
-  const calcularProgresso = () => {
-    const campos = ['resposta_1', 'resposta_2', 'resposta_3', 'oracao', 'gratidao', 'aprendizado'];
-    const preenchidos = campos.filter(campo => historico[campo as keyof DevocionalHistorico]).length;
-    return Math.round((preenchidos / campos.length) * 100);
-  };
-
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="animate-pulse text-center">
+          <BookOpen className="h-8 w-8 mx-auto mb-4 text-gray-400" />
+          <p className="text-gray-600">Carregando devocional...</p>
+        </div>
       </div>
     );
   }
 
   if (!devocional) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-4">
-        <div className="max-w-4xl mx-auto">
-          <Button 
-            onClick={() => navigate('/')} 
-            variant="ghost" 
-            className="mb-6"
-          >
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Voltar à Home
-          </Button>
-          <Card className="text-center p-8">
-            <CardContent>
-              <BookOpen className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                Nenhum devocional disponível hoje
-              </h2>
-              <p className="text-gray-600">
-                O devocional de hoje ainda não foi publicado. Volte mais tarde!
-              </p>
-            </CardContent>
-          </Card>
-        </div>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <Card className="w-full max-w-md">
+          <CardContent className="p-6 text-center">
+            <Calendar className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+            <h2 className="text-lg font-semibold text-gray-900 mb-2">
+              Nenhum devocional disponível
+            </h2>
+            <p className="text-gray-600">
+              Não há devocional programado para hoje. Volte amanhã!
+            </p>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
-  const progresso = calcularProgresso();
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-4">
-      <div className="max-w-4xl mx-auto">
-        <div className="flex items-center justify-between mb-6">
-          <Button 
-            onClick={() => navigate('/')} 
-            variant="ghost"
-          >
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Voltar à Home
-          </Button>
-          
-          <div className="flex items-center gap-4">
-            <div className="text-right">
-              <div className="text-sm text-gray-600">Progresso</div>
-              <div className="font-semibold">{progresso}%</div>
-            </div>
-            <Progress value={progresso} className="w-24" />
+    <div className="min-h-screen bg-gray-50 py-4 sm:py-6 lg:py-8">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header */}
+        <div className="text-center mb-6 sm:mb-8">
+          <div className="flex items-center justify-center gap-2 mb-2">
+            <BookOpen className="h-6 w-6 text-blue-600" />
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">
+              Devocional Diário
+            </h1>
           </div>
+          <p className="text-sm sm:text-base text-gray-600">
+            {new Date(devocional.data).toLocaleDateString('pt-BR', { 
+              weekday: 'long', 
+              year: 'numeric', 
+              month: 'long', 
+              day: 'numeric' 
+            })}
+          </p>
         </div>
 
-        {/* Header do Devocional */}
-        <Card className="mb-6">
-          <CardHeader className="text-center">
-            <div className="flex items-center justify-center gap-2 text-blue-600 mb-2">
-              <Calendar className="h-5 w-5" />
-              <span className="text-sm font-medium">
-                {new Date(devocional.data + 'T00:00:00').toLocaleDateString('pt-BR', {
-                  weekday: 'long',
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric',
-                  timeZone: 'America/Sao_Paulo'
-                })}
-              </span>
-            </div>
-            <CardTitle className="text-3xl font-bold text-gray-900 mb-2">
-              {devocional.tema}
-            </CardTitle>
-            <div className="bg-blue-50 p-4 rounded-lg">
-              <p className="text-lg font-medium text-gray-900 mb-2">
-                "{devocional.versiculo}"
-              </p>
-              <p className="text-blue-600 font-semibold">
-                {devocional.referencia}
-              </p>
-            </div>
-          </CardHeader>
-        </Card>
+        {/* Status já realizado */}
+        {jaRealizado && (
+          <Card className="mb-6 border-green-200 bg-green-50">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 text-green-700">
+                <CheckCircle className="h-5 w-5" />
+                <span className="text-sm font-medium">
+                  Devocional já realizado! Você pode revisar suas respostas abaixo.
+                </span>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
-        {/* Texto Central */}
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <BookOpen className="h-5 w-5" />
-              Reflexão
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-gray-700 leading-relaxed">
-              {devocional.texto_central}
-            </p>
-          </CardContent>
-        </Card>
+        {/* Conteúdo do Devocional */}
+        <div className="space-y-6">
+          {/* Tema e Versículo */}
+          <Card>
+            <CardHeader className="pb-4">
+              <CardTitle className="text-lg sm:text-xl text-center text-blue-900">
+                {devocional.tema}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-400">
+                <p className="text-sm sm:text-base text-blue-900 font-medium italic mb-2">
+                  "{devocional.versiculo}"
+                </p>
+                <p className="text-xs sm:text-sm text-blue-700 text-right">
+                  {devocional.referencia}
+                </p>
+              </div>
+              <div className="prose prose-sm sm:prose-base max-w-none">
+                <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
+                  {devocional.texto_central}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
 
-        {/* Perguntas de Reflexão */}
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle>Perguntas para Reflexão</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                1. {devocional.pergunta_1}
-              </label>
-              <Textarea
-                value={historico.resposta_1}
-                onChange={(e) => handleInputChange('resposta_1', e.target.value)}
-                placeholder="Escreva sua reflexão aqui..."
-                className="min-h-[100px]"
-              />
+          {/* Perguntas de Reflexão */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg text-gray-900">Perguntas para Reflexão</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-2">
+                <Label htmlFor="pergunta1" className="text-sm font-medium text-gray-700">
+                  1. {devocional.pergunta_1}
+                </Label>
+                <Textarea
+                  id="pergunta1"
+                  value={respostas.resposta_1}
+                  onChange={(e) => setRespostas({ ...respostas, resposta_1: e.target.value })}
+                  className="min-h-20 resize-none"
+                  placeholder="Sua reflexão aqui..."
+                  disabled={jaRealizado}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="pergunta2" className="text-sm font-medium text-gray-700">
+                  2. {devocional.pergunta_2}
+                </Label>
+                <Textarea
+                  id="pergunta2"
+                  value={respostas.resposta_2}
+                  onChange={(e) => setRespostas({ ...respostas, resposta_2: e.target.value })}
+                  className="min-h-20 resize-none"
+                  placeholder="Sua reflexão aqui..."
+                  disabled={jaRealizado}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="pergunta3" className="text-sm font-medium text-gray-700">
+                  3. {devocional.pergunta_3}
+                </Label>
+                <Textarea
+                  id="pergunta3"
+                  value={respostas.resposta_3}
+                  onChange={(e) => setRespostas({ ...respostas, resposta_3: e.target.value })}
+                  className="min-h-20 resize-none"
+                  placeholder="Sua reflexão aqui..."
+                  disabled={jaRealizado}
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Seção de Oração e Gratidão */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg text-gray-900">Momento de Oração</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-2">
+                <Label htmlFor="oracao" className="text-sm font-medium text-gray-700">
+                  Sua oração de hoje:
+                </Label>
+                <Textarea
+                  id="oracao"
+                  value={respostas.oracao}
+                  onChange={(e) => setRespostas({ ...respostas, oracao: e.target.value })}
+                  className="min-h-20 resize-none"
+                  placeholder="Escreva sua oração..."
+                  disabled={jaRealizado}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="gratidao" className="text-sm font-medium text-gray-700">
+                  Pelo que você é grato hoje?
+                </Label>
+                <Textarea
+                  id="gratidao"
+                  value={respostas.gratidao}
+                  onChange={(e) => setRespostas({ ...respostas, gratidao: e.target.value })}
+                  className="min-h-20 resize-none"
+                  placeholder="Liste suas gratidões..."
+                  disabled={jaRealizado}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="aprendizado" className="text-sm font-medium text-gray-700">
+                  Qual foi seu principal aprendizado?
+                </Label>
+                <Textarea
+                  id="aprendizado"
+                  value={respostas.aprendizado}
+                  onChange={(e) => setRespostas({ ...respostas, aprendizado: e.target.value })}
+                  className="min-h-20 resize-none"
+                  placeholder="Compartilhe seu aprendizado..."
+                  disabled={jaRealizado}
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Botão de Finalizar */}
+          {!jaRealizado && (
+            <div className="text-center pb-6">
+              <Button
+                onClick={handleSalvar}
+                disabled={saving}
+                size="lg"
+                className="w-full sm:w-auto px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                {saving ? 'Salvando...' : 'Finalizar Devocional'}
+              </Button>
             </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                2. {devocional.pergunta_2}
-              </label>
-              <Textarea
-                value={historico.resposta_2}
-                onChange={(e) => handleInputChange('resposta_2', e.target.value)}
-                placeholder="Escreva sua reflexão aqui..."
-                className="min-h-[100px]"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                3. {devocional.pergunta_3}
-              </label>
-              <Textarea
-                value={historico.resposta_3}
-                onChange={(e) => handleInputChange('resposta_3', e.target.value)}
-                placeholder="Escreva sua reflexão aqui..."
-                className="min-h-[100px]"
-              />
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Diário de Bordo */}
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Heart className="h-5 w-5" />
-              Diário de Bordo
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Oração do Dia
-              </label>
-              <Textarea
-                value={historico.oracao}
-                onChange={(e) => handleInputChange('oracao', e.target.value)}
-                placeholder="Compartilhe sua oração..."
-                className="min-h-[80px]"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Gratidão
-              </label>
-              <Textarea
-                value={historico.gratidao}
-                onChange={(e) => handleInputChange('gratidao', e.target.value)}
-                placeholder="Pelo que você é grato hoje?"
-                className="min-h-[80px]"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Aprendizado
-              </label>
-              <Textarea
-                value={historico.aprendizado}
-                onChange={(e) => handleInputChange('aprendizado', e.target.value)}
-                placeholder="O que você aprendeu hoje?"
-                className="min-h-[80px]"
-              />
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Botões de Ação */}
-        <div className="flex gap-4 mb-6">
-          <Button
-            onClick={salvarProgresso}
-            disabled={saving}
-            variant="outline"
-            className="flex-1"
-          >
-            {saving ? 'Salvando...' : 'Salvar Progresso'}
-          </Button>
-          
-          <Button
-            onClick={marcarComoCompleto}
-            className={`flex-1 ${historico.completado ? 'bg-green-600 hover:bg-green-700' : ''}`}
-          >
-            <CheckCircle className="mr-2 h-4 w-4" />
-            {historico.completado ? 'Concluído ✓' : 'Marcar como Concluído'}
-          </Button>
+          )}
         </div>
       </div>
     </div>

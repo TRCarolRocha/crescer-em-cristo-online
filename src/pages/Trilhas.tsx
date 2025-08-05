@@ -1,66 +1,64 @@
 
-import React, { useEffect, useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
+import { BookOpen, Clock, Users, ChevronRight, Trophy, Target } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { useToast } from '@/hooks/use-toast';
-import { Clock, BookOpen, Users, Star, Play, Home, ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import ConteudoTrilha from '@/components/ConteudoTrilha';
 
-interface Track {
+interface Trilha {
   id: string;
   title: string;
   description: string;
   level: string;
   lessons: number;
   duration: string;
-  difficulty: string;
   topics: string[];
 }
 
 interface UserProgress {
   track_id: string;
   progress: number;
-  started_at: string;
-  completed_at?: string;
+  completed_at: string | null;
 }
 
 const Trilhas = () => {
-  const [tracks, setTracks] = useState<Track[]>([]);
+  const [trilhas, setTrilhas] = useState<Trilha[]>([]);
   const [userProgress, setUserProgress] = useState<UserProgress[]>([]);
+  const [selectedTrilha, setSelectedTrilha] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [selectedTrack, setSelectedTrack] = useState<Track | null>(null);
   const { user } = useAuth();
-  const { toast } = useToast();
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetchTracks();
-    if (user) {
+    fetchTrilhas();
+    if (user?.id) {
       fetchUserProgress();
     }
   }, [user]);
 
-  const fetchTracks = async () => {
+  const fetchTrilhas = async () => {
     try {
       const { data, error } = await supabase
         .from('discipleship_tracks')
         .select('*')
-        .order('level', { ascending: true });
+        .order('title', { ascending: true });
 
       if (error) throw error;
-      setTracks(data || []);
+      setTrilhas(data || []);
     } catch (error) {
       console.error('Erro ao carregar trilhas:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
   const fetchUserProgress = async () => {
-    if (!user) return;
+    if (!user?.id) return;
 
     try {
       const { data, error } = await supabase
@@ -72,229 +70,232 @@ const Trilhas = () => {
       setUserProgress(data || []);
     } catch (error) {
       console.error('Erro ao carregar progresso:', error);
-    } finally {
-      setLoading(false);
     }
   };
 
-  const startTrack = async (trackId: string) => {
-    if (!user) {
-      toast({
-        title: "Login necessário",
-        description: "Faça login para iniciar uma trilha",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    try {
-      const { error } = await supabase
-        .from('user_track_progress')
-        .insert({
-          user_id: user.id,
-          track_id: trackId,
-          progress: 0
-        });
-
-      if (error) throw error;
-
-      toast({
-        title: "Trilha iniciada!",
-        description: "Você pode acompanhar seu progresso aqui",
-      });
-
-      fetchUserProgress();
-    } catch (error: any) {
-      if (error.code === '23505') {
-        toast({
-          title: "Trilha já iniciada",
-          description: "Você já está cursando esta trilha",
-        });
-      } else {
-        toast({
-          title: "Erro",
-          description: "Não foi possível iniciar a trilha",
-          variant: "destructive"
-        });
-      }
-    }
+  const getProgressForTrack = (trackId: string): number => {
+    const progress = userProgress.find(p => p.track_id === trackId);
+    return progress?.progress || 0;
   };
 
-  const openTrack = (track: Track) => {
-    setSelectedTrack(track);
-    // Iniciar trilha automaticamente se o usuário estiver logado e não tiver iniciado
-    if (user && !getTrackProgress(track.id)) {
-      startTrack(track.id);
-    }
+  const isTrackCompleted = (trackId: string): boolean => {
+    const progress = userProgress.find(p => p.track_id === trackId);
+    return !!progress?.completed_at;
   };
 
   const getLevelColor = (level: string) => {
     switch (level) {
-      case 'novo': return 'bg-green-100 text-green-800';
-      case 'crescimento': return 'bg-blue-100 text-blue-800';
-      case 'lider': return 'bg-purple-100 text-purple-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'Iniciante':
+        return 'bg-green-100 text-green-800 border-green-200';
+      case 'Intermediário':
+        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'Avançado':
+        return 'bg-red-100 text-red-800 border-red-200';
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-200';
     }
-  };
-
-  const getLevelIcon = (level: string) => {
-    switch (level) {
-      case 'novo': return '🌱';
-      case 'crescimento': return '🌿';
-      case 'lider': return '🌳';
-      default: return '📚';
-    }
-  };
-
-  const getTrackProgress = (trackId: string) => {
-    return userProgress.find(p => p.track_id === trackId);
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="animate-pulse text-center">
+          <BookOpen className="h-8 w-8 mx-auto mb-4 text-gray-400" />
+          <p className="text-gray-600">Carregando trilhas...</p>
+        </div>
       </div>
     );
   }
 
-  if (selectedTrack) {
+  if (selectedTrilha) {
+    const trilha = trilhas.find(t => t.id === selectedTrilha);
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
-        <div className="container mx-auto px-4 py-8">
-          <div className="flex items-center gap-4 mb-8">
+      <div className="min-h-screen bg-gray-50 py-4 sm:py-6 lg:py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="mb-6">
             <Button
-              variant="outline"
-              onClick={() => setSelectedTrack(null)}
-              className="flex items-center gap-2"
+              variant="ghost"
+              onClick={() => setSelectedTrilha(null)}
+              className="mb-4"
             >
-              <ArrowLeft className="h-4 w-4" />
-              Voltar às Trilhas
+              ← Voltar às Trilhas
             </Button>
-            <Button
-              variant="outline"
-              onClick={() => navigate('/')}
-              className="flex items-center gap-2"
-            >
-              <Home className="h-4 w-4" />
-              Voltar para Home
-            </Button>
+            <ConteudoTrilha
+              trilhaId={selectedTrilha}
+              trilhaTitulo={trilha?.title || ''}
+            />
           </div>
-
-          <ConteudoTrilha 
-            trilhaId={selectedTrack.id} 
-            trilhaTitulo={selectedTrack.title}
-          />
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex items-center justify-between mb-8">
-          <Button
-            variant="outline"
-            onClick={() => navigate('/')}
-            className="flex items-center gap-2"
-          >
-            <Home className="h-4 w-4" />
-            Voltar para Home
-          </Button>
-        </div>
-
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-900 to-purple-900 bg-clip-text text-transparent mb-4">
-            Trilhas de Discipulado
-          </h1>
-          <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-            Escolha a trilha ideal para o seu momento espiritual e cresça na fé de forma estruturada e acompanhada.
+    <div className="min-h-screen bg-gray-50 py-4 sm:py-6 lg:py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header */}
+        <div className="text-center mb-8 sm:mb-12">
+          <div className="flex items-center justify-center gap-2 mb-4">
+            <BookOpen className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600" />
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900">
+              Trilhas de Discipulado
+            </h1>
+          </div>
+          <p className="text-sm sm:text-base lg:text-lg text-gray-600 max-w-3xl mx-auto">
+            Jornadas estruturadas para seu crescimento espiritual. Escolha uma trilha adequada ao seu nível e comece sua caminhada!
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {tracks.map((track) => {
-            const progress = getTrackProgress(track.id);
-            const isStarted = !!progress;
-            const isCompleted = progress?.completed_at;
+        {/* Estatísticas do usuário */}
+        {user && userProgress.length > 0 && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8 sm:mb-12">
+            <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
+              <CardContent className="p-4 sm:p-6">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-blue-200 rounded-lg">
+                    <Target className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
+                  </div>
+                  <div>
+                    <p className="text-xs sm:text-sm text-blue-600 font-medium">Trilhas Iniciadas</p>
+                    <p className="text-xl sm:text-2xl font-bold text-blue-900">{userProgress.length}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
+              <CardContent className="p-4 sm:p-6">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-green-200 rounded-lg">
+                    <Trophy className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" />
+                  </div>
+                  <div>
+                    <p className="text-xs sm:text-sm text-green-600 font-medium">Trilhas Concluídas</p>
+                    <p className="text-xl sm:text-2xl font-bold text-green-900">
+                      {userProgress.filter(p => p.completed_at).length}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200 sm:col-span-2 lg:col-span-1">
+              <CardContent className="p-4 sm:p-6">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-purple-200 rounded-lg">
+                    <BookOpen className="h-4 w-4 sm:h-5 sm:w-5 text-purple-600" />
+                  </div>
+                  <div>
+                    <p className="text-xs sm:text-sm text-purple-600 font-medium">Progresso Médio</p>
+                    <p className="text-xl sm:text-2xl font-bold text-purple-900">
+                      {userProgress.length > 0 
+                        ? Math.round(userProgress.reduce((acc, p) => acc + p.progress, 0) / userProgress.length)
+                        : 0
+                      }%
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* Grid de Trilhas */}
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
+          {trilhas.map((trilha) => {
+            const progress = getProgressForTrack(trilha.id);
+            const isCompleted = isTrackCompleted(trilha.id);
 
             return (
-              <Card key={track.id} className="hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <div className="flex items-start justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      <span className="text-2xl">{getLevelIcon(track.level)}</span>
-                      <Badge className={getLevelColor(track.level)}>
-                        {track.level === 'novo' && 'Novo na Fé'}
-                        {track.level === 'crescimento' && 'Crescimento'}
-                        {track.level === 'lider' && 'Liderança'}
-                      </Badge>
+              <Card 
+                key={trilha.id} 
+                className={`group hover:shadow-lg transition-all duration-300 cursor-pointer transform hover:-translate-y-1 ${
+                  isCompleted ? 'border-green-200 bg-green-50' : ''
+                }`}
+                onClick={() => setSelectedTrilha(trilha.id)}
+              >
+                <CardHeader className="pb-3">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex-1 min-w-0">
+                      <CardTitle className="text-base sm:text-lg font-bold text-gray-900 line-clamp-2 group-hover:text-blue-600 transition-colors">
+                        {trilha.title}
+                      </CardTitle>
+                      <div className="flex items-center gap-2 mt-2">
+                        <Badge className={`text-xs px-2 py-1 ${getLevelColor(trilha.level)}`}>
+                          {trilha.level}
+                        </Badge>
+                        {isCompleted && (
+                          <Badge className="text-xs px-2 py-1 bg-green-100 text-green-800 border-green-200">
+                            <Trophy className="h-3 w-3 mr-1" />
+                            Concluída
+                          </Badge>
+                        )}
+                      </div>
                     </div>
-                    {isCompleted && <Star className="h-5 w-5 text-yellow-500 fill-current" />}
+                    <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400 group-hover:text-blue-600 transition-colors flex-shrink-0" />
                   </div>
-                  
-                  <CardTitle className="text-xl mb-2">{track.title}</CardTitle>
-                  <CardDescription>{track.description}</CardDescription>
                 </CardHeader>
 
                 <CardContent className="space-y-4">
-                  <div className="flex items-center gap-4 text-sm text-gray-600">
-                    <div className="flex items-center gap-1">
-                      <BookOpen className="h-4 w-4" />
-                      <span>{track.lessons} lições</span>
+                  <p className="text-xs sm:text-sm text-gray-600 line-clamp-3 leading-relaxed">
+                    {trilha.description}
+                  </p>
+
+                  {/* Progresso */}
+                  {user && progress > 0 && (
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs text-gray-500">Progresso</span>
+                        <span className="text-xs font-semibold text-gray-700">{progress}%</span>
+                      </div>
+                      <Progress value={progress} className="h-2" />
                     </div>
-                    <div className="flex items-center gap-1">
-                      <Clock className="h-4 w-4" />
-                      <span>{track.duration}</span>
+                  )}
+
+                  {/* Metadados */}
+                  <div className="grid grid-cols-2 gap-4 pt-3 border-t border-gray-100">
+                    <div className="flex items-center gap-2">
+                      <BookOpen className="h-3 w-3 text-gray-500" />
+                      <span className="text-xs text-gray-600">{trilha.lessons} lições</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Clock className="h-3 w-3 text-gray-500" />
+                      <span className="text-xs text-gray-600">{trilha.duration}</span>
                     </div>
                   </div>
 
-                  {track.topics && track.topics.length > 0 && (
+                  {/* Tópicos */}
+                  {trilha.topics && trilha.topics.length > 0 && (
                     <div className="flex flex-wrap gap-1">
-                      {track.topics.slice(0, 3).map((topic, index) => (
-                        <Badge key={index} variant="outline" className="text-xs">
+                      {trilha.topics.slice(0, 3).map((topic, index) => (
+                        <Badge 
+                          key={index} 
+                          variant="outline" 
+                          className="text-xs px-2 py-0.5 bg-gray-50 text-gray-600 border-gray-200"
+                        >
                           {topic}
                         </Badge>
                       ))}
-                      {track.topics.length > 3 && (
-                        <Badge variant="outline" className="text-xs">
-                          +{track.topics.length - 3}
+                      {trilha.topics.length > 3 && (
+                        <Badge 
+                          variant="outline" 
+                          className="text-xs px-2 py-0.5 bg-gray-50 text-gray-500 border-gray-200"
+                        >
+                          +{trilha.topics.length - 3}
                         </Badge>
                       )}
                     </div>
                   )}
 
-                  {isStarted && (
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span>Progresso</span>
-                        <span>{progress.progress}%</span>
-                      </div>
-                      <Progress value={progress.progress} />
-                    </div>
-                  )}
-
+                  {/* Botão de Ação */}
                   <Button 
-                    onClick={() => openTrack(track)}
-                    className="w-full"
+                    className="w-full mt-4 text-sm h-9"
+                    variant={progress > 0 ? "default" : "outline"}
                   >
-                    {isCompleted ? (
-                      <>
-                        <Star className="h-4 w-4 mr-2" />
-                        Revisar Conteúdo
-                      </>
-                    ) : isStarted ? (
-                      <>
-                        <Play className="h-4 w-4 mr-2" />
-                        Continuar
-                      </>
-                    ) : (
-                      <>
-                        <Play className="h-4 w-4 mr-2" />
-                        Iniciar Trilha
-                      </>
-                    )}
+                    {progress > 0 
+                      ? (isCompleted ? 'Revisar Trilha' : 'Continuar') 
+                      : 'Iniciar Trilha'
+                    }
                   </Button>
                 </CardContent>
               </Card>
@@ -302,15 +303,15 @@ const Trilhas = () => {
           })}
         </div>
 
-        {!user && (
-          <div className="text-center mt-12 p-6 bg-white/80 rounded-lg">
-            <h3 className="text-xl font-semibold mb-2">Faça login para começar</h3>
-            <p className="text-gray-600 mb-4">
-              Entre em sua conta para iniciar as trilhas e acompanhar seu progresso.
+        {trilhas.length === 0 && (
+          <div className="text-center py-12">
+            <BookOpen className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              Nenhuma trilha disponível
+            </h3>
+            <p className="text-gray-600">
+              Novas trilhas de discipulado estarão disponíveis em breve.
             </p>
-            <Button onClick={() => navigate('/auth')}>
-              Fazer Login
-            </Button>
           </div>
         )}
       </div>

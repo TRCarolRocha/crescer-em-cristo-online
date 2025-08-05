@@ -5,9 +5,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { Video, FileText, BookOpen } from 'lucide-react';
 
 interface Content {
   id?: string;
@@ -32,16 +33,30 @@ const ContentDialog: React.FC<ContentDialogProps> = ({ content, trilhaId, onClos
     titulo: content?.titulo || '',
     descricao: content?.descricao || '',
     ordem: content?.ordem || 1,
-    pdf_url: content?.pdf_url || '',
     video_url: content?.video_url || '',
     texto: content?.texto || '',
-    tipo: content?.video_url ? 'video' : content?.pdf_url ? 'pdf' : 'texto'
+    pdf_url: content?.pdf_url || ''
   });
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validar se pelo menos um tipo de conteúdo foi preenchido
+    const hasVideo = formData.video_url.trim() !== '';
+    const hasText = formData.texto.trim() !== '';
+    const hasPdf = formData.pdf_url.trim() !== '';
+
+    if (!hasVideo && !hasText && !hasPdf) {
+      toast({
+        title: "Erro de Validação",
+        description: "É necessário preencher pelo menos um tipo de conteúdo (vídeo, texto ou PDF)",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -50,9 +65,10 @@ const ContentDialog: React.FC<ContentDialogProps> = ({ content, trilhaId, onClos
         descricao: formData.descricao,
         ordem: formData.ordem,
         trilha_id: trilhaId,
-        pdf_url: formData.tipo === 'pdf' ? formData.pdf_url : null,
-        video_url: formData.tipo === 'video' ? formData.video_url : null,
-        texto: formData.tipo === 'texto' ? formData.texto : null
+        // Salvar apenas os campos preenchidos
+        video_url: hasVideo ? formData.video_url : null,
+        texto: hasText ? formData.texto : null,
+        pdf_url: hasPdf ? formData.pdf_url : null
       };
 
       if (content?.id) {
@@ -62,18 +78,23 @@ const ContentDialog: React.FC<ContentDialogProps> = ({ content, trilhaId, onClos
           .eq('id', content.id);
 
         if (error) throw error;
+        
+        toast({
+          title: "Sucesso",
+          description: "Conteúdo atualizado com sucesso"
+        });
       } else {
         const { error } = await supabase
           .from('conteudos')
           .insert([dataToSave]);
 
         if (error) throw error;
+        
+        toast({
+          title: "Sucesso",
+          description: "Conteúdo criado com sucesso"
+        });
       }
-
-      toast({
-        title: "Sucesso",
-        description: content?.id ? "Conteúdo atualizado com sucesso" : "Conteúdo criado com sucesso"
-      });
 
       onSuccess();
     } catch (error) {
@@ -90,70 +111,108 @@ const ContentDialog: React.FC<ContentDialogProps> = ({ content, trilhaId, onClos
 
   return (
     <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{content?.id ? 'Editar Conteúdo' : 'Novo Conteúdo'}</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <Label htmlFor="titulo">Título</Label>
-            <Input
-              id="titulo"
-              value={formData.titulo}
-              onChange={(e) => setFormData({ ...formData, titulo: e.target.value })}
-              required
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="descricao">Descrição</Label>
-            <Textarea
-              id="descricao"
-              value={formData.descricao}
-              onChange={(e) => setFormData({ ...formData, descricao: e.target.value })}
-              rows={3}
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
+        
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Informações Básicas */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-gray-900">Informações Básicas</h3>
+            
             <div>
-              <Label htmlFor="ordem">Ordem</Label>
+              <Label htmlFor="titulo">Título *</Label>
+              <Input
+                id="titulo"
+                value={formData.titulo}
+                onChange={(e) => setFormData({ ...formData, titulo: e.target.value })}
+                required
+                placeholder="Digite o título do conteúdo"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="descricao">Descrição</Label>
+              <Textarea
+                id="descricao"
+                value={formData.descricao}
+                onChange={(e) => setFormData({ ...formData, descricao: e.target.value })}
+                rows={3}
+                placeholder="Descrição breve do conteúdo"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="ordem">Ordem *</Label>
               <Input
                 id="ordem"
                 type="number"
+                min="1"
                 value={formData.ordem}
                 onChange={(e) => setFormData({ ...formData, ordem: parseInt(e.target.value) || 1 })}
                 required
               />
             </div>
-            <div>
-              <Label htmlFor="tipo">Tipo de Conteúdo</Label>
-              <Select value={formData.tipo} onValueChange={(value) => setFormData({ ...formData, tipo: value })}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o tipo" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="video">Vídeo</SelectItem>
-                  <SelectItem value="pdf">PDF</SelectItem>
-                  <SelectItem value="texto">Texto</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
           </div>
 
-          {formData.tipo === 'video' && (
+          <Separator />
+
+          {/* Seção de Vídeo */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <Video className="h-5 w-5 text-blue-600" />
+              <h3 className="text-lg font-semibold text-gray-900">Vídeo (Opcional)</h3>
+            </div>
+            
             <div>
               <Label htmlFor="video_url">URL do Vídeo</Label>
               <Input
                 id="video_url"
                 value={formData.video_url}
                 onChange={(e) => setFormData({ ...formData, video_url: e.target.value })}
-                placeholder="https://youtube.com/watch?v=..."
+                placeholder="https://youtube.com/watch?v=... ou https://vimeo.com/..."
               />
+              <p className="text-xs text-gray-500 mt-1">
+                Cole aqui o link do YouTube, Vimeo ou outra plataforma de vídeo
+              </p>
             </div>
-          )}
+          </div>
 
-          {formData.tipo === 'pdf' && (
+          <Separator />
+
+          {/* Seção de Texto */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <BookOpen className="h-5 w-5 text-green-600" />
+              <h3 className="text-lg font-semibold text-gray-900">Conteúdo de Texto (Opcional)</h3>
+            </div>
+            
+            <div>
+              <Label htmlFor="texto">Texto da Lição</Label>
+              <Textarea
+                id="texto"
+                value={formData.texto}
+                onChange={(e) => setFormData({ ...formData, texto: e.target.value })}
+                rows={8}
+                placeholder="Digite o conteúdo textual da lição..."
+                className="resize-none"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Este texto será exibido como material de estudo
+              </p>
+            </div>
+          </div>
+
+          <Separator />
+
+          {/* Seção de PDF */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <FileText className="h-5 w-5 text-red-600" />
+              <h3 className="text-lg font-semibold text-gray-900">Material PDF (Opcional)</h3>
+            </div>
+            
             <div>
               <Label htmlFor="pdf_url">URL do PDF</Label>
               <Input
@@ -162,28 +221,25 @@ const ContentDialog: React.FC<ContentDialogProps> = ({ content, trilhaId, onClos
                 onChange={(e) => setFormData({ ...formData, pdf_url: e.target.value })}
                 placeholder="https://exemplo.com/arquivo.pdf"
               />
+              <p className="text-xs text-gray-500 mt-1">
+                Link direto para download do material complementar em PDF
+              </p>
             </div>
-          )}
+          </div>
 
-          {formData.tipo === 'texto' && (
-            <div>
-              <Label htmlFor="texto">Conteúdo do Texto</Label>
-              <Textarea
-                id="texto"
-                value={formData.texto}
-                onChange={(e) => setFormData({ ...formData, texto: e.target.value })}
-                rows={6}
-                placeholder="Digite o conteúdo da lição..."
-              />
-            </div>
-          )}
+          <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+            <p className="text-sm text-yellow-800">
+              <strong>Nota:</strong> Você pode preencher um, dois ou todos os tipos de conteúdo. 
+              É obrigatório preencher pelo menos um tipo (vídeo, texto ou PDF).
+            </p>
+          </div>
 
-          <DialogFooter>
+          <DialogFooter className="gap-2">
             <Button type="button" variant="outline" onClick={onClose}>
               Cancelar
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? 'Salvando...' : 'Salvar'}
+              {loading ? 'Salvando...' : 'Salvar Conteúdo'}
             </Button>
           </DialogFooter>
         </form>
