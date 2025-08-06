@@ -113,13 +113,20 @@ const Trilhas = () => {
       <div className="min-h-screen bg-gray-50 py-4 sm:py-6 lg:py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mb-6">
-            <Button
-              variant="ghost"
-              onClick={() => setSelectedTrilha(null)}
-              className="mb-4"
-            >
-              ← Voltar às Trilhas
-            </Button>
+            <div className="flex gap-2 mb-4">
+              <Button
+                variant="ghost"
+                onClick={() => setSelectedTrilha(null)}
+              >
+                ← Voltar às Trilhas
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => navigate('/')}
+              >
+                🏠 Início
+              </Button>
+            </div>
             <ConteudoTrilha
               trilhaId={selectedTrilha}
               trilhaTitulo={trilha?.title || ''}
@@ -133,6 +140,17 @@ const Trilhas = () => {
   return (
     <div className="min-h-screen bg-gray-50 py-4 sm:py-6 lg:py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header com botão de voltar */}
+        <div className="flex justify-between items-center mb-6">
+          <Button
+            variant="outline"
+            onClick={() => navigate('/')}
+            className="flex items-center gap-2"
+          >
+            🏠 Voltar ao Início
+          </Button>
+        </div>
+
         {/* Header */}
         <div className="text-center mb-8 sm:mb-12">
           <div className="flex items-center justify-center gap-2 mb-4">

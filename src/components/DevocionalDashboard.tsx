@@ -2,10 +2,11 @@
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Calendar, Trophy, Target, BookOpen, History } from 'lucide-react';
+import { Calendar, Trophy, Target, BookOpen, History, Heart } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import WeeklyDevotionalProgress from './WeeklyDevotionalProgress';
 
 interface DevocionalStats {
   streak_atual: number;
@@ -21,6 +22,7 @@ const DevocionalDashboard = () => {
     total_completados: 0,
     ultimo_devocional: null
   });
+  const [completedDates, setCompletedDates] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -28,6 +30,7 @@ const DevocionalDashboard = () => {
   useEffect(() => {
     if (user?.id) {
       fetchStats();
+      fetchCompletedDates();
     }
   }, [user]);
 
@@ -35,43 +38,95 @@ const DevocionalDashboard = () => {
     if (!user?.id) return;
 
     try {
-      // Buscar estatísticas do usuário - usando fallback para dados mock
-      const { data, error } = await supabase
-        .from('devocional_historico')
+      // Buscar estatísticas reais do usuário
+      const { data: statsData, error: statsError } = await supabase
+        .from('devocional_stats')
         .select('*')
-        .eq('user_id', user.id);
+        .eq('user_id', user.id)
+        .single();
 
-      if (error) {
-        console.error('Erro ao buscar stats:', error);
-        // Fallback com dados mock para desenvolvimento
-        setStats({
-          streak_atual: 3,
-          melhor_streak: 7,
-          total_completados: 15,
-          ultimo_devocional: new Date().toISOString()
-        });
+      if (statsError && statsError.code !== 'PGRST116') {
+        console.error('Erro ao buscar stats:', statsError);
+        return;
+      }
+
+      if (statsData) {
+        setStats(statsData);
       } else {
-        // Processar dados reais quando disponíveis
-        const completados = data?.length || 0;
-        const ultimoDevocional = data && data.length > 0 ? data[0].created_at : null;
+        // Se não há stats, buscar dados do histórico para calcular
+        const { data: historicoData, error: historicoError } = await supabase
+          .from('devocional_historico')
+          .select(`
+            id,
+            completado,
+            created_at,
+            devocionais!inner(data)
+          `)
+          .eq('user_id', user.id)
+          .eq('completado', true)
+          .order('created_at', { ascending: false });
+
+        if (historicoError) {
+          console.error('Erro ao buscar histórico:', historicoError);
+          return;
+        }
+
+        const completados = historicoData?.length || 0;
+        const ultimoDevocional = historicoData && historicoData.length > 0 
+          ? historicoData[0].devocionais.data 
+          : null;
+
+        // Calcular streak atual (simplificado)
+        let streakAtual = 0;
+        if (historicoData && historicoData.length > 0) {
+          const today = new Date().toISOString().split('T')[0];
+          const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+          
+          // Verificar se fez hoje ou ontem
+          const temHoje = historicoData.some(h => h.devocionais.data === today);
+          const temOntem = historicoData.some(h => h.devocionais.data === yesterday);
+          
+          if (temHoje || temOntem) {
+            streakAtual = 1; // Simplificado - calcular streak completo seria mais complexo
+          }
+        }
+
         setStats({
-          streak_atual: 3, // Calcular streak atual
-          melhor_streak: 7, // Calcular melhor streak
+          streak_atual: streakAtual,
+          melhor_streak: Math.max(streakAtual, 1),
           total_completados: completados,
           ultimo_devocional: ultimoDevocional
         });
       }
     } catch (error) {
       console.error('Erro ao buscar estatísticas:', error);
-      // Fallback com dados mock
-      setStats({
-        streak_atual: 3,
-        melhor_streak: 7,
-        total_completados: 15,
-        ultimo_devocional: new Date().toISOString()
-      });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchCompletedDates = async () => {
+    if (!user?.id) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('devocional_historico')
+        .select(`
+          completado,
+          devocionais!inner(data)
+        `)
+        .eq('user_id', user.id)
+        .eq('completado', true);
+
+      if (error) {
+        console.error('Erro ao buscar datas completadas:', error);
+        return;
+      }
+
+      const dates = data?.map(item => item.devocionais.data) || [];
+      setCompletedDates(dates);
+    } catch (error) {
+      console.error('Erro ao buscar datas completadas:', error);
     }
   };
 
@@ -146,23 +201,33 @@ const DevocionalDashboard = () => {
         </Card>
       </div>
 
-      {/* Motivação */}
-      <Card className="bg-gradient-to-r from-blue-500 to-purple-600 text-white">
+      {/* Progresso Semanal */}
+      <WeeklyDevotionalProgress completedDates={completedDates} />
+
+      {/* Card de Histórico mais atrativo */}
+      <Card className="bg-gradient-to-r from-purple-500 via-pink-500 to-red-500 text-white">
         <CardContent className="pt-6">
           <div className="text-center">
-            <h3 className="text-lg font-semibold mb-2">Continue sua jornada!</h3>
-            <p className="text-blue-100">
-              {stats.streak_atual === 0 
-                ? "Comece hoje mesmo sua jornada devocional diária!" 
-                : `Você está em uma sequência de ${stats.streak_atual} dias. Continue assim!`
-              }
+            <Heart className="h-8 w-8 mx-auto mb-3 text-pink-100" />
+            <h3 className="text-xl font-bold mb-2">Explore Sua Jornada Espiritual</h3>
+            <p className="text-pink-100 mb-4">
+              Reveja seus momentos de crescimento, reflexões e orações que marcaram sua caminhada com Deus.
             </p>
-            <Button 
-              className="mt-4 bg-white text-blue-600 hover:bg-blue-50"
-              onClick={() => navigate('/devocional')}
-            >
-              Fazer Devocional Hoje
-            </Button>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
+              <Button 
+                className="bg-white text-purple-600 hover:bg-pink-50 font-semibold"
+                onClick={() => navigate('/historico-devocional')}
+              >
+                📖 Ver Meu Histórico
+              </Button>
+              <Button 
+                variant="outline"
+                className="border-white text-white hover:bg-white hover:text-purple-600"
+                onClick={() => navigate('/devocional')}
+              >
+                ✨ Devocional de Hoje
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>

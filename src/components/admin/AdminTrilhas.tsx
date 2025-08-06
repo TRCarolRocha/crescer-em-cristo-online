@@ -1,14 +1,14 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { BookOpen, Plus, Edit, FileText, Video, File, Trash } from 'lucide-react';
+import { BookOpen, Plus, Edit, FileText, Video, File, Trash, HelpCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import CreateTrackDialog from './CreateTrackDialog';
 import EditTrackDialog from './EditTrackDialog';
 import ContentDialog from './ContentDialog';
+import QuestionDialog from './QuestionDialog';
 
 interface Track {
   id: string;
@@ -43,6 +43,11 @@ const AdminTrilhas = () => {
     content?: Content;
   }>({ show: false, trilhaId: '' });
   const [expandedTrack, setExpandedTrack] = useState<string | null>(null);
+  const [questionDialog, setQuestionDialog] = useState<{
+    show: boolean;
+    contentId: string;
+    contentTitle: string;
+  }>({ show: false, contentId: '', contentTitle: '' });
   const { toast } = useToast();
 
   useEffect(() => {
@@ -284,6 +289,18 @@ const AdminTrilhas = () => {
                           <Button
                             size="sm"
                             variant="ghost"
+                            onClick={() => setQuestionDialog({ 
+                              show: true, 
+                              contentId: content.id, 
+                              contentTitle: content.titulo 
+                            })}
+                            title="Gerenciar Perguntas"
+                          >
+                            <HelpCircle className="h-3 w-3" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
                             onClick={() => setContentDialog({ 
                               show: true, 
                               trilhaId: track.id, 
@@ -350,6 +367,14 @@ const AdminTrilhas = () => {
             await fetchContents(contentDialog.trilhaId);
             setContentDialog({ show: false, trilhaId: '' });
           }}
+        />
+      )}
+
+      {questionDialog.show && (
+        <QuestionDialog
+          contentId={questionDialog.contentId}
+          contentTitle={questionDialog.contentTitle}
+          onClose={() => setQuestionDialog({ show: false, contentId: '', contentTitle: '' })}
         />
       )}
     </div>
