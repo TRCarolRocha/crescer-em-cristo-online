@@ -35,44 +35,30 @@ const WeeklyDevotionalProgress: React.FC<WeeklyDevotionalProgressProps> = ({ com
 
   const getStatusIcon = (date: Date) => {
     const status = getDayStatus(date);
+    const isCurrentDay = isToday(date);
     
     switch (status) {
       case 'completed':
-        return <CheckCircle className="h-5 w-5 text-green-500" />;
+        return <CheckCircle className={`h-4 w-4 text-green-500 ${isCurrentDay ? 'ring-2 ring-green-400 rounded-full' : ''}`} />;
       case 'missed':
-        return <X className="h-5 w-5 text-red-400" />;
+        return <X className={`h-4 w-4 text-red-400 ${isCurrentDay ? 'ring-2 ring-red-400 rounded-full' : ''}`} />;
       case 'future':
-        return <div className="h-5 w-5 rounded-full border-2 border-gray-300" />;
+        return <div className={`h-4 w-4 rounded-full border-2 border-gray-300 ${isCurrentDay ? 'ring-2 ring-blue-400' : ''}`} />;
       default:
         return null;
     }
   };
 
-  const getStatusColor = (date: Date) => {
-    const status = getDayStatus(date);
-    
-    switch (status) {
-      case 'completed':
-        return 'bg-green-100 border-green-300 text-green-800';
-      case 'missed':
-        return 'bg-red-50 border-red-200 text-red-700';
-      case 'future':
-        return 'bg-gray-50 border-gray-200 text-gray-600';
-      default:
-        return 'bg-gray-50 border-gray-200 text-gray-600';
-    }
-  };
-
   return (
     <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
-      <CardHeader>
+      <CardHeader className="pb-3">
         <div className="flex items-center gap-2">
           <Calendar className="h-5 w-5 text-blue-600" />
           <CardTitle className="text-lg text-blue-900">Progresso Semanal</CardTitle>
         </div>
       </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-7 gap-2">
+      <CardContent className="pt-0">
+        <div className="flex justify-between items-center gap-1">
           {weekDays.map((date, index) => {
             const dayName = format(date, 'EEE', { locale: ptBR });
             const dayNumber = format(date, 'd');
@@ -81,16 +67,12 @@ const WeeklyDevotionalProgress: React.FC<WeeklyDevotionalProgressProps> = ({ com
             return (
               <div
                 key={index}
-                className={`
-                  text-center p-3 rounded-lg border-2 transition-all
-                  ${getStatusColor(date)}
-                  ${isCurrentDay ? 'ring-2 ring-blue-400 ring-opacity-50' : ''}
-                `}
+                className="flex flex-col items-center space-y-1 flex-1"
               >
-                <div className="text-xs font-medium uppercase mb-1">
+                <div className={`text-xs font-medium uppercase ${isCurrentDay ? 'text-blue-600 font-bold' : 'text-gray-600'}`}>
                   {dayName}
                 </div>
-                <div className="text-sm font-bold mb-2">
+                <div className={`text-sm font-bold ${isCurrentDay ? 'text-blue-800' : 'text-gray-700'}`}>
                   {dayNumber}
                 </div>
                 <div className="flex justify-center">
@@ -101,17 +83,17 @@ const WeeklyDevotionalProgress: React.FC<WeeklyDevotionalProgressProps> = ({ com
           })}
         </div>
         
-        <div className="flex justify-center items-center gap-4 mt-4 text-xs">
+        <div className="flex justify-center items-center gap-4 mt-4 text-xs border-t pt-3">
           <div className="flex items-center gap-1">
-            <CheckCircle className="h-4 w-4 text-green-500" />
+            <CheckCircle className="h-3 w-3 text-green-500" />
             <span className="text-green-700">Completo</span>
           </div>
           <div className="flex items-center gap-1">
-            <X className="h-4 w-4 text-red-400" />
+            <X className="h-3 w-3 text-red-400" />
             <span className="text-red-600">Perdido</span>
           </div>
           <div className="flex items-center gap-1">
-            <div className="h-4 w-4 rounded-full border-2 border-gray-300" />
+            <div className="h-3 w-3 rounded-full border-2 border-gray-300" />
             <span className="text-gray-600">Futuro</span>
           </div>
         </div>

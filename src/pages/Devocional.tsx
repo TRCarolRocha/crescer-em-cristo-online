@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -42,7 +43,7 @@ const Devocional = () => {
         .from('devocionais')
         .select('*')
         .eq('data', today)
-        .single();
+        .maybeSingle();
 
       if (devocionalError) {
         console.error('Erro ao buscar devocional:', devocionalError);
@@ -54,23 +55,35 @@ const Devocional = () => {
         return;
       }
 
-      setDevocional(devocionalData);
+      if (devocionalData) {
+        // Mapear campos do banco para a interface
+        const devocionalMapped: Devocional = {
+          id: devocionalData.id,
+          data: devocionalData.data,
+          titulo: devocionalData.tema,
+          versiculo: `${devocionalData.versiculo} - ${devocionalData.referencia}`,
+          reflexao: devocionalData.texto_central || '',
+          oracao: `Reflexões para hoje:\n\n1. ${devocionalData.pergunta_1}\n\n2. ${devocionalData.pergunta_2}\n\n3. ${devocionalData.pergunta_3}`
+        };
 
-      // Verificar se o usuário já completou o devocional hoje
-      if (user?.id) {
-        const { data: historicoData, error: historicoError } = await supabase
-          .from('devocional_historico')
-          .select('*')
-          .eq('user_id', user.id)
-          .eq('devocional_id', devocionalData?.id)
-          .single();
+        setDevocional(devocionalMapped);
 
-        if (historicoError) {
-          console.error('Erro ao verificar histórico:', historicoError);
-          return;
+        // Verificar se o usuário já completou o devocional hoje
+        if (user?.id) {
+          const { data: historicoData, error: historicoError } = await supabase
+            .from('devocional_historico')
+            .select('*')
+            .eq('user_id', user.id)
+            .eq('devocional_id', devocionalData.id)
+            .maybeSingle();
+
+          if (historicoError) {
+            console.error('Erro ao verificar histórico:', historicoError);
+            return;
+          }
+
+          setCompletado(!!historicoData?.completado);
         }
-
-        setCompletado(!!historicoData?.completado);
       }
     } catch (error) {
       console.error('Erro ao buscar devocional:', error);
@@ -85,7 +98,7 @@ const Devocional = () => {
   };
 
   const handleSave = async () => {
-    if (!devocional) return;
+    if (!devocional || !user?.id) return;
 
     setSaving(true);
     try {
@@ -93,11 +106,10 @@ const Devocional = () => {
       const { error } = await supabase
         .from('devocional_historico')
         .upsert({
-          user_id: user?.id,
+          user_id: user.id,
           devocional_id: devocional.id,
-          data: devocional.data,
           completado: true
-        }, { onConflict: ['user_id', 'devocional_id'] });
+        }, { onConflict: 'user_id,devocional_id' });
 
       if (error) {
         console.error('Erro ao salvar progresso:', error);
@@ -207,7 +219,7 @@ const Devocional = () => {
               </div>
               <div>
                 <Label htmlFor="oracao" className="text-sm font-medium">
-                  Oração
+                  Perguntas para Reflexão
                 </Label>
                 <Textarea
                   id="oracao"

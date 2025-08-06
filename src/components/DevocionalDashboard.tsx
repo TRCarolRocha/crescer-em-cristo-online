@@ -43,7 +43,7 @@ const DevocionalDashboard = () => {
         .from('devocional_stats')
         .select('*')
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
 
       if (statsError && statsError.code !== 'PGRST116') {
         console.error('Erro ao buscar stats:', statsError);
@@ -204,7 +204,7 @@ const DevocionalDashboard = () => {
       {/* Progresso Semanal */}
       <WeeklyDevotionalProgress completedDates={completedDates} />
 
-      {/* Card de Histórico mais atrativo */}
+      {/* Card de Histórico redesenhado */}
       <Card className="bg-gradient-to-r from-purple-500 via-pink-500 to-red-500 text-white">
         <CardContent className="pt-6">
           <div className="text-center">
@@ -213,21 +213,12 @@ const DevocionalDashboard = () => {
             <p className="text-pink-100 mb-4">
               Reveja seus momentos de crescimento, reflexões e orações que marcaram sua caminhada com Deus.
             </p>
-            <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
-              <Button 
-                className="bg-white text-purple-600 hover:bg-pink-50 font-semibold"
-                onClick={() => navigate('/historico-devocional')}
-              >
-                📖 Ver Meu Histórico
-              </Button>
-              <Button 
-                variant="outline"
-                className="border-white text-white hover:bg-white hover:text-purple-600"
-                onClick={() => navigate('/devocional')}
-              >
-                ✨ Devocional de Hoje
-              </Button>
-            </div>
+            <Button 
+              className="bg-white text-purple-600 hover:bg-pink-50 font-semibold"
+              onClick={() => navigate('/historico-devocional')}
+            >
+              📖 Ver Meu Histórico
+            </Button>
           </div>
         </CardContent>
       </Card>
