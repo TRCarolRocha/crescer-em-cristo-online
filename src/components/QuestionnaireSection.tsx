@@ -14,9 +14,9 @@ import { HelpCircle, CheckCircle, AlertCircle } from 'lucide-react';
 interface Question {
   id: string;
   question: string;
-  question_type: 'text' | 'multiple_choice' | 'true_false';
-  options?: string[];
-  correct_answer?: string;
+  question_type: string;
+  options?: any;
+  correct_answer?: string | null;
   ordem: number;
 }
 
@@ -190,7 +190,17 @@ const QuestionnaireSection: React.FC<QuestionnaireSectionProps> = ({
 
   const renderQuestion = (question: Question) => {
     const userResult = getQuestionResult(question.id);
-    const isAnswered = showResults && userResult;
+    const isAnswered = showResults && !!userResult;
+
+    // Parse options se for array JSON
+    let questionOptions: string[] = [];
+    if (question.options && typeof question.options === 'object') {
+      if (Array.isArray(question.options)) {
+        questionOptions = question.options;
+      } else if (question.options && typeof question.options === 'object' && 'options' in question.options) {
+        questionOptions = Array.isArray((question.options as any).options) ? (question.options as any).options : [];
+      }
+    }
 
     switch (question.question_type) {
       case 'multiple_choice':
@@ -201,7 +211,7 @@ const QuestionnaireSection: React.FC<QuestionnaireSectionProps> = ({
               onValueChange={(value) => handleResponseChange(question.id, value)}
               disabled={isAnswered}
             >
-              {question.options?.map((option, index) => (
+              {questionOptions.map((option, index) => (
                 <div key={index} className="flex items-center space-x-2">
                   <RadioGroupItem value={option} id={`${question.id}-${index}`} />
                   <Label htmlFor={`${question.id}-${index}`} className="flex-1">
