@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Heart, Calendar, CheckCircle, BookOpen, ArrowLeft } from 'lucide-react';
+import { Heart, Calendar, CheckCircle, ArrowLeft } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -56,14 +56,30 @@ const Devocional = () => {
       }
 
       if (devocionalData) {
+        // Tratar campos nulos e criar conteúdo adequado
+        const textoReflexao = devocionalData.texto_central || 'Dedique um tempo para reflexão e oração sobre o versículo de hoje.';
+        
+        // Filtrar e formatar perguntas válidas
+        const perguntas = [
+          devocionalData.pergunta_1,
+          devocionalData.pergunta_2,
+          devocionalData.pergunta_3
+        ].filter(pergunta => pergunta && pergunta.trim() !== '');
+
+        const perguntasFormatadas = perguntas.length > 0 
+          ? `Perguntas para reflexão:\n\n${perguntas.map((p, i) => `${i + 1}. ${p}`).join('\n\n')}`
+          : 'Use este momento para reflexão pessoal e oração.';
+
         // Mapear campos do banco para a interface
         const devocionalMapped: Devocional = {
           id: devocionalData.id,
           data: devocionalData.data,
-          titulo: devocionalData.tema,
-          versiculo: `${devocionalData.versiculo} - ${devocionalData.referencia}`,
-          reflexao: devocionalData.texto_central || '',
-          oracao: `Reflexões para hoje:\n\n1. ${devocionalData.pergunta_1}\n\n2. ${devocionalData.pergunta_2}\n\n3. ${devocionalData.pergunta_3}`
+          titulo: devocionalData.tema || 'Devocional de Hoje',
+          versiculo: devocionalData.referencia 
+            ? `${devocionalData.versiculo || ''} - ${devocionalData.referencia}`
+            : devocionalData.versiculo || 'Versículo não disponível',
+          reflexao: textoReflexao,
+          oracao: perguntasFormatadas
         };
 
         setDevocional(devocionalMapped);
@@ -212,8 +228,8 @@ const Devocional = () => {
                 </Label>
                 <Textarea
                   id="reflexao"
-                  defaultValue={devocional.reflexao}
-                  className="mt-2 w-full rounded-md shadow-sm border-gray-300 focus:border-indigo-500 focus:ring focus:ring-indigo-200"
+                  value={devocional.reflexao}
+                  className="mt-2 w-full min-h-[120px] rounded-md shadow-sm border-gray-300 focus:border-indigo-500 focus:ring focus:ring-indigo-200"
                   readOnly
                 />
               </div>
@@ -223,8 +239,8 @@ const Devocional = () => {
                 </Label>
                 <Textarea
                   id="oracao"
-                  defaultValue={devocional.oracao}
-                  className="mt-2 w-full rounded-md shadow-sm border-gray-300 focus:border-indigo-500 focus:ring focus:ring-indigo-200"
+                  value={devocional.oracao}
+                  className="mt-2 w-full min-h-[120px] rounded-md shadow-sm border-gray-300 focus:border-indigo-500 focus:ring focus:ring-indigo-200"
                   readOnly
                 />
               </div>
