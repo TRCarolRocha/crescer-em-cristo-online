@@ -29,6 +29,7 @@ interface UserContentProgress {
   answered_questions: boolean;
   completed: boolean;
   time_spent: number;
+  completed_at?: string;
 }
 
 interface ConteudoTrilhaProps {
@@ -134,6 +135,25 @@ const ConteudoTrilha = ({ trilhaId, trilhaTitulo }: ConteudoTrilhaProps) => {
 
       const newProgress = { ...currentProgress, ...updates };
       
+      // Auto-completion logic: check if all required steps are completed
+      const conteudo = conteudos.find(c => c.id === contentId);
+      if (conteudo && !newProgress.completed) {
+        const hasVideo = !!conteudo.video_url;
+        const hasText = !!conteudo.texto;
+        const hasPdf = !!conteudo.pdf_url;
+        
+        const videoCompleted = !hasVideo || newProgress.watched_video;
+        const textCompleted = !hasText || newProgress.read_text;
+        const pdfCompleted = !hasPdf || newProgress.downloaded_pdf;
+        const questionsCompleted = newProgress.answered_questions;
+        
+        // Mark as completed if all required steps are done
+        if (videoCompleted && textCompleted && pdfCompleted && questionsCompleted) {
+          newProgress.completed = true;
+          newProgress.completed_at = new Date().toISOString();
+        }
+      }
+      
       const { data, error } = await supabase
         .from('user_content_progress')
         .upsert({
@@ -153,6 +173,14 @@ const ConteudoTrilha = ({ trilhaId, trilhaTitulo }: ConteudoTrilhaProps) => {
         ...prev,
         [contentId]: { ...newProgress, id: data.id }
       }));
+
+      // Show completion notification if content was just completed
+      if (newProgress.completed && !currentProgress.completed) {
+        toast({
+          title: "Parabéns! 🎉",
+          description: `Módulo "${conteudo?.titulo}" concluído! Próxima aula desbloqueada.`,
+        });
+      }
 
       // Atualizar time_spent se aplicável
       if (updates.time_spent) {

@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -114,8 +114,49 @@ const DiagnosticForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
   const [result, setResult] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const { user } = useAuth();
   const { toast } = useToast();
+
+  // Check for existing diagnostic on component mount
+  useEffect(() => {
+    const checkExistingDiagnostic = async () => {
+      if (!user?.id) {
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        const { data, error } = await supabase
+          .from('diagnostics')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('completed_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (error && error.code !== 'PGRST116') {
+          console.error('Erro ao verificar diagnóstico existente:', error);
+          setIsLoading(false);
+          return;
+        }
+
+        if (data) {
+          // User already has a diagnostic, show result
+          const parsedResult = JSON.parse(data.result);
+          setResult(parsedResult);
+          setAnswers(data.answers as Record<string, string>);
+          setIsCompleted(true);
+        }
+      } catch (error) {
+        console.error('Erro ao carregar diagnóstico:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    checkExistingDiagnostic();
+  }, [user]);
 
   const handleAnswer = (questionId: string, value: string) => {
     setAnswers(prev => ({ ...prev, [questionId]: value }));
@@ -223,6 +264,22 @@ const DiagnosticForm = () => {
   const isLastQuestion = currentQuestion === questions.length - 1;
   const canProceed = answers[currentQ.id];
 
+  // Show loading while checking for existing diagnostic
+  if (isLoading) {
+    return (
+      <div className="max-w-2xl mx-auto p-6">
+        <Card>
+          <CardContent className="flex items-center justify-center p-8">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <p className="text-gray-600">Verificando seu diagnóstico...</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   if (isCompleted && result) {
     return (
       <div className="max-w-4xl mx-auto p-6">
@@ -252,6 +309,31 @@ const DiagnosticForm = () => {
             </div>
 
             <div className="bg-white p-6 border-l-4 border-blue-500 rounded">
+              <h4 className="font-semibold mb-2">O que isso significa:</h4>
+              {result.level === 'novo' && (
+                <div className="space-y-2">
+                  <p className="text-gray-700">Você está no início da sua jornada espiritual! Isso é maravilhoso.</p>
+                  <p className="text-gray-700">Neste estágio, é importante focar nos fundamentos: oração diária, leitura bíblica regular e participação ativa na comunidade.</p>
+                  <p className="text-gray-700">Recomendamos começar com trilhas básicas para estabelecer uma base sólida na fé.</p>
+                </div>
+              )}
+              {result.level === 'crescimento' && (
+                <div className="space-y-2">
+                  <p className="text-gray-700">Você está crescendo espiritualmente! Já tem bons hábitos estabelecidos.</p>
+                  <p className="text-gray-700">Neste estágio, é hora de se aprofundar no conhecimento bíblico e começar a servir mais ativamente.</p>
+                  <p className="text-gray-700">Considere participar de ministérios e começar a compartilhar sua fé com outros.</p>
+                </div>
+              )}
+              {result.level === 'lider' && (
+                <div className="space-y-2">
+                  <p className="text-gray-700">Você demonstra maturidade espiritual avançada! Parabéns pelo seu crescimento.</p>
+                  <p className="text-gray-700">Neste estágio, você está pronto para liderar e discipular outros, sendo um exemplo na fé.</p>
+                  <p className="text-gray-700">Seu próximo passo é desenvolver suas habilidades de liderança servidora e mentoria.</p>
+                </div>
+              )}
+            </div>
+
+            <div className="bg-white p-6 border-l-4 border-green-500 rounded">
               <h4 className="font-semibold mb-2">Recomendação Personalizada:</h4>
               <p className="text-gray-700">{result.recommendation}</p>
             </div>
@@ -271,9 +353,10 @@ const DiagnosticForm = () => {
             <div className="flex flex-col sm:flex-row gap-4 pt-4">
               <Button 
                 onClick={() => window.location.href = '/trilhas'}
-                className="flex-1"
+                className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                size="lg"
               >
-                Ver Todas as Trilhas
+                🚀 Continuar para Trilhas Sugeridas
               </Button>
               <Button 
                 variant="outline"
