@@ -4,7 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { BookOpen, Clock, Users, ChevronRight, Trophy, Target } from 'lucide-react';
+import { Separator } from '@/components/ui/separator';
+import { BookOpen, Clock, Users, ChevronRight, Trophy, Target, Award, Star } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -18,6 +19,8 @@ interface Trilha {
   lessons: number;
   duration: string;
   topics: string[];
+  allowed_levels: string[];
+  allowed_groups: string[];
 }
 
 interface UserProgress {
@@ -26,13 +29,38 @@ interface UserProgress {
   completed_at: string | null;
 }
 
+interface UserDiagnostic {
+  result: string;
+}
+
+interface UserGroup {
+  id: string;
+  name: string;
+}
+
 const Trilhas = () => {
   const [trilhas, setTrilhas] = useState<Trilha[]>([]);
+  const [filteredTrilhas, setFilteredTrilhas] = useState<Trilha[]>([]);
   const [userProgress, setUserProgress] = useState<UserProgress[]>([]);
   const [selectedTrilha, setSelectedTrilha] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [userDiagnostic, setUserDiagnostic] = useState<UserDiagnostic | null>(null);
+  const [userGroups, setUserGroups] = useState<UserGroup[]>([]);
   const { user } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    fetchTrilhas();
+    if (user?.id) {
+      fetchUserProgress();
+      fetchUserDiagnostic();
+      fetchUserGroups();
+    }
+  }, [user]);
+
+  useEffect(() => {
+    filterTrilhas();
+  }, [trilhas, userDiagnostic, userGroups]);
 
   useEffect(() => {
     fetchTrilhas();
@@ -73,6 +101,78 @@ const Trilhas = () => {
     }
   };
 
+  const fetchUserDiagnostic = async () => {
+    if (!user?.id) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('diagnostics')
+        .select('result')
+        .eq('user_id', user.id)
+        .order('completed_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      if (error && error.code !== 'PGRST116') throw error;
+      setUserDiagnostic(data);
+    } catch (error) {
+      console.error('Erro ao carregar diagnóstico:', error);
+    }
+  };
+
+  const fetchUserGroups = async () => {
+    if (!user?.id) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('group_members')
+        .select('group_id')
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+      
+      if (data && data.length > 0) {
+        const groupIds = data.map(item => item.group_id);
+        
+        const { data: groups, error: groupsError } = await supabase
+          .from('member_groups')
+          .select('id, name')
+          .in('id', groupIds);
+
+        if (groupsError) throw groupsError;
+        setUserGroups(groups || []);
+      }
+    } catch (error) {
+      console.error('Erro ao carregar grupos:', error);
+    }
+  };
+
+  const filterTrilhas = () => {
+    if (!user) {
+      setFilteredTrilhas(trilhas);
+      return;
+    }
+
+    const filtered = trilhas.filter(trilha => {
+      // Se não tem restrições, mostra para todos
+      if (!trilha.allowed_levels?.length && !trilha.allowed_groups?.length) {
+        return true;
+      }
+
+      // Verifica se o nível do usuário está permitido
+      const levelAllowed = !trilha.allowed_levels?.length || 
+        (userDiagnostic?.result && trilha.allowed_levels.includes(userDiagnostic.result));
+
+      // Verifica se algum grupo do usuário está permitido
+      const groupAllowed = !trilha.allowed_groups?.length ||
+        userGroups.some(group => trilha.allowed_groups.includes(group.id));
+
+      return levelAllowed || groupAllowed;
+    });
+
+    setFilteredTrilhas(filtered);
+  };
+
   const getProgressForTrack = (trackId: string): number => {
     const progress = userProgress.find(p => p.track_id === trackId);
     return progress?.progress || 0;
@@ -81,6 +181,24 @@ const Trilhas = () => {
   const isTrackCompleted = (trackId: string): boolean => {
     const progress = userProgress.find(p => p.track_id === trackId);
     return !!progress?.completed_at;
+  };
+
+  const getTrackRecommendationReason = (trilha: Trilha): string | null => {
+    if (!user) return null;
+    
+    const levelAllowed = trilha.allowed_levels?.includes(userDiagnostic?.result || '');
+    const groupAllowed = userGroups.some(group => trilha.allowed_groups?.includes(group.id));
+    
+    if (levelAllowed && groupAllowed) {
+      return 'Recomendada pelo diagnóstico e grupo';
+    } else if (levelAllowed) {
+      return 'Recomendada pelo diagnóstico';
+    } else if (groupAllowed) {
+      const matchingGroup = userGroups.find(group => trilha.allowed_groups?.includes(group.id));
+      return `Disponível pelo grupo: ${matchingGroup?.name}`;
+    }
+    
+    return null;
   };
 
   const getLevelColor = (level: string) => {
@@ -160,8 +278,24 @@ const Trilhas = () => {
             </h1>
           </div>
           <p className="text-sm sm:text-base lg:text-lg text-gray-600 max-w-3xl mx-auto">
-            Jornadas estruturadas para seu crescimento espiritual. Escolha uma trilha adequada ao seu nível e comece sua caminhada!
+            Jornadas estruturadas para seu crescimento espiritual. 
+            {userDiagnostic?.result && (
+              <span className="block mt-2 text-blue-600 font-medium">
+                Trilhas personalizadas para seu nível: {userDiagnostic.result}
+              </span>
+            )}
           </p>
+          {userGroups.length > 0 && (
+            <div className="mt-4 flex flex-wrap justify-center gap-2">
+              <span className="text-sm text-gray-600">Seus grupos: </span>
+              {userGroups.map(group => (
+                <Badge key={group.id} variant="outline" className="text-xs">
+                  <Users className="h-3 w-3 mr-1" />
+                  {group.name}
+                </Badge>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Estatísticas do usuário */}
@@ -220,16 +354,17 @@ const Trilhas = () => {
 
         {/* Grid de Trilhas */}
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
-          {trilhas.map((trilha) => {
+          {filteredTrilhas.map((trilha) => {
             const progress = getProgressForTrack(trilha.id);
             const isCompleted = isTrackCompleted(trilha.id);
+            const recommendationReason = getTrackRecommendationReason(trilha);
 
             return (
               <Card 
                 key={trilha.id} 
                 className={`group hover:shadow-lg transition-all duration-300 cursor-pointer transform hover:-translate-y-1 ${
                   isCompleted ? 'border-green-200 bg-green-50' : ''
-                }`}
+                } ${recommendationReason?.includes('diagnóstico') ? 'ring-2 ring-blue-200 bg-blue-50' : ''}`}
                 onClick={() => setSelectedTrilha(trilha.id)}
               >
                 <CardHeader className="pb-3">
@@ -238,7 +373,7 @@ const Trilhas = () => {
                       <CardTitle className="text-base sm:text-lg font-bold text-gray-900 line-clamp-2 group-hover:text-blue-600 transition-colors">
                         {trilha.title}
                       </CardTitle>
-                      <div className="flex items-center gap-2 mt-2">
+                      <div className="flex items-center gap-2 mt-2 flex-wrap">
                         <Badge className={`text-xs px-2 py-1 ${getLevelColor(trilha.level)}`}>
                           {trilha.level}
                         </Badge>
@@ -248,7 +383,24 @@ const Trilhas = () => {
                             Concluída
                           </Badge>
                         )}
+                        {recommendationReason?.includes('diagnóstico') && (
+                          <Badge className="text-xs px-2 py-1 bg-blue-100 text-blue-800 border-blue-200">
+                            <Star className="h-3 w-3 mr-1" />
+                            Recomendada
+                          </Badge>
+                        )}
+                        {recommendationReason?.includes('grupo') && (
+                          <Badge className="text-xs px-2 py-1 bg-purple-100 text-purple-800 border-purple-200">
+                            <Users className="h-3 w-3 mr-1" />
+                            Grupo
+                          </Badge>
+                        )}
                       </div>
+                      {recommendationReason && (
+                        <p className="text-xs text-blue-600 mt-1 font-medium">
+                          {recommendationReason}
+                        </p>
+                      )}
                     </div>
                     <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400 group-hover:text-blue-600 transition-colors flex-shrink-0" />
                   </div>
@@ -321,15 +473,26 @@ const Trilhas = () => {
           })}
         </div>
 
-        {trilhas.length === 0 && (
+        {filteredTrilhas.length === 0 && (
           <div className="text-center py-12">
             <BookOpen className="h-12 w-12 mx-auto text-gray-400 mb-4" />
             <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              Nenhuma trilha disponível
+              {!user ? 'Nenhuma trilha disponível' : 'Nenhuma trilha personalizada encontrada'}
             </h3>
-            <p className="text-gray-600">
-              Novas trilhas de discipulado estarão disponíveis em breve.
+            <p className="text-gray-600 mb-4">
+              {!user 
+                ? 'Novas trilhas de discipulado estarão disponíveis em breve.'
+                : userDiagnostic
+                  ? 'Não encontramos trilhas adequadas ao seu nível atual ou grupos. Considere refazer o diagnóstico ou entrar em contato com a liderança.'
+                  : 'Complete primeiro o diagnóstico espiritual para ver trilhas personalizadas.'
+              }
             </p>
+            {user && !userDiagnostic && (
+              <Button onClick={() => navigate('/diagnostico')} className="mt-4">
+                <Award className="h-4 w-4 mr-2" />
+                Fazer Diagnóstico Espiritual
+              </Button>
+            )}
           </div>
         )}
       </div>
