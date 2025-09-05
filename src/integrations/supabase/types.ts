@@ -346,6 +346,8 @@ export type Database = {
       }
       discipleship_tracks: {
         Row: {
+          allowed_groups: string[] | null
+          allowed_levels: string[] | null
           created_at: string | null
           description: string | null
           difficulty: string | null
@@ -357,6 +359,8 @@ export type Database = {
           topics: string[] | null
         }
         Insert: {
+          allowed_groups?: string[] | null
+          allowed_levels?: string[] | null
           created_at?: string | null
           description?: string | null
           difficulty?: string | null
@@ -368,6 +372,8 @@ export type Database = {
           topics?: string[] | null
         }
         Update: {
+          allowed_groups?: string[] | null
+          allowed_levels?: string[] | null
           created_at?: string | null
           description?: string | null
           difficulty?: string | null
@@ -479,6 +485,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      member_groups: {
+        Row: {
+          created_at: string
+          created_by: string
+          description: string | null
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          description?: string | null
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       mensagens: {
         Row: {
