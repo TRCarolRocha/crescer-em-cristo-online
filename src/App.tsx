@@ -6,7 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import Index from "./pages/Index";
-import DiagnosticoUnificado from "./pages/DiagnosticoUnificado";
+import Diagnostico from "./pages/Diagnostico";
 import Trilhas from "./pages/Trilhas";
 import Agenda from "./pages/Agenda";
 import Membros from "./pages/Membros";
@@ -33,7 +33,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<AuthPage />} />
-            <Route path="/diagnostico" element={<DiagnosticoUnificado />} />
+            <Route path="/diagnostico" element={<Diagnostico />} />
             <Route path="/fale-com-lideranca" element={
               <ProtectedRoute>
                 <FaleComLideranca />

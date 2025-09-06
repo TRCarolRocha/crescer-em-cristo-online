@@ -224,9 +224,22 @@ const AdminGrupos = () => {
 
   const handleAddMember = async (groupId: string, userId: string) => {
     try {
+      // Check if member already exists in group
+      const { data: existingMember } = await supabase
+        .from('group_members')
+        .select('id')
+        .eq('group_id', groupId)
+        .eq('user_id', userId)
+        .maybeSingle();
+
+      if (existingMember) {
+        toast.error('Este membro já faz parte do grupo');
+        return;
+      }
+
       const { error } = await supabase
         .from('group_members')
-        .upsert({
+        .insert({
           group_id: groupId,
           user_id: userId
         });
@@ -431,7 +444,11 @@ const AdminGrupos = () => {
             <div>
               <Label>Adicionar Membro</Label>
               <div className="flex gap-2 mt-2">
-                <Select onValueChange={(userId) => selectedGroup && handleAddMember(selectedGroup, userId)}>
+                <Select onValueChange={(userId) => {
+                  if (selectedGroup) {
+                    handleAddMember(selectedGroup, userId);
+                  }
+                }}>
                   <SelectTrigger className="flex-1">
                     <SelectValue placeholder="Selecione um membro..." />
                   </SelectTrigger>

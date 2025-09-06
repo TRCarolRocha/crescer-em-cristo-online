@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Eye, Settings, Users, Target } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { DIAGNOSTIC_LEVELS } from '@/utils/diagnosticLevels';
 
 interface Track {
   id: string;
@@ -23,11 +24,6 @@ interface MemberGroup {
   name: string;
 }
 
-const DIAGNOSTIC_LEVELS = [
-  { value: 'novo', label: 'Novo na Fé' },
-  { value: 'crescimento', label: 'Em Crescimento' },
-  { value: 'lider', label: 'Líder Maduro' }
-];
 
 const AdminVisibilidadeTrilhas = () => {
   const [tracks, setTracks] = useState<Track[]>([]);

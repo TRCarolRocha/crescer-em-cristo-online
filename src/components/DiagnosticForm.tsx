@@ -9,6 +9,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { CheckCircle, ArrowRight, ArrowLeft } from 'lucide-react';
+import { DIAGNOSTIC_LEVELS, getDiagnosticLevelByPercentage, getDiagnosticLevelInfo } from '@/utils/diagnosticLevels';
 
 interface Question {
   id: string;
@@ -194,26 +195,26 @@ const DiagnosticForm = () => {
     const maxScore = Object.values(categoryScores).reduce((sum, cat) => sum + cat.max, 0);
     const percentage = Math.round((totalScore / maxScore) * 100);
 
-    let level = 'novo';
+    const level = getDiagnosticLevelByPercentage(percentage);
+    const levelInfo = getDiagnosticLevelInfo(level);
+    
     let recommendation = '';
     let recommendedTracks = [];
 
-    if (percentage >= 80) {
-      level = 'lider';
+    if (level === 'lider') {
       recommendation = 'Você demonstra uma maturidade espiritual avançada! Está pronto para liderar e discipular outros.';
       recommendedTracks = ['Liderança Servidora'];
-    } else if (percentage >= 50) {
-      level = 'crescimento';
+    } else if (level === 'crescimento') {
       recommendation = 'Você está em um bom caminho de crescimento espiritual! Hora de se aprofundar nas doutrinas.';
       recommendedTracks = ['Doutrinas Essenciais'];
     } else {
-      level = 'novo';
       recommendation = 'Que bom ter você conosco! Vamos começar fortalecendo os fundamentos da sua fé.';
       recommendedTracks = ['Fundamentos da Fé', 'Primeiros Passos na Oração'];
     }
 
     return {
       level,
+      levelInfo,
       percentage,
       recommendation,
       recommendedTracks,
@@ -299,9 +300,7 @@ const DiagnosticForm = () => {
             <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-6 rounded-lg">
               <h3 className="text-xl font-semibold mb-2">Seu Nível Atual</h3>
               <div className="text-3xl font-bold text-blue-600 mb-2">
-                {result.level === 'novo' && '🌱 Novo na Fé'}
-                {result.level === 'crescimento' && '🌿 Em Crescimento'}
-                {result.level === 'lider' && '🌳 Líder Maduro'}
+                {result.levelInfo ? `${result.levelInfo.emoji} ${result.levelInfo.label}` : 'Nível não encontrado'}
               </div>
               <div className="text-lg text-gray-600">
                 Pontuação: {result.percentage}% ({result.totalScore}/{result.maxScore} pontos)
