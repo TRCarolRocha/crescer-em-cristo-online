@@ -3,9 +3,11 @@ import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useNavigate } from 'react-router-dom';
-import { Users, BookOpen, Heart, MessageSquare, Settings } from 'lucide-react';
+import { Users, BookOpen, Heart, MessageSquare, Settings, UsersIcon, Eye } from 'lucide-react';
 import AdminMembros from '@/components/admin/AdminMembros';
+import AdminGrupos from '@/components/admin/AdminGrupos';
 import AdminTrilhas from '@/components/admin/AdminTrilhas';
+import AdminVisibilidadeTrilhas from '@/components/admin/AdminVisibilidadeTrilhas';
 import AdminDevocionais from '@/components/admin/AdminDevocionais';
 import AdminAvisos from '@/components/admin/AdminAvisos';
 import AdminAgenda from '@/components/admin/AdminAgenda';
@@ -30,14 +32,22 @@ const Admin = () => {
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-7">
             <TabsTrigger value="membros" className="flex items-center gap-2">
               <Users className="h-4 w-4" />
               Membros
             </TabsTrigger>
+            <TabsTrigger value="grupos" className="flex items-center gap-2">
+              <UsersIcon className="h-4 w-4" />
+              Grupos
+            </TabsTrigger>
             <TabsTrigger value="trilhas" className="flex items-center gap-2">
               <BookOpen className="h-4 w-4" />
               Trilhas
+            </TabsTrigger>
+            <TabsTrigger value="visibilidade" className="flex items-center gap-2">
+              <Eye className="h-4 w-4" />
+              Visibilidade
             </TabsTrigger>
             <TabsTrigger value="devocionais" className="flex items-center gap-2">
               <Heart className="h-4 w-4" />
@@ -57,8 +67,16 @@ const Admin = () => {
             <AdminMembros />
           </TabsContent>
 
+          <TabsContent value="grupos" className="mt-6">
+            <AdminGrupos />
+          </TabsContent>
+
           <TabsContent value="trilhas" className="mt-6">
             <AdminTrilhas />
+          </TabsContent>
+
+          <TabsContent value="visibilidade" className="mt-6">
+            <AdminVisibilidadeTrilhas />
           </TabsContent>
 
           <TabsContent value="devocionais" className="mt-6">
