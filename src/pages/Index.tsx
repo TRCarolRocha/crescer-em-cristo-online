@@ -30,7 +30,7 @@ const Index = () => {
     
     try {
       const { data, error } = await supabase
-        .from('diagnosticos')
+        .from('diagnostics')
         .select('id')
         .eq('user_id', user.id)
         .maybeSingle();
