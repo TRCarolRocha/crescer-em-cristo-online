@@ -481,7 +481,7 @@ export type Database = {
             foreignKeyName: "group_members_group_id_fkey"
             columns: ["group_id"]
             isOneToOne: false
-            referencedRelation: "study_groups"
+            referencedRelation: "member_groups"
             referencedColumns: ["id"]
           },
         ]
