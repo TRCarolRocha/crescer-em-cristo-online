@@ -201,12 +201,21 @@ const DiagnosticForm = () => {
     let recommendation = '';
     let recommendedTracks = [];
 
-    if (level === 'lider') {
+    if (level === 'lider_maduro') {
       recommendation = 'Você demonstra uma maturidade espiritual avançada! Está pronto para liderar e discipular outros.';
       recommendedTracks = ['Liderança Servidora'];
+    } else if (level === 'mentor') {
+      recommendation = 'Você tem potencial para mentorear outros! Continue se aprofundando no conhecimento.';
+      recommendedTracks = ['Mentoria Cristã', 'Discipulado'];
+    } else if (level === 'consolidado') {
+      recommendation = 'Você está consolidando bem seus conhecimentos! Hora de buscar mais responsabilidades.';
+      recommendedTracks = ['Liderança Intermediária'];
     } else if (level === 'crescimento') {
       recommendation = 'Você está em um bom caminho de crescimento espiritual! Hora de se aprofundar nas doutrinas.';
       recommendedTracks = ['Doutrinas Essenciais'];
+    } else if (level === 'aprendiz') {
+      recommendation = 'Você está progredindo bem como aprendiz! Continue se dedicando às trilhas básicas.';
+      recommendedTracks = ['Fundamentos da Fé'];
     } else {
       recommendation = 'Que bom ter você conosco! Vamos começar fortalecendo os fundamentos da sua fé.';
       recommendedTracks = ['Fundamentos da Fé', 'Primeiros Passos na Oração'];
@@ -241,12 +250,24 @@ const DiagnosticForm = () => {
 
       if (error) throw error;
 
+      // Award points for completing diagnostic
+      await supabase.rpc('award_spiritual_points', {
+        p_user_id: user.id,
+        p_activity_type: 'diagnostic',
+        p_points: 20,
+        p_activity_data: {
+          level: diagnosticResult.level,
+          percentage: diagnosticResult.percentage,
+          totalScore: diagnosticResult.totalScore
+        }
+      });
+
       setResult(diagnosticResult);
       setIsCompleted(true);
       
       toast({
         title: "Diagnóstico Concluído!",
-        description: "Seu resultado foi salvo e suas trilhas foram recomendadas.",
+        description: "Seu resultado foi salvo e você ganhou 20 pontos!",
       });
     } catch (error) {
       console.error('Erro ao salvar diagnóstico:', error);

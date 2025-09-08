@@ -6,16 +6,17 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import Index from "./pages/Index";
-import Diagnostico from "./pages/Diagnostico";
-import Trilhas from "./pages/Trilhas";
-import Agenda from "./pages/Agenda";
-import Membros from "./pages/Membros";
 import Comunicacao from "./pages/Comunicacao";
+import FaleComLideranca from "./pages/FaleComLideranca";
+import Agenda from "./pages/Agenda";
 import Devocional from "./pages/Devocional";
 import HistoricoDevocional from "./pages/HistoricoDevocional";
+import Trilhas from "./pages/Trilhas";
+import Diagnostico from "./pages/Diagnostico";
+import Progresso from "./pages/Progresso";
+import Membros from "./pages/Membros";
 import Perfil from "./pages/Perfil";
 import Admin from "./pages/Admin";
-import FaleComLideranca from "./pages/FaleComLideranca";
 import AuthPage from "./components/auth/AuthPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminRoute from "./components/AdminRoute";
@@ -62,6 +63,11 @@ const App = () => (
             <Route path="/trilhas" element={
               <ProtectedRoute>
                 <Trilhas />
+              </ProtectedRoute>
+            } />
+            <Route path="/progresso" element={
+              <ProtectedRoute>
+                <Progresso />
               </ProtectedRoute>
             } />
             <Route path="/agenda" element={

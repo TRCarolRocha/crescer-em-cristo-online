@@ -486,6 +486,36 @@ export type Database = {
           },
         ]
       }
+      level_progression_history: {
+        Row: {
+          from_level: string | null
+          id: string
+          points_at_promotion: number
+          promoted_at: string
+          time_in_previous_level_months: number | null
+          to_level: string
+          user_id: string
+        }
+        Insert: {
+          from_level?: string | null
+          id?: string
+          points_at_promotion: number
+          promoted_at?: string
+          time_in_previous_level_months?: number | null
+          to_level: string
+          user_id: string
+        }
+        Update: {
+          from_level?: string | null
+          id?: string
+          points_at_promotion?: number
+          promoted_at?: string
+          time_in_previous_level_months?: number | null
+          to_level?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       member_groups: {
         Row: {
           created_at: string
@@ -718,6 +748,42 @@ export type Database = {
         }
         Relationships: []
       }
+      spiritual_levels: {
+        Row: {
+          created_at: string
+          description: string | null
+          emoji: string
+          id: string
+          level_key: string
+          min_points: number
+          min_time_months: number
+          name: string
+          requirements: Json | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          emoji: string
+          id?: string
+          level_key: string
+          min_points?: number
+          min_time_months?: number
+          name: string
+          requirements?: Json | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          emoji?: string
+          id?: string
+          level_key?: string
+          min_points?: number
+          min_time_months?: number
+          name?: string
+          requirements?: Json | null
+        }
+        Relationships: []
+      }
       study_groups: {
         Row: {
           created_at: string | null
@@ -742,6 +808,39 @@ export type Database = {
           leader_id?: string
           max_members?: number | null
           name?: string
+        }
+        Relationships: []
+      }
+      user_achievements: {
+        Row: {
+          achievement_description: string | null
+          achievement_title: string
+          achievement_type: string
+          earned_at: string
+          id: string
+          metadata: Json | null
+          points_awarded: number
+          user_id: string
+        }
+        Insert: {
+          achievement_description?: string | null
+          achievement_title: string
+          achievement_type: string
+          earned_at?: string
+          id?: string
+          metadata?: Json | null
+          points_awarded?: number
+          user_id: string
+        }
+        Update: {
+          achievement_description?: string | null
+          achievement_title?: string
+          achievement_type?: string
+          earned_at?: string
+          id?: string
+          metadata?: Json | null
+          points_awarded?: number
+          user_id?: string
         }
         Relationships: []
       }
@@ -833,6 +932,54 @@ export type Database = {
           },
         ]
       }
+      user_spiritual_points: {
+        Row: {
+          activities_completed: Json | null
+          created_at: string
+          id: string
+          level_current: string
+          level_started_at: string | null
+          points_devotionals: number | null
+          points_diagnostics: number | null
+          points_groups: number | null
+          points_total: number
+          points_tracks: number | null
+          streak_multiplier: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          activities_completed?: Json | null
+          created_at?: string
+          id?: string
+          level_current?: string
+          level_started_at?: string | null
+          points_devotionals?: number | null
+          points_diagnostics?: number | null
+          points_groups?: number | null
+          points_total?: number
+          points_tracks?: number | null
+          streak_multiplier?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          activities_completed?: Json | null
+          created_at?: string
+          id?: string
+          level_current?: string
+          level_started_at?: string | null
+          points_devotionals?: number | null
+          points_diagnostics?: number | null
+          points_groups?: number | null
+          points_total?: number
+          points_tracks?: number | null
+          streak_multiplier?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_track_progress: {
         Row: {
           completed_at: string | null
@@ -873,6 +1020,19 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      award_spiritual_points: {
+        Args: {
+          p_activity_data?: Json
+          p_activity_type: string
+          p_points: number
+          p_user_id: string
+        }
+        Returns: undefined
+      }
+      check_level_eligibility: {
+        Args: { p_target_level: string; p_user_id: string }
+        Returns: boolean
+      }
       is_admin: {
         Args: Record<PropertyKey, never>
         Returns: boolean
