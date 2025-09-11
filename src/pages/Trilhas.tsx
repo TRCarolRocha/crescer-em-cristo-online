@@ -223,10 +223,7 @@ const Trilhas = () => {
               Trilhas de Discipulado
             </h1>
           </div>
-          <p className="text-sm sm:text-base lg:text-lg text-gray-600 max-w-3xl mx-auto">
-            Jornadas estruturadas para seu crescimento espiritual. 
-            {userDiagnostic?.result}
-          </p>
+          
           {userGroups.length > 0 && <div className="mt-4 flex flex-wrap justify-center gap-2">
               <span className="text-sm text-gray-600">Seus grupos: </span>
               {userGroups.map(group => <Badge key={group.id} variant="outline" className="text-xs">
