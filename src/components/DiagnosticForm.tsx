@@ -373,17 +373,18 @@ const DiagnosticForm = () => {
             <div className="flex flex-col sm:flex-row gap-4 pt-4">
               <Button 
                 onClick={() => window.location.href = '/trilhas'}
-                className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                className="flex-1 bg-gradient-to-r from-primary to-secondary"
                 size="lg"
               >
                 🚀 Continuar para Trilhas Sugeridas
               </Button>
               <Button 
+                onClick={() => window.location.href = '/progresso'}
                 variant="outline"
-                onClick={() => window.location.href = '/'}
                 className="flex-1"
+                size="lg"
               >
-                Ir para Início
+                📊 Ver Meu Progresso
               </Button>
             </div>
           </CardContent>
