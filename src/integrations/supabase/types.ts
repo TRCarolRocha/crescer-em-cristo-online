@@ -299,6 +299,56 @@ export type Database = {
         }
         Relationships: []
       }
+      diagnostic_milestones: {
+        Row: {
+          created_at: string
+          description: string | null
+          emoji: string
+          id: string
+          is_horizontal_branch: boolean
+          level_key: string
+          min_points: number
+          min_time_months: number
+          name: string
+          order_index: number
+          parent_milestone_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          emoji: string
+          id?: string
+          is_horizontal_branch?: boolean
+          level_key: string
+          min_points?: number
+          min_time_months?: number
+          name: string
+          order_index: number
+          parent_milestone_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          emoji?: string
+          id?: string
+          is_horizontal_branch?: boolean
+          level_key?: string
+          min_points?: number
+          min_time_months?: number
+          name?: string
+          order_index?: number
+          parent_milestone_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "diagnostic_milestones_parent_milestone_id_fkey"
+            columns: ["parent_milestone_id"]
+            isOneToOne: false
+            referencedRelation: "diagnostic_milestones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       diagnosticos: {
         Row: {
           data_resposta: string | null
@@ -661,6 +711,48 @@ export type Database = {
         }
         Relationships: []
       }
+      milestone_connections: {
+        Row: {
+          connection_type: string
+          created_at: string
+          from_milestone_id: string
+          id: string
+          requirements: Json | null
+          to_milestone_id: string
+        }
+        Insert: {
+          connection_type?: string
+          created_at?: string
+          from_milestone_id: string
+          id?: string
+          requirements?: Json | null
+          to_milestone_id: string
+        }
+        Update: {
+          connection_type?: string
+          created_at?: string
+          from_milestone_id?: string
+          id?: string
+          requirements?: Json | null
+          to_milestone_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "milestone_connections_from_milestone_id_fkey"
+            columns: ["from_milestone_id"]
+            isOneToOne: false
+            referencedRelation: "diagnostic_milestones"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "milestone_connections_to_milestone_id_fkey"
+            columns: ["to_milestone_id"]
+            isOneToOne: false
+            referencedRelation: "diagnostic_milestones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ministerios_departamentos: {
         Row: {
           id: string
@@ -747,6 +839,53 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      progression_tracks: {
+        Row: {
+          activities_required: Json | null
+          created_at: string
+          description: string | null
+          id: string
+          milestone_id: string
+          name: string
+          order_index: number
+          points_required: number
+          track_key: string
+          unlocks_content: Json | null
+        }
+        Insert: {
+          activities_required?: Json | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          milestone_id: string
+          name: string
+          order_index: number
+          points_required?: number
+          track_key: string
+          unlocks_content?: Json | null
+        }
+        Update: {
+          activities_required?: Json | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          milestone_id?: string
+          name?: string
+          order_index?: number
+          points_required?: number
+          track_key?: string
+          unlocks_content?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "progression_tracks_milestone_id_fkey"
+            columns: ["milestone_id"]
+            isOneToOne: false
+            referencedRelation: "diagnostic_milestones"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       spiritual_levels: {
         Row: {
@@ -893,6 +1032,63 @@ export type Database = {
             columns: ["content_id"]
             isOneToOne: false
             referencedRelation: "conteudos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_journey_state: {
+        Row: {
+          available_branches: Json | null
+          completed_milestones: Json | null
+          completed_tracks: Json | null
+          created_at: string
+          current_milestone_id: string
+          current_track_id: string | null
+          id: string
+          journey_started_at: string
+          last_progression_at: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          available_branches?: Json | null
+          completed_milestones?: Json | null
+          completed_tracks?: Json | null
+          created_at?: string
+          current_milestone_id: string
+          current_track_id?: string | null
+          id?: string
+          journey_started_at?: string
+          last_progression_at?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          available_branches?: Json | null
+          completed_milestones?: Json | null
+          completed_tracks?: Json | null
+          created_at?: string
+          current_milestone_id?: string
+          current_track_id?: string | null
+          id?: string
+          journey_started_at?: string
+          last_progression_at?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_journey_state_current_milestone_id_fkey"
+            columns: ["current_milestone_id"]
+            isOneToOne: false
+            referencedRelation: "diagnostic_milestones"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_journey_state_current_track_id_fkey"
+            columns: ["current_track_id"]
+            isOneToOne: false
+            referencedRelation: "progression_tracks"
             referencedColumns: ["id"]
           },
         ]
