@@ -13,7 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { PageContainer } from '@/components/layout/PageContainer';
-import { getCurrentDateBR, formatDateLongBR } from '@/utils/dateUtils';
+import { getCurrentDateBR, formatDateISOInSaoPaulo } from '@/utils/dateUtils';
 
 interface Devocional {
   id: string;
@@ -213,12 +213,14 @@ const Devocional = () => {
   }
 
   return (
-    <PageContainer>
+    <PageContainer maxWidth="4xl">
       <PageHeader 
         title="Devocional Diário"
-        description={formatDateLongBR(devocional.data)}
+        description={formatDateISOInSaoPaulo(devocional.data)}
+        variant="plain"
       />
 
+      <div className="max-w-2xl mx-auto">
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
@@ -244,30 +246,28 @@ const Devocional = () => {
               )}
             </CardDescription>
           </CardHeader>
-          <CardContent className="p-6">
-            <Accordion type="multiple" defaultValue={["reflexao", "perguntas", "diario"]} className="w-full space-y-4">
+          <CardContent className="p-4 sm:p-6">
+            <Accordion type="multiple" defaultValue={["reflexao"]} className="w-full space-y-4">
               {/* Seção Reflexão */}
-              <AccordionItem value="reflexao" className="border rounded-lg p-1">
+              <AccordionItem value="reflexao" className="border border-sky-200 rounded-lg p-1">
                 <AccordionTrigger className="px-4 py-3 hover:no-underline">
                   <div className="flex items-center gap-3">
-                    <BookOpen className="h-5 w-5 text-blue-600" />
+                    <BookOpen className="h-5 w-5 text-sky-600" />
                     <span className="font-semibold">Reflexão</span>
                   </div>
                 </AccordionTrigger>
                 <AccordionContent className="px-4 pb-4">
-                  <Textarea
-                    value={devocional.texto_central}
-                    className="w-full min-h-[100px] bg-gray-50"
-                    readOnly
-                  />
+                  <div className="rounded-lg border border-sky-100 bg-sky-50/50 p-4 text-slate-700 whitespace-pre-line leading-relaxed">
+                    {devocional.texto_central}
+                  </div>
                 </AccordionContent>
               </AccordionItem>
 
               {/* Seção Perguntas para Reflexão */}
-              <AccordionItem value="perguntas" className="border rounded-lg p-1">
+              <AccordionItem value="perguntas" className="border border-slate-200 rounded-lg p-1">
                 <AccordionTrigger className="px-4 py-3 hover:no-underline">
                   <div className="flex items-center gap-3">
-                    <MessageSquare className="h-5 w-5 text-green-600" />
+                    <MessageSquare className="h-5 w-5 text-sky-600" />
                     <span className="font-semibold">Perguntas para Reflexão</span>
                   </div>
                 </AccordionTrigger>
@@ -309,10 +309,10 @@ const Devocional = () => {
               </AccordionItem>
 
               {/* Seção Diário de Bordo */}
-              <AccordionItem value="diario" className="border rounded-lg p-1">
+              <AccordionItem value="diario" className="border border-slate-200 rounded-lg p-1">
                 <AccordionTrigger className="px-4 py-3 hover:no-underline">
                   <div className="flex items-center gap-3">
-                    <Heart className="h-5 w-5 text-purple-600" />
+                    <Heart className="h-5 w-5 text-sky-600" />
                     <span className="font-semibold">Diário de Bordo</span>
                   </div>
                 </AccordionTrigger>
@@ -358,9 +358,9 @@ const Devocional = () => {
             </Accordion>
 
             {/* Botão Salvar Progresso */}
-            <div className="mt-6 pt-4 border-t">
+            <div className="mt-6 pt-6 border-t">
               <Button
-                className="w-full"
+                className="w-full sm:w-auto sm:min-w-[200px]"
                 onClick={handleSave}
                 disabled={saving}
                 size="lg"
@@ -383,6 +383,7 @@ const Devocional = () => {
             </div>
           </CardContent>
         </Card>
+      </div>
     </PageContainer>
   );
 };

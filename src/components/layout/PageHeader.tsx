@@ -8,6 +8,7 @@ interface PageHeaderProps {
   showBackButton?: boolean;
   backTo?: string;
   className?: string;
+  variant?: 'gradient' | 'plain';
 }
 
 export const PageHeader = ({ 
@@ -15,7 +16,8 @@ export const PageHeader = ({
   description, 
   showBackButton = true, 
   backTo = '/',
-  className = ''
+  className = '',
+  variant = 'gradient'
 }: PageHeaderProps) => {
   const navigate = useNavigate();
 
@@ -43,7 +45,11 @@ export const PageHeader = ({
       )}
       
       <div className="text-center">
-        <h1 className="text-3xl sm:text-4xl font-bold font-playfair bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent mb-4">
+        <h1 className={`text-3xl sm:text-4xl font-bold font-playfair mb-4 ${
+          variant === 'gradient' 
+            ? 'bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent' 
+            : 'text-foreground'
+        }`}>
           {title}
         </h1>
         {description && (

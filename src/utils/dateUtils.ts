@@ -9,9 +9,24 @@ const TIMEZONE = 'America/Sao_Paulo';
  * Garante consistência e evita problemas de duplicidade na meia-noite
  */
 export const getCurrentDateBR = (): string => {
-  const now = new Date();
-  const zonedDate = toZonedTime(now, TIMEZONE);
-  return format(zonedDate, 'yyyy-MM-dd');
+  return new Date().toLocaleDateString("sv-SE", { timeZone: TIMEZONE });
+};
+
+/**
+ * Formata qualquer data para YYYY-MM-DD no timezone de São Paulo
+ * Se já for uma string YYYY-MM-DD, retorna sem conversão para evitar problemas de timezone
+ */
+export const formatDateISOInSaoPaulo = (date?: Date | string): string => {
+  if (!date) return getCurrentDateBR();
+  
+  // Se já é string no formato YYYY-MM-DD, retornar como está
+  if (typeof date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    return date;
+  }
+  
+  // Caso contrário, converter usando timezone
+  const dateObj = typeof date === 'string' ? new Date(date) : date;
+  return dateObj.toLocaleDateString("sv-SE", { timeZone: TIMEZONE });
 };
 
 /**
