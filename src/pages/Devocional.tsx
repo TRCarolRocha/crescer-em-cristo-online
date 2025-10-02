@@ -6,11 +6,14 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Heart, Calendar, CheckCircle, ArrowLeft, BookOpen, MessageSquare, Lightbulb, Star } from 'lucide-react';
+import { Heart, Calendar, CheckCircle, BookOpen, MessageSquare, Lightbulb, Star } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
+import { PageHeader } from '@/components/layout/PageHeader';
+import { PageContainer } from '@/components/layout/PageContainer';
+import { getCurrentDateBR, formatDateLongBR } from '@/utils/dateUtils';
 
 interface Devocional {
   id: string;
@@ -50,7 +53,7 @@ const Devocional = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const today = new Date().toISOString().split('T')[0];
+  const today = getCurrentDateBR();
 
   useEffect(() => {
     fetchDevocional();
@@ -184,52 +187,40 @@ const Devocional = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500"></div>
-      </div>
+      <PageContainer>
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        </div>
+      </PageContainer>
     );
   }
 
   if (!devocional) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50 flex items-center justify-center text-center">
-        <div>
-          <Heart className="h-10 w-10 mx-auto text-gray-400 mb-4" />
-          <p className="text-gray-600">
+      <PageContainer>
+        <PageHeader 
+          title="Devocional Diário"
+          description="Seu momento com Deus"
+        />
+        <div className="flex flex-col items-center justify-center min-h-[40vh] text-center">
+          <Heart className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+          <p className="text-lg text-muted-foreground">
             Nenhum devocional disponível para hoje.
           </p>
         </div>
-      </div>
+      </PageContainer>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50">
-      <div className="container mx-auto py-6 px-4">
-        {/* Header com botão de voltar */}
-        <div className="flex justify-between items-center mb-6">
-          <Button
-            variant="outline"
-            onClick={() => navigate('/')}
-            className="flex items-center gap-2"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Voltar ao Início
-          </Button>
-          
-          <div className="text-gray-600 flex items-center gap-2">
-            <Calendar className="h-4 w-4" />
-            {new Date(devocional.data).toLocaleDateString('pt-BR', {
-              weekday: 'long',
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-            })}
-          </div>
-        </div>
+    <PageContainer>
+      <PageHeader 
+        title="Devocional Diário"
+        description={formatDateLongBR(devocional.data)}
+      />
 
-        <Card className="bg-white shadow-md rounded-lg">
-          <CardHeader className="flex flex-col space-y-1.5 p-6">
+        <Card>
+          <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle className="text-xl font-bold">{devocional.titulo}</CardTitle>
               {completado ? (
@@ -392,8 +383,7 @@ const Devocional = () => {
             </div>
           </CardContent>
         </Card>
-      </div>
-    </div>
+    </PageContainer>
   );
 };
 

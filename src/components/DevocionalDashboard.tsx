@@ -7,6 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import WeeklyDevotionalProgress from './WeeklyDevotionalProgress';
+import { getCurrentDateBR } from '@/utils/dateUtils';
 
 interface DevocionalStats {
   streak_atual: number;
@@ -79,12 +80,13 @@ const DevocionalDashboard = () => {
         // Calcular streak atual (simplificado)
         let streakAtual = 0;
         if (historicoData && historicoData.length > 0) {
-          const today = new Date().toISOString().split('T')[0];
-          const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+          const today = getCurrentDateBR();
+          const yesterday = new Date(Date.now() - 86400000);
+          const yesterdayStr = getCurrentDateBR();
           
           // Verificar se fez hoje ou ontem
           const temHoje = historicoData.some(h => h.devocionais.data === today);
-          const temOntem = historicoData.some(h => h.devocionais.data === yesterday);
+          const temOntem = historicoData.some(h => h.devocionais.data === yesterdayStr);
           
           if (temHoje || temOntem) {
             streakAtual = 1; // Simplificado - calcular streak completo seria mais complexo

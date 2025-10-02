@@ -50,11 +50,11 @@ const WeeklyDevotionalProgress: React.FC<WeeklyDevotionalProgressProps> = ({ com
   };
 
   return (
-    <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
+    <Card className="bg-gradient-to-r from-sky-50 via-blue-50 to-sky-100 border-sky-200">
       <CardHeader className="pb-3">
         <div className="flex items-center gap-2">
-          <Calendar className="h-5 w-5 text-blue-600" />
-          <CardTitle className="text-lg text-blue-900">Progresso Semanal</CardTitle>
+          <Calendar className="h-5 w-5 text-sky-600" />
+          <CardTitle className="text-lg text-sky-900">Progresso Semanal</CardTitle>
         </div>
       </CardHeader>
       <CardContent className="pt-0">
@@ -69,10 +69,10 @@ const WeeklyDevotionalProgress: React.FC<WeeklyDevotionalProgressProps> = ({ com
                 key={index}
                 className="flex flex-col items-center space-y-1 flex-1"
               >
-                <div className={`text-xs font-medium uppercase ${isCurrentDay ? 'text-blue-600 font-bold' : 'text-gray-600'}`}>
+                <div className={`text-xs font-medium uppercase ${isCurrentDay ? 'text-sky-600 font-bold' : 'text-gray-600'}`}>
                   {dayName}
                 </div>
-                <div className={`text-sm font-bold ${isCurrentDay ? 'text-blue-800' : 'text-gray-700'}`}>
+                <div className={`text-sm font-bold ${isCurrentDay ? 'text-sky-800' : 'text-gray-700'}`}>
                   {dayNumber}
                 </div>
                 <div className="flex justify-center">
