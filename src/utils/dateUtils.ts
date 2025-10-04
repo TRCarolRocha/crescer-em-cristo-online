@@ -49,6 +49,27 @@ export const formatDateLongBR = (date: Date | string): string => {
 };
 
 /**
+ * Formata uma string YYYY-MM-DD para o formato brasileiro longo com dia da semana
+ * Exemplo: "2025-10-02" → "quinta-feira, 02 de outubro de 2025"
+ */
+export const formatDateHeaderBR = (dateString: string): string => {
+  try {
+    // Parse a string YYYY-MM-DD e interpreta como UTC midnight
+    const [year, month, day] = dateString.split('-').map(Number);
+    const utcDate = new Date(Date.UTC(year, month - 1, day, 0, 0, 0));
+    
+    // Converter para timezone de São Paulo
+    const zonedDate = toZonedTime(utcDate, TIMEZONE);
+    
+    // Formatar com locale brasileiro
+    return format(zonedDate, "EEEE, dd 'de' MMMM 'de' yyyy", { locale: ptBR });
+  } catch (error) {
+    console.error('Erro ao formatar data:', error);
+    return dateString;
+  }
+};
+
+/**
  * Converte uma data para o timezone de São Paulo
  */
 export const toSaoPauloTime = (date: Date | string): Date => {

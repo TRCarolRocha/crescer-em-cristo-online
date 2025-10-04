@@ -1,19 +1,15 @@
 
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Heart, Calendar, CheckCircle, BookOpen, MessageSquare, Lightbulb, Star } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { useNavigate } from 'react-router-dom';
-import { PageHeader } from '@/components/layout/PageHeader';
 import { PageContainer } from '@/components/layout/PageContainer';
-import { getCurrentDateBR, formatDateISOInSaoPaulo } from '@/utils/dateUtils';
+import { getCurrentDateBR, formatDateHeaderBR } from '@/utils/dateUtils';
 
 interface Devocional {
   id: string;
@@ -51,7 +47,6 @@ const Devocional = () => {
   const [completado, setCompletado] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
-  const navigate = useNavigate();
 
   const today = getCurrentDateBR();
 
@@ -197,192 +192,198 @@ const Devocional = () => {
 
   if (!devocional) {
     return (
-      <PageContainer>
-        <PageHeader 
-          title="Devocional Diário"
-          description="Seu momento com Deus"
-        />
-        <div className="flex flex-col items-center justify-center min-h-[40vh] text-center">
-          <Heart className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-          <p className="text-lg text-muted-foreground">
-            Nenhum devocional disponível para hoje.
-          </p>
+      <PageContainer maxWidth="2xl">
+        <div className="max-w-[600px] mx-auto px-4 sm:px-6 py-6">
+          <div className="flex flex-col items-center justify-center min-h-[40vh] text-center">
+            <Heart className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+            <p className="text-lg text-muted-foreground">
+              Nenhum devocional disponível para hoje.
+            </p>
+          </div>
         </div>
       </PageContainer>
     );
   }
 
   return (
-    <PageContainer maxWidth="4xl">
-      <PageHeader 
-        title="Devocional Diário"
-        description={formatDateISOInSaoPaulo(devocional.data)}
-        variant="plain"
-      />
+    <PageContainer maxWidth="2xl">
+      <div className="max-w-[600px] mx-auto px-4 sm:px-6 py-6 space-y-6">
+        
+        {/* Card da Data */}
+        <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-6 text-center shadow-lg">
+          <div className="flex items-center justify-center gap-2 mb-2">
+            <Calendar className="h-5 w-5 text-white/90" />
+            <span className="text-white/90 text-sm font-medium uppercase tracking-wide">
+              Devocional do Dia
+            </span>
+          </div>
+          <p className="text-white text-xl sm:text-2xl font-semibold">
+            {formatDateHeaderBR(devocional.data)}
+          </p>
+        </div>
 
-      <div className="max-w-2xl mx-auto">
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-xl font-bold">{devocional.titulo}</CardTitle>
-              {completado ? (
-                <Badge variant="outline" className="bg-green-100 text-green-800 border-green-300">
-                  <CheckCircle className="h-4 w-4 mr-1" />
-                  Completo
-                </Badge>
-              ) : (
-                <Badge variant="secondary">
-                  <Heart className="h-4 w-4 mr-1" />
-                  Devocional
-                </Badge>
-              )}
+        {/* Card do Tema */}
+        <div className="bg-white rounded-2xl p-8 shadow-md text-center border border-gray-100">
+          <h1 className="text-2xl sm:text-3xl font-semibold text-gray-900 leading-tight">
+            {devocional.titulo}
+          </h1>
+          
+          {completado && (
+            <Badge className="mt-4 bg-green-100 text-green-800 border-green-300">
+              <CheckCircle className="h-4 w-4 mr-1" />
+              Completo
+            </Badge>
+          )}
+        </div>
+
+        {/* Card do Versículo */}
+        <div className="bg-gradient-to-br from-blue-50 to-sky-50 rounded-2xl p-8 shadow-sm border border-blue-100">
+          <div className="text-center space-y-4">
+            <p className="text-lg sm:text-xl text-gray-800 leading-relaxed font-medium italic">
+              "{devocional.versiculo}"
+            </p>
+            
+            {devocional.referencia && (
+              <p className="text-base font-bold text-blue-600">
+                {devocional.referencia}
+              </p>
+            )}
+          </div>
+        </div>
+
+        {/* Card da Reflexão */}
+        <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-md border border-gray-100">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+              <BookOpen className="h-5 w-5 text-blue-600" />
             </div>
-            <CardDescription className="text-lg font-medium text-gray-700">
-              {devocional.versiculo}
-              {devocional.referencia && (
-                <span className="block text-sm text-gray-500 mt-1">
-                  {devocional.referencia}
-                </span>
-              )}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="p-4 sm:p-6">
-            <Accordion type="multiple" defaultValue={["reflexao"]} className="w-full space-y-4">
-              {/* Seção Reflexão */}
-              <AccordionItem value="reflexao" className="border border-sky-200 rounded-lg p-1">
-                <AccordionTrigger className="px-4 py-3 hover:no-underline">
-                  <div className="flex items-center gap-3">
-                    <BookOpen className="h-5 w-5 text-sky-600" />
-                    <span className="font-semibold">Reflexão</span>
-                  </div>
-                </AccordionTrigger>
-                <AccordionContent className="px-4 pb-4">
-                  <div className="rounded-lg border border-sky-100 bg-sky-50/50 p-4 text-slate-700 whitespace-pre-line leading-relaxed">
-                    {devocional.texto_central}
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
+            <h2 className="text-xl font-semibold text-gray-900">Reflexão</h2>
+          </div>
+          
+          <div className="prose prose-gray max-w-none">
+            <p className="text-gray-700 leading-relaxed whitespace-pre-line">
+              {devocional.texto_central}
+            </p>
+          </div>
+        </div>
 
-              {/* Seção Perguntas para Reflexão */}
-              <AccordionItem value="perguntas" className="border border-slate-200 rounded-lg p-1">
-                <AccordionTrigger className="px-4 py-3 hover:no-underline">
-                  <div className="flex items-center gap-3">
-                    <MessageSquare className="h-5 w-5 text-sky-600" />
-                    <span className="font-semibold">Perguntas para Reflexão</span>
-                  </div>
-                </AccordionTrigger>
-                <AccordionContent className="px-4 pb-4 space-y-4">
-                  {devocional.pergunta_1 && (
-                    <div>
-                      <Label className="font-medium text-gray-700">1. {devocional.pergunta_1}</Label>
-                      <Textarea
-                        value={userResponses.resposta_1}
-                        onChange={(e) => handleResponseChange('resposta_1', e.target.value)}
-                        placeholder="Digite sua resposta..."
-                        className="mt-2 min-h-[80px]"
-                      />
-                    </div>
-                  )}
-                  {devocional.pergunta_2 && (
-                    <div>
-                      <Label className="font-medium text-gray-700">2. {devocional.pergunta_2}</Label>
-                      <Textarea
-                        value={userResponses.resposta_2}
-                        onChange={(e) => handleResponseChange('resposta_2', e.target.value)}
-                        placeholder="Digite sua resposta..."
-                        className="mt-2 min-h-[80px]"
-                      />
-                    </div>
-                  )}
-                  {devocional.pergunta_3 && (
-                    <div>
-                      <Label className="font-medium text-gray-700">3. {devocional.pergunta_3}</Label>
-                      <Textarea
-                        value={userResponses.resposta_3}
-                        onChange={(e) => handleResponseChange('resposta_3', e.target.value)}
-                        placeholder="Digite sua resposta..."
-                        className="mt-2 min-h-[80px]"
-                      />
-                    </div>
-                  )}
-                </AccordionContent>
-              </AccordionItem>
-
-              {/* Seção Diário de Bordo */}
-              <AccordionItem value="diario" className="border border-slate-200 rounded-lg p-1">
-                <AccordionTrigger className="px-4 py-3 hover:no-underline">
-                  <div className="flex items-center gap-3">
-                    <Heart className="h-5 w-5 text-sky-600" />
-                    <span className="font-semibold">Diário de Bordo</span>
-                  </div>
-                </AccordionTrigger>
-                <AccordionContent className="px-4 pb-4 space-y-4">
-                  <div>
-                    <Label className="font-medium text-gray-700 flex items-center gap-2">
-                      <Heart className="h-4 w-4" />
-                      Oração
-                    </Label>
-                    <Textarea
-                      value={userResponses.oracao}
-                      onChange={(e) => handleResponseChange('oracao', e.target.value)}
-                      placeholder="Compartilhe suas orações e pedidos..."
-                      className="mt-2 min-h-[100px]"
-                    />
-                  </div>
-                  <div>
-                    <Label className="font-medium text-gray-700 flex items-center gap-2">
-                      <Star className="h-4 w-4" />
-                      Gratidão
-                    </Label>
-                    <Textarea
-                      value={userResponses.gratidao}
-                      onChange={(e) => handleResponseChange('gratidao', e.target.value)}
-                      placeholder="Pelo que você é grato hoje?"
-                      className="mt-2 min-h-[80px]"
-                    />
-                  </div>
-                  <div>
-                    <Label className="font-medium text-gray-700 flex items-center gap-2">
-                      <Lightbulb className="h-4 w-4" />
-                      Aprendizado
-                    </Label>
-                    <Textarea
-                      value={userResponses.aprendizado}
-                      onChange={(e) => handleResponseChange('aprendizado', e.target.value)}
-                      placeholder="O que Deus tem ensinado você?"
-                      className="mt-2 min-h-[80px]"
-                    />
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
-
-            {/* Botão Salvar Progresso */}
-            <div className="mt-6 pt-6 border-t">
-              <Button
-                className="w-full sm:w-auto sm:min-w-[200px]"
-                onClick={handleSave}
-                disabled={saving}
-                size="lg"
-              >
-                {saving ? (
-                  <>
-                    <svg className="animate-spin h-5 w-5 mr-2" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Salvando Progresso...
-                  </>
-                ) : (
-                  <>
-                    <Heart className="h-4 w-4 mr-2" />
-                    Salvar Progresso
-                  </>
-                )}
-              </Button>
+        {/* Card de Perguntas para Reflexão */}
+        <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-md border border-gray-100 space-y-6">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0">
+              <MessageSquare className="h-5 w-5 text-purple-600" />
             </div>
-          </CardContent>
-        </Card>
+            <h2 className="text-xl font-semibold text-gray-900">Perguntas para Reflexão</h2>
+          </div>
+          
+          {devocional.pergunta_1 && (
+            <div>
+              <Label className="font-medium text-gray-700 mb-2 block">1. {devocional.pergunta_1}</Label>
+              <Textarea
+                value={userResponses.resposta_1}
+                onChange={(e) => handleResponseChange('resposta_1', e.target.value)}
+                placeholder="Digite sua resposta..."
+                className="min-h-[80px]"
+              />
+            </div>
+          )}
+          {devocional.pergunta_2 && (
+            <div>
+              <Label className="font-medium text-gray-700 mb-2 block">2. {devocional.pergunta_2}</Label>
+              <Textarea
+                value={userResponses.resposta_2}
+                onChange={(e) => handleResponseChange('resposta_2', e.target.value)}
+                placeholder="Digite sua resposta..."
+                className="min-h-[80px]"
+              />
+            </div>
+          )}
+          {devocional.pergunta_3 && (
+            <div>
+              <Label className="font-medium text-gray-700 mb-2 block">3. {devocional.pergunta_3}</Label>
+              <Textarea
+                value={userResponses.resposta_3}
+                onChange={(e) => handleResponseChange('resposta_3', e.target.value)}
+                placeholder="Digite sua resposta..."
+                className="min-h-[80px]"
+              />
+            </div>
+          )}
+        </div>
+
+        {/* Card do Diário de Bordo */}
+        <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-md border border-gray-100 space-y-6">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-10 h-10 rounded-full bg-rose-100 flex items-center justify-center flex-shrink-0">
+              <Heart className="h-5 w-5 text-rose-600" />
+            </div>
+            <h2 className="text-xl font-semibold text-gray-900">Diário de Bordo</h2>
+          </div>
+          
+          <div>
+            <Label className="font-medium text-gray-700 flex items-center gap-2 mb-2">
+              <Heart className="h-4 w-4 text-rose-500" />
+              Oração
+            </Label>
+            <Textarea
+              value={userResponses.oracao}
+              onChange={(e) => handleResponseChange('oracao', e.target.value)}
+              placeholder="Compartilhe suas orações e pedidos..."
+              className="min-h-[100px]"
+            />
+          </div>
+          
+          <div>
+            <Label className="font-medium text-gray-700 flex items-center gap-2 mb-2">
+              <Star className="h-4 w-4 text-yellow-500" />
+              Gratidão
+            </Label>
+            <Textarea
+              value={userResponses.gratidao}
+              onChange={(e) => handleResponseChange('gratidao', e.target.value)}
+              placeholder="Pelo que você é grato hoje?"
+              className="min-h-[80px]"
+            />
+          </div>
+          
+          <div>
+            <Label className="font-medium text-gray-700 flex items-center gap-2 mb-2">
+              <Lightbulb className="h-4 w-4 text-amber-500" />
+              Aprendizado
+            </Label>
+            <Textarea
+              value={userResponses.aprendizado}
+              onChange={(e) => handleResponseChange('aprendizado', e.target.value)}
+              placeholder="O que Deus tem ensinado você?"
+              className="min-h-[80px]"
+            />
+          </div>
+        </div>
+
+        {/* Botão Salvar */}
+        <div className="pt-4">
+          <Button
+            onClick={handleSave}
+            disabled={saving}
+            size="lg"
+            className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 text-lg py-6 rounded-xl"
+          >
+            {saving ? (
+              <>
+                <svg className="animate-spin h-5 w-5 mr-2" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Salvando...
+              </>
+            ) : (
+              <>
+                <Heart className="h-5 w-5 mr-2" />
+                Salvar Devocional
+              </>
+            )}
+          </Button>
+        </div>
       </div>
     </PageContainer>
   );
