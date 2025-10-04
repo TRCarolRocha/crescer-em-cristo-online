@@ -7,6 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import CreateDevocionalDialog from './CreateDevocionalDialog';
 import EditDevocionalDialog from './EditDevocionalDialog';
+import { formatDateHeaderBR } from '@/utils/dateUtils';
 
 interface Devocional {
   id: string;
@@ -85,19 +86,6 @@ const AdminDevocionais = () => {
     }
   };
 
-  const formatDate = (dateString: string) => {
-    try {
-      return new Date(dateString).toLocaleDateString('pt-BR', {
-        timeZone: 'America/Sao_Paulo',
-        weekday: 'long',
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric'
-      }).replace(/^./, c => c.toUpperCase());
-    } catch (error) {
-      return dateString;
-    }
-  };
 
   if (loading) {
     return (
@@ -129,7 +117,7 @@ const AdminDevocionais = () => {
                   <div>
                     <h3 className="font-semibold text-lg">{devocional.tema}</h3>
                     <p className="text-gray-600">{devocional.referencia}</p>
-                    <p className="text-gray-500 text-sm">{formatDate(devocional.data)}</p>
+                    <p className="text-gray-500 text-sm">{formatDateHeaderBR(devocional.data)}</p>
                     <p className="text-gray-700 text-sm mt-2 line-clamp-2">
                       {devocional.texto_central.substring(0, 150)}...
                     </p>

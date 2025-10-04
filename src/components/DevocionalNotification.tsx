@@ -6,6 +6,7 @@ import { BookOpen, Calendar } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { getCurrentDateBR } from '@/utils/dateUtils';
 
 interface DevocionalData {
   id: string;
@@ -34,7 +35,7 @@ const DevocionalNotification = ({ className = '' }: DevocionalNotificationProps)
     if (!user?.id) return;
 
     try {
-      const hoje = new Date().toISOString().split('T')[0];
+      const hoje = getCurrentDateBR();
 
       // Buscar devocional de hoje
       const { data: devocionalData, error: devocionalError } = await supabase

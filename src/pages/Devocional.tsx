@@ -1,10 +1,11 @@
 
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Heart, Calendar, CheckCircle, BookOpen, MessageSquare, Lightbulb, Star } from 'lucide-react';
+import { Heart, Calendar, CheckCircle, BookOpen, MessageSquare, Lightbulb, Star, Home } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -47,6 +48,7 @@ const Devocional = () => {
   const [completado, setCompletado] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const today = getCurrentDateBR();
 
@@ -209,6 +211,17 @@ const Devocional = () => {
     <PageContainer maxWidth="2xl">
       <div className="max-w-[600px] mx-auto px-4 sm:px-6 py-6 space-y-6">
         
+        {/* Botão Voltar à Home */}
+        <Button 
+          variant="outline" 
+          onClick={() => navigate('/')}
+          className="flex items-center gap-2"
+        >
+          <Home className="h-4 w-4" />
+          <span className="hidden sm:inline">Voltar à Home</span>
+          <span className="sm:hidden">Home</span>
+        </Button>
+
         {/* Card da Data */}
         <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-6 text-center shadow-lg">
           <div className="flex items-center justify-center gap-2 mb-2">
