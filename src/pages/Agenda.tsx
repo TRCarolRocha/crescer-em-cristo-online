@@ -2,10 +2,11 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Calendar, Clock, MapPin, Users } from "lucide-react";
+import { Calendar, Clock, MapPin, Users, Cake } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { Badge } from "@/components/ui/badge";
 
 interface AgendaEvento {
   id: string;
@@ -17,14 +18,25 @@ interface AgendaEvento {
   status: boolean;
 }
 
+interface Birthday {
+  id: string;
+  full_name: string;
+  birth_date: string;
+  birth_day: number;
+  birth_month: number;
+  days_until: number;
+}
+
 const Agenda = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [eventos, setEventos] = useState<AgendaEvento[]>([]);
+  const [birthdays, setBirthdays] = useState<Birthday[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchEventos();
+    fetchBirthdays();
   }, []);
 
   const fetchEventos = async () => {
@@ -46,6 +58,50 @@ const Agenda = () => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchBirthdays = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id, full_name, birth_date')
+        .not('birth_date', 'is', null);
+
+      if (error) throw error;
+
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const birthdaysList: Birthday[] = [];
+
+      data?.forEach(profile => {
+        if (profile.birth_date) {
+          const birthDate = new Date(profile.birth_date + 'T00:00:00');
+          const thisYear = today.getFullYear();
+          const nextBirthday = new Date(thisYear, birthDate.getMonth(), birthDate.getDate());
+          
+          if (nextBirthday < today) {
+            nextBirthday.setFullYear(thisYear + 1);
+          }
+          
+          const daysUntil = Math.ceil((nextBirthday.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+          
+          if (daysUntil <= 30) {
+            birthdaysList.push({
+              id: profile.id,
+              full_name: profile.full_name || 'Sem nome',
+              birth_date: profile.birth_date,
+              birth_day: birthDate.getDate(),
+              birth_month: birthDate.getMonth() + 1,
+              days_until: daysUntil
+            });
+          }
+        }
+      });
+
+      setBirthdays(birthdaysList.sort((a, b) => a.days_until - b.days_until));
+    } catch (error) {
+      console.error('Erro ao carregar aniversários:', error);
     }
   };
 
@@ -89,6 +145,43 @@ const Agenda = () => {
             Voltar ao Início
           </Button>
         </div>
+
+        {/* Aniversários do Mês */}
+        {birthdays.length > 0 && (
+          <div className="space-y-4 mb-8">
+            <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
+              <Cake className="h-6 w-6 text-pink-600" />
+              🎂 Aniversários do Mês
+            </h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {birthdays.map((birthday) => (
+                <Card key={birthday.id} className="bg-gradient-to-br from-pink-50 to-purple-50 border-pink-200 hover:shadow-lg transition-shadow">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="font-semibold text-gray-900">{birthday.full_name}</h3>
+                        <p className="text-sm text-gray-600 mt-1">
+                          {birthday.birth_day}/{birthday.birth_month}
+                        </p>
+                      </div>
+                      <div className="text-center">
+                        <Cake className="h-8 w-8 text-pink-600 mx-auto" />
+                        {birthday.days_until === 0 ? (
+                          <Badge className="mt-1 bg-pink-600">Hoje!</Badge>
+                        ) : (
+                          <p className="text-xs text-gray-600 mt-1">
+                            em {birthday.days_until} dia{birthday.days_until > 1 ? 's' : ''}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Lista de Eventos */}
         <div className="space-y-4">

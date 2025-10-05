@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { getUserRoles, addRole, removeRole } from '@/utils/roleUtils';
 
 interface Member {
   id: string;
@@ -49,8 +50,17 @@ const EditMemberDialog: React.FC<EditMemberDialogProps> = ({
     ministry: member.ministry || ''
   });
   const [selectedTags, setSelectedTags] = useState<string[]>(member.tags || []);
+  const [isLider, setIsLider] = useState(false);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
+
+  useEffect(() => {
+    const loadRoles = async () => {
+      const roles = await getUserRoles(member.id);
+      setIsLider(roles.includes('lider'));
+    };
+    loadRoles();
+  }, [member.id]);
 
   const handleTagChange = (tagId: string, checked: boolean) => {
     if (checked) {
@@ -93,6 +103,20 @@ const EditMemberDialog: React.FC<EditMemberDialogProps> = ({
       if (error) {
         console.error('Erro detalhado ao atualizar membro:', error);
         throw error;
+      }
+
+      // Gerenciar role de líder
+      if (isLider) {
+        await addRole(member.id, 'lider');
+      } else {
+        await removeRole(member.id, 'lider');
+      }
+
+      // Gerenciar role admin/member baseado no campo role
+      if (formData.role === 'admin') {
+        await addRole(member.id, 'admin');
+      } else {
+        await removeRole(member.id, 'admin');
       }
 
       console.log('Membro atualizado com sucesso');
@@ -173,6 +197,17 @@ const EditMemberDialog: React.FC<EditMemberDialogProps> = ({
               />
               <p className="text-xs text-gray-500 mt-1">Deixe em branco se não souber a data</p>
             </div>
+          </div>
+
+          <div className="flex items-center space-x-2 p-4 bg-purple-50 rounded-lg border border-purple-200">
+            <Checkbox
+              id="is-lider"
+              checked={isLider}
+              onCheckedChange={(checked) => setIsLider(checked as boolean)}
+            />
+            <Label htmlFor="is-lider" className="font-medium cursor-pointer">
+              É Líder? (Líder de célula, ministério ou departamento)
+            </Label>
           </div>
 
           <div className="grid grid-cols-2 gap-4">

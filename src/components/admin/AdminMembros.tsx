@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import EditMemberDialog from './EditMemberDialog';
 import TagBadge from '@/components/TagBadge';
 import { getTagColor, getTagName } from '@/utils/tagUtils';
+import { getUserRoles } from '@/utils/roleUtils';
 
 interface Member {
   id: string;
@@ -24,6 +25,7 @@ interface Member {
   tags: string[];
   created_at: string;
   updated_at: string;
+  roles?: string[];
 }
 
 interface MinisterioDepartamento {
@@ -56,8 +58,16 @@ const AdminMembros = () => {
         throw error;
       }
       
-      console.log('Membros carregados:', data);
-      setMembers(data || []);
+      // Buscar roles de cada membro
+      const membersWithRoles = await Promise.all(
+        (data || []).map(async (member) => {
+          const roles = await getUserRoles(member.id);
+          return { ...member, roles };
+        })
+      );
+      
+      console.log('Membros carregados:', membersWithRoles);
+      setMembers(membersWithRoles);
     } catch (error) {
       console.error('Erro ao buscar membros:', error);
       toast({
@@ -163,9 +173,19 @@ const AdminMembros = () => {
                   </div>
                 </div>
                 <div className="flex items-center gap-4">
-                  <Badge variant={member.role === 'admin' ? 'default' : 'secondary'}>
-                    {member.role === 'admin' ? 'Administrador' : 'Membro'}
-                  </Badge>
+                  <div className="flex gap-2">
+                    {member.roles?.includes('admin') && (
+                      <Badge variant="default">Administrador</Badge>
+                    )}
+                    {member.roles?.includes('lider') && (
+                      <Badge variant="secondary" className="bg-purple-100 text-purple-800">
+                        Líder
+                      </Badge>
+                    )}
+                    {!member.roles?.includes('admin') && !member.roles?.includes('lider') && (
+                      <Badge variant="outline">Membro</Badge>
+                    )}
+                  </div>
                   <div className="flex gap-2">
                     <Button
                       size="sm"
