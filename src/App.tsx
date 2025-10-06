@@ -7,7 +7,6 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { ChurchProvider } from "@/contexts/ChurchContext";
 import { SidebarProvider } from "@/components/ui/sidebar";
-import { HodosHomeButton } from "@/components/common/HodosHomeButton";
 import { ChurchSidebar } from "@/components/layout/ChurchSidebar";
 import { BottomNav } from "@/components/layout/BottomNav";
 import LandingPage from "./pages/LandingPage";
@@ -63,7 +62,6 @@ const App = () => (
           <Toaster />
           <Sonner />
           <BrowserRouter>
-            <HodosHomeButton />
             <Routes>
               <Route path="/" element={<HomeRedirect />} />
               <Route path="/auth" element={<AuthPage />} />

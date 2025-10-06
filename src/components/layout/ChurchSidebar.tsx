@@ -28,7 +28,10 @@ export function ChurchSidebar() {
 
   return (
     <Sidebar className="border-r border-purple-200 bg-white">
-      <SidebarHeader className="p-4 border-b">
+      <SidebarHeader 
+        className="p-4 border-b cursor-pointer hover:bg-purple-50/50 transition-colors"
+        onClick={() => navigate('/')}
+      >
         <div className="flex items-center gap-3">
           <HeaderLogo size="sm" />
           <div className="flex flex-col">

@@ -1,8 +1,8 @@
 import { BookOpen, Users, Building2, Calendar, MessageCircle, Map } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useRef } from "react";
-import hodosLogo from "@/assets/hodos-logo.png";
 import { GradientButton } from "@/components/common/GradientButton";
+import { HeaderLogo } from "@/components/common/HeaderLogo";
 
 const LandingPage = () => {
   const navigate = useNavigate();
@@ -53,20 +53,12 @@ const LandingPage = () => {
       {/* Hero Section */}
       <section className="relative z-10 px-6 pt-20 pb-32">
         <div className="max-w-6xl mx-auto text-center space-y-8">
-          <div className="animate-float">
-            <img 
-              src={hodosLogo} 
-              alt="Hodos Logo" 
-              className="h-32 w-32 mx-auto object-contain drop-shadow-2xl"
-              style={{
-                filter: 'drop-shadow(0 0 30px rgba(123, 47, 247, 0.6))',
-              }}
-            />
+          <div className="flex items-center justify-center gap-6 animate-float">
+            <HeaderLogo size="lg" />
+            <h1 className="hodos-title-light">
+              HODOS
+            </h1>
           </div>
-          
-          <h1 className="hodos-title-light">
-            HODOS
-          </h1>
           
           <p className="text-2xl md:text-3xl font-light text-purple-200 max-w-3xl mx-auto">
             Hub de Discipulado Digital
