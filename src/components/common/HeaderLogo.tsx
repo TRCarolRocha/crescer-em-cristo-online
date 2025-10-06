@@ -1,5 +1,5 @@
 import React from 'react';
-import hodosLogo from '@/assets/hodos-logo.png';
+import hodosLogoGradient from '@/assets/hodos-logo-gradient.png';
 import { cn } from '@/lib/utils';
 
 interface HeaderLogoProps {
@@ -9,22 +9,22 @@ interface HeaderLogoProps {
 
 export const HeaderLogo: React.FC<HeaderLogoProps> = ({ size = 'md', className }) => {
   const sizeClasses = {
-    sm: 'h-12 w-12',
+    sm: 'h-10 w-10',
     md: 'h-16 w-16',
-    lg: 'h-24 w-24',
+    lg: 'h-20 w-20',
   };
 
   return (
     <img
-      src={hodosLogo}
+      src={hodosLogoGradient}
       alt="Hodos Logo"
       className={cn(
         sizeClasses[size],
-        'object-contain drop-shadow-2xl',
+        'object-contain',
         className
       )}
       style={{
-        filter: 'drop-shadow(0 0 20px rgba(123, 47, 247, 0.4))',
+        filter: 'drop-shadow(0 0 15px rgba(123, 47, 247, 0.3))',
       }}
     />
   );

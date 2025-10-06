@@ -14,7 +14,7 @@ const ChurchAdminDashboard = () => {
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
         <div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-[#7b2ff7] to-[#f107a3] bg-clip-text text-transparent">
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-[#7b2ff7] to-[#f107a3] bg-clip-text text-transparent">
             Dashboard - {churchSlug?.replace('-', ' ')}
           </h1>
           <p className="text-muted-foreground mt-2">
@@ -71,12 +71,88 @@ const ChurchAdminDashboard = () => {
 
         {/* Management Tabs */}
         <Tabs defaultValue="members" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
+            <TabsTrigger value="profile">Perfil</TabsTrigger>
             <TabsTrigger value="members">Membros</TabsTrigger>
             <TabsTrigger value="discipleships">Discipulados</TabsTrigger>
             <TabsTrigger value="content">Conteúdos</TabsTrigger>
             <TabsTrigger value="agenda">Agenda</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="profile" className="space-y-4">
+            <ChartCard title="Perfil da Igreja">
+              <div className="space-y-6">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Logo da Igreja</label>
+                  <input 
+                    type="file" 
+                    accept="image/*"
+                    className="block w-full text-sm text-muted-foreground
+                      file:mr-4 file:py-2 file:px-4
+                      file:rounded-md file:border-0
+                      file:text-sm file:font-semibold
+                      file:bg-gradient-to-r file:from-[#7b2ff7] file:to-[#f107a3]
+                      file:text-white hover:file:opacity-90"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Nome da Igreja</label>
+                  <input 
+                    type="text"
+                    defaultValue={churchSlug?.replace('-', ' ')}
+                    className="w-full px-3 py-2 border rounded-md"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Descrição/Headline</label>
+                  <textarea 
+                    rows={3}
+                    placeholder="Uma breve descrição da igreja..."
+                    className="w-full px-3 py-2 border rounded-md"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Cor Primária</label>
+                    <input 
+                      type="color"
+                      defaultValue="#7b2ff7"
+                      className="w-full h-10 rounded-md cursor-pointer"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Cor Secundária</label>
+                    <input 
+                      type="color"
+                      defaultValue="#f107a3"
+                      className="w-full h-10 rounded-md cursor-pointer"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Slug Personalizado</label>
+                  <input 
+                    type="text"
+                    defaultValue={churchSlug}
+                    className="w-full px-3 py-2 border rounded-md"
+                    placeholder="igreja-nome"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    URL: /igreja/{churchSlug || 'seu-slug'}
+                  </p>
+                </div>
+
+                <button className="px-6 py-2 bg-gradient-to-r from-[#7b2ff7] to-[#f107a3] text-white rounded-md hover:opacity-90 transition-opacity">
+                  Salvar Alterações
+                </button>
+              </div>
+            </ChartCard>
+          </TabsContent>
 
           <TabsContent value="members" className="space-y-4">
             <ChartCard title="Gestão de Membros">
