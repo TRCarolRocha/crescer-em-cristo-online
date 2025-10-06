@@ -1,147 +1,181 @@
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { BookOpen, Users, Building2, ArrowRight, Heart, Sparkles } from "lucide-react";
+import { BookOpen, Users, Building2, Calendar, MessageCircle, Map } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useRef } from "react";
 import hodosLogo from "@/assets/hodos-logo.png";
+import { GradientButton } from "@/components/common/GradientButton";
 
 const LandingPage = () => {
   const navigate = useNavigate();
+  const featuresRef = useRef<HTMLElement>(null);
 
   const scrollToFeatures = () => {
-    document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' });
+    featuresRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
   const features = [
     {
       icon: BookOpen,
-      title: "Jornada de Discipulado",
-      description: "Trilhas personalizadas para cada etapa da sua fé",
-      gradient: "from-blue-500 to-cyan-500"
+      title: "Devocionais Diários",
+      description: "Reflexões profundas para fortalecer sua caminhada espiritual",
+    },
+    {
+      icon: Map,
+      title: "Trilhas de Discipulado",
+      description: "Jornadas personalizadas para cada etapa da sua fé",
     },
     {
       icon: Users,
-      title: "Comunidade de Fé",
-      description: "Conecte-se com outros cristãos e fortaleça sua caminhada",
-      gradient: "from-purple-500 to-pink-500"
+      title: "Comunidade Conectada",
+      description: "Grupos e comunicação para fortalecer laços espirituais",
+    },
+    {
+      icon: Calendar,
+      title: "Agenda de Eventos",
+      description: "Acompanhe cultos, eventos e atividades da sua igreja",
+    },
+    {
+      icon: MessageCircle,
+      title: "Comunicação Interna",
+      description: "Canal direto entre membros e liderança",
     },
     {
       icon: Building2,
-      title: "Gestão de Igrejas",
-      description: "Ferramentas completas para líderes e administradores",
-      gradient: "from-indigo-500 to-blue-500"
-    }
+      title: "Gestão Multi-Igrejas",
+      description: "Plataforma completa para administradores e líderes",
+    },
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-      {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-        {/* Animated background grid */}
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(59,130,246,0.1)_0%,transparent_50%)] animate-pulse" />
-        <div className="absolute inset-0 bg-[repeating-linear-gradient(0deg,transparent,transparent_2px,rgba(255,255,255,0.03)_2px,rgba(255,255,255,0.03)_4px)] animate-fade-in" />
-        <div className="absolute inset-0 bg-[repeating-linear-gradient(90deg,transparent,transparent_2px,rgba(255,255,255,0.03)_2px,rgba(255,255,255,0.03)_4px)] animate-fade-in" />
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white overflow-hidden relative">
+      {/* Animated Background */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#7b2ff720_1px,transparent_1px),linear-gradient(to_bottom,#f107a320_1px,transparent_1px)] bg-[size:40px_40px] animate-[grid-flow_20s_linear_infinite]" />
 
-        {/* Content */}
-        <div className="relative z-10 container mx-auto px-4 text-center">
-          {/* Logo */}
-          <div className="mb-8 flex justify-center animate-scale-in">
+      {/* Hero Section */}
+      <section className="relative z-10 px-6 pt-20 pb-32">
+        <div className="max-w-6xl mx-auto text-center space-y-8">
+          <div className="animate-float">
             <img 
               src={hodosLogo} 
               alt="Hodos Logo" 
-              className="h-24 w-24 object-contain drop-shadow-2xl"
+              className="h-32 w-32 mx-auto object-contain drop-shadow-2xl"
+              style={{
+                filter: 'drop-shadow(0 0 30px rgba(123, 47, 247, 0.6))',
+              }}
             />
           </div>
-
-          {/* Main Title - Aerora Style */}
-          <h1 className="hodos-title mb-4 animate-fade-in">
+          
+          <h1 className="hodos-title-light">
             HODOS
           </h1>
-
-          {/* Subtitle */}
-          <p className="text-2xl md:text-3xl font-semibold text-white/90 mb-2 animate-fade-in delay-100">
+          
+          <p className="text-2xl md:text-3xl font-light text-purple-200 max-w-3xl mx-auto">
             Hub de Discipulado Digital
           </p>
-
-          {/* Tagline */}
-          <p className="text-lg md:text-xl text-white/70 mb-12 max-w-2xl mx-auto animate-fade-in delay-200">
-            Um caminho de fé, propósito e conexão digital
+          
+          <p className="text-lg md:text-xl text-slate-300 max-w-2xl mx-auto leading-relaxed">
+            Uma plataforma completa para transformar a jornada espiritual da sua comunidade
           </p>
-
-          {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center animate-fade-in delay-300">
-            <Button
-              size="lg"
-              onClick={() => navigate('/auth')}
-              className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white px-8 py-6 text-lg shadow-2xl hover:shadow-blue-500/50 transition-all duration-300 hover:scale-105"
+          
+          <div className="flex flex-col sm:flex-row gap-4 justify-center pt-8">
+            <GradientButton
+              onClick={() => navigate("/auth")}
+              className="px-8 py-4 text-lg"
             >
               Entrar
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
-            <Button
-              size="lg"
-              variant="outline"
+            </GradientButton>
+            <button
               onClick={scrollToFeatures}
-              className="border-2 border-white/30 bg-white/5 backdrop-blur-sm text-white hover:bg-white/10 px-8 py-6 text-lg transition-all duration-300 hover:scale-105"
+              className="px-8 py-4 border-2 border-purple-400/50 backdrop-blur-sm rounded-xl font-semibold text-lg hover:bg-white/10 hover:border-purple-400 transform hover:scale-105 transition-all duration-300"
             >
               Explorar o Hodos
-              <Sparkles className="ml-2 h-5 w-5" />
-            </Button>
-          </div>
-
-          {/* Decorative elements */}
-          <div className="absolute top-20 left-10 animate-float">
-            <Heart className="h-8 w-8 text-pink-400/20" />
-          </div>
-          <div className="absolute bottom-20 right-10 animate-float delay-1000">
-            <Sparkles className="h-8 w-8 text-blue-400/20" />
+            </button>
           </div>
         </div>
       </section>
 
       {/* Features Section */}
-      <section id="features" className="py-24 px-4 relative">
-        <div className="container mx-auto max-w-6xl">
-          <h2 className="text-4xl md:text-5xl font-bold text-center text-white mb-6 animate-fade-in">
-            Uma Plataforma Completa
+      <section ref={featuresRef} className="relative z-10 px-6 py-20 bg-white/5 backdrop-blur-sm">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-4xl md:text-5xl font-bold text-center mb-4 text-transparent bg-clip-text bg-gradient-to-r from-[#7b2ff7] to-[#f107a3]">
+            Recursos Principais
           </h2>
-          <p className="text-xl text-white/70 text-center mb-16 max-w-2xl mx-auto">
-            Ferramentas poderosas para crescimento espiritual e gestão comunitária
+          <p className="text-center text-slate-300 mb-16 max-w-2xl mx-auto">
+            Tudo que sua igreja precisa em uma única plataforma
           </p>
-
-          <div className="grid md:grid-cols-3 gap-8">
+          
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {features.map((feature, index) => (
-              <Card
+              <div
                 key={index}
-                className="feature-card group hover:scale-105 transition-all duration-300 animate-fade-in"
-                style={{ animationDelay: `${index * 100}ms` }}
+                className="p-8 rounded-2xl border-2 border-purple-500/30 bg-white/10 backdrop-blur-md transition-all duration-300 hover:bg-white/20 hover:border-purple-400 group cursor-pointer"
+                style={{
+                  animationDelay: `${index * 0.1}s`,
+                  animation: "fade-in 0.5s ease-out forwards",
+                }}
               >
-                <div className={`h-16 w-16 rounded-2xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300`}>
+                <div 
+                  className="h-16 w-16 rounded-2xl flex items-center justify-center mb-6 transform group-hover:scale-110 transition-transform duration-300 bg-gradient-to-br from-[#7b2ff7] to-[#f107a3]"
+                >
                   <feature.icon className="h-8 w-8 text-white" />
                 </div>
-                <h3 className="text-2xl font-bold text-foreground mb-3">
+                
+                <h3 className="text-2xl font-bold mb-4 text-white group-hover:text-purple-200 transition-colors">
                   {feature.title}
                 </h3>
-                <p className="text-muted-foreground">
+                
+                <p className="text-slate-300 leading-relaxed">
                   {feature.description}
                 </p>
-              </Card>
+              </div>
             ))}
           </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="py-12 px-4 border-t border-white/10">
-        <div className="container mx-auto text-center">
-          <p className="text-white/60 mb-4">
-            © 2025 Hodos - Hub de Discipulado Digital. Todos os direitos reservados.
-          </p>
-          <div className="flex justify-center gap-6 text-sm text-white/50">
-            <a href="#" className="hover:text-white/80 transition-colors">Sobre</a>
-            <a href="#" className="hover:text-white/80 transition-colors">Contato</a>
-            <a href="#" className="hover:text-white/80 transition-colors">Para Igrejas</a>
-            <a href="#" className="hover:text-white/80 transition-colors">Termos</a>
-            <a href="#" className="hover:text-white/80 transition-colors">Privacidade</a>
+      <footer className="relative z-10 px-6 py-12 border-t border-purple-500/20 bg-black/20 backdrop-blur-sm">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid md:grid-cols-3 gap-8 mb-8">
+            <div>
+              <h4 className="font-bold text-lg mb-4 text-transparent bg-clip-text bg-gradient-to-r from-[#7b2ff7] to-[#f107a3]">
+                Sobre o Hodos
+              </h4>
+              <p className="text-slate-400 text-sm">
+                Plataforma de discipulado digital que conecta igrejas e transforma vidas.
+              </p>
+            </div>
+            <div>
+              <h4 className="font-bold text-lg mb-4 text-transparent bg-clip-text bg-gradient-to-r from-[#7b2ff7] to-[#f107a3]">
+                Igrejas Parceiras
+              </h4>
+              <p className="text-slate-400 text-sm">
+                Descubra comunidades conectadas ao Hodos.
+              </p>
+            </div>
+            <div>
+              <h4 className="font-bold text-lg mb-4 text-transparent bg-clip-text bg-gradient-to-r from-[#7b2ff7] to-[#f107a3]">
+                Conteúdos Públicos
+              </h4>
+              <p className="text-slate-400 text-sm">
+                Devocionais e trilhas disponíveis para todos.
+              </p>
+            </div>
+          </div>
+          <div className="text-center pt-8 border-t border-purple-500/20">
+            <p className="text-slate-400 text-sm">
+              © 2024 Hodos. Transformando vidas através do discipulado digital.
+            </p>
+            <div className="mt-4 flex justify-center gap-6">
+              <a href="#" className="text-slate-400 hover:text-purple-400 transition-colors text-sm">
+                Sobre
+              </a>
+              <a href="#" className="text-slate-400 hover:text-purple-400 transition-colors text-sm">
+                Contato
+              </a>
+              <a href="#" className="text-slate-400 hover:text-purple-400 transition-colors text-sm">
+                Privacidade
+              </a>
+            </div>
           </div>
         </div>
       </footer>

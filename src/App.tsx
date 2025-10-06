@@ -6,6 +6,10 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { ChurchProvider } from "@/contexts/ChurchContext";
+import { SidebarProvider } from "@/components/ui/sidebar";
+import { HodosHomeButton } from "@/components/common/HodosHomeButton";
+import { ChurchSidebar } from "@/components/layout/ChurchSidebar";
+import { BottomNav } from "@/components/layout/BottomNav";
 import LandingPage from "./pages/LandingPage";
 import ChurchHomePage from "./pages/ChurchHomePage";
 import IndividualDashboard from "./pages/IndividualDashboard";
@@ -20,9 +24,15 @@ import Progresso from "./pages/Progresso";
 import Membros from "./pages/Membros";
 import Perfil from "./pages/Perfil";
 import Admin from "./pages/Admin";
+import SuperAdminDashboard from "./pages/admin/SuperAdminDashboard";
+import ChurchAdminDashboard from "./pages/admin/ChurchAdminDashboard";
+import ChurchList from "./pages/admin/ChurchList";
+import PublicContent from "./pages/admin/PublicContent";
 import AuthPage from "./components/auth/AuthPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminRoute from "./components/AdminRoute";
+import SuperAdminRoute from "./components/SuperAdminRoute";
+import ChurchAdminRoute from "./components/ChurchAdminRoute";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -53,14 +63,47 @@ const App = () => (
           <Toaster />
           <Sonner />
           <BrowserRouter>
+            <HodosHomeButton />
             <Routes>
               <Route path="/" element={<HomeRedirect />} />
               <Route path="/auth" element={<AuthPage />} />
               
-              {/* Church Routes */}
+              {/* Super Admin Routes */}
+              <Route path="/admin/hodos" element={
+                <SuperAdminRoute>
+                  <SuperAdminDashboard />
+                </SuperAdminRoute>
+              } />
+              <Route path="/admin/hodos/igrejas" element={
+                <SuperAdminRoute>
+                  <ChurchList />
+                </SuperAdminRoute>
+              } />
+              <Route path="/admin/hodos/conteudos" element={
+                <SuperAdminRoute>
+                  <PublicContent />
+                </SuperAdminRoute>
+              } />
+              
+              {/* Church Admin Routes */}
+              <Route path="/admin/igrejas/:churchSlug" element={
+                <ChurchAdminRoute>
+                  <ChurchAdminDashboard />
+                </ChurchAdminRoute>
+              } />
+              
+              {/* Church Routes with Sidebar */}
               <Route path="/igreja/:churchSlug" element={
                 <ProtectedRoute>
-                  <ChurchHomePage />
+                  <SidebarProvider>
+                    <div className="flex min-h-screen w-full">
+                      <ChurchSidebar />
+                      <main className="flex-1">
+                        <ChurchHomePage />
+                      </main>
+                      <BottomNav />
+                    </div>
+                  </SidebarProvider>
                 </ProtectedRoute>
               } />
               

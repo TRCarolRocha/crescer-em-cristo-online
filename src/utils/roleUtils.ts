@@ -1,6 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 
-export type AppRole = 'admin' | 'lider' | 'member';
+export type AppRole = 'super_admin' | 'admin' | 'lider' | 'member';
 
 export const getUserRoles = async (userId?: string): Promise<AppRole[]> => {
   try {

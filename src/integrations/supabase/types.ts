@@ -1343,7 +1343,15 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
+      is_church_admin: {
+        Args: { p_church_id: string }
+        Returns: boolean
+      }
       is_lider: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      is_super_admin: {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
