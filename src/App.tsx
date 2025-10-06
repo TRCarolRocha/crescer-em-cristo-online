@@ -3,9 +3,12 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { AuthProvider } from "@/contexts/AuthContext";
-import Index from "./pages/Index";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider, useAuth } from "@/contexts/AuthContext";
+import { ChurchProvider } from "@/contexts/ChurchContext";
+import LandingPage from "./pages/LandingPage";
+import ChurchHomePage from "./pages/ChurchHomePage";
+import IndividualDashboard from "./pages/IndividualDashboard";
 import Comunicacao from "./pages/Comunicacao";
 import FaleComLideranca from "./pages/FaleComLideranca";
 import Agenda from "./pages/Agenda";
@@ -24,16 +27,49 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
+const HomeRedirect = () => {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (user) {
+    return <Navigate to="/igreja/monte-hebrom" replace />;
+  }
+
+  return <LandingPage />;
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/auth" element={<AuthPage />} />
+      <ChurchProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<HomeRedirect />} />
+              <Route path="/auth" element={<AuthPage />} />
+              
+              {/* Church Routes */}
+              <Route path="/igreja/:churchSlug" element={
+                <ProtectedRoute>
+                  <ChurchHomePage />
+                </ProtectedRoute>
+              } />
+              
+              {/* Individual User Space */}
+              <Route path="/meu-espaco" element={
+                <ProtectedRoute>
+                  <IndividualDashboard />
+                </ProtectedRoute>
+              } />
             <Route path="/diagnostico" element={<Diagnostico />} />
             <Route path="/fale-com-lideranca" element={
               <ProtectedRoute>
@@ -89,6 +125,7 @@ const App = () => (
           </Routes>
         </BrowserRouter>
       </TooltipProvider>
+      </ChurchProvider>
     </AuthProvider>
   </QueryClientProvider>
 );

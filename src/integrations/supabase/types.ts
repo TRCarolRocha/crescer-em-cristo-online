@@ -83,6 +83,51 @@ export type Database = {
         }
         Relationships: []
       }
+      churches: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          headline: string | null
+          id: string
+          is_active: boolean | null
+          is_public: boolean | null
+          logo_url: string | null
+          name: string
+          primary_color: string | null
+          secondary_color: string | null
+          slug: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          headline?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_public?: boolean | null
+          logo_url?: string | null
+          name: string
+          primary_color?: string | null
+          secondary_color?: string | null
+          slug: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          headline?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_public?: boolean | null
+          logo_url?: string | null
+          name?: string
+          primary_color?: string | null
+          secondary_color?: string | null
+          slug?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       content_questions: {
         Row: {
           content_id: string | null
@@ -176,6 +221,7 @@ export type Database = {
           created_at: string
           data: string
           id: string
+          is_public: boolean | null
           pergunta_1: string
           pergunta_2: string
           pergunta_3: string
@@ -189,6 +235,7 @@ export type Database = {
           created_at?: string
           data: string
           id?: string
+          is_public?: boolean | null
           pergunta_1: string
           pergunta_2: string
           pergunta_3: string
@@ -202,6 +249,7 @@ export type Database = {
           created_at?: string
           data?: string
           id?: string
+          is_public?: boolean | null
           pergunta_1?: string
           pergunta_2?: string
           pergunta_3?: string
@@ -403,6 +451,7 @@ export type Database = {
           difficulty: string | null
           duration: string | null
           id: string
+          is_public: boolean | null
           lessons: number | null
           level: string
           title: string
@@ -416,6 +465,7 @@ export type Database = {
           difficulty?: string | null
           duration?: string | null
           id?: string
+          is_public?: boolean | null
           lessons?: number | null
           level: string
           title: string
@@ -429,6 +479,7 @@ export type Database = {
           difficulty?: string | null
           duration?: string | null
           id?: string
+          is_public?: boolean | null
           lessons?: number | null
           level?: string
           title?: string
@@ -800,6 +851,7 @@ export type Database = {
           address: string | null
           avatar_url: string | null
           birth_date: string | null
+          church_id: string | null
           created_at: string | null
           department: string | null
           full_name: string | null
@@ -814,6 +866,7 @@ export type Database = {
           address?: string | null
           avatar_url?: string | null
           birth_date?: string | null
+          church_id?: string | null
           created_at?: string | null
           department?: string | null
           full_name?: string | null
@@ -828,6 +881,7 @@ export type Database = {
           address?: string | null
           avatar_url?: string | null
           birth_date?: string | null
+          church_id?: string | null
           created_at?: string | null
           department?: string | null
           full_name?: string | null
@@ -838,7 +892,15 @@ export type Database = {
           tags?: string[] | null
           updated_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_church_id_fkey"
+            columns: ["church_id"]
+            isOneToOne: false
+            referencedRelation: "churches"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       progression_tracks: {
         Row: {

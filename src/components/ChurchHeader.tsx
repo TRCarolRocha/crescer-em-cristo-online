@@ -1,13 +1,31 @@
-
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Sparkles, Star } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import UserMenu from "./auth/UserMenu";
 
-const ChurchHeader = () => {
+interface Church {
+  id: string;
+  slug: string;
+  name: string;
+  logo_url: string | null;
+  headline: string | null;
+  description: string | null;
+  primary_color: string;
+  secondary_color: string;
+}
+
+interface ChurchHeaderProps {
+  church?: Church;
+}
+
+const ChurchHeader = ({ church }: ChurchHeaderProps) => {
   const navigate = useNavigate();
   const { user } = useAuth();
+
+  const churchName = church?.name || "MONTE HEBROM";
+  const churchLogo = church?.logo_url || "/lovable-uploads/a989c536-6a58-44f9-a982-3a6b3847a288.png";
+  const churchHeadline = church?.headline || "Lugar de Refúgio e Aliança";
 
   return (
     <div className="relative overflow-hidden bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 min-h-[85vh] sm:min-h-[80vh] lg:min-h-[75vh] flex items-center">
@@ -70,8 +88,8 @@ const ChurchHeader = () => {
               <div className="relative">
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-purple-600/20 rounded-full blur-2xl scale-110 animate-glow"></div>
                 <img 
-                  src="/lovable-uploads/a989c536-6a58-44f9-a982-3a6b3847a288.png" 
-                  alt="Igreja Batista Missionária Ministério Monte Hebrom" 
+                  src={churchLogo}
+                  alt={churchName} 
                   className="relative h-40 w-40 sm:h-48 sm:w-48 md:h-60 md:w-60 lg:h-72 lg:w-72 xl:h-80 xl:w-80 object-contain drop-shadow-2xl transition-transform duration-500 hover:scale-105" 
                 />
               </div>
@@ -80,12 +98,14 @@ const ChurchHeader = () => {
             {/* Nome da Igreja com nova tipografia */}
             <div className="text-center lg:text-left">
               <h1 className="font-playfair tracking-tight">
-                <span className="block text-4xl sm:text-5xl md:text-7xl lg:text-8xl xl:text-9xl font-bold bg-gradient-to-r from-blue-900 via-indigo-800 to-purple-900 bg-clip-text text-transparent">
-                  MONTE
-                </span>
-                <span className="block text-4xl sm:text-5xl md:text-7xl lg:text-8xl xl:text-9xl font-bold bg-gradient-to-r from-purple-800 via-blue-800 to-indigo-900 bg-clip-text text-transparent -mt-2 sm:-mt-3 lg:-mt-4">
-                  HEBROM
-                </span>
+                {churchName.split(' ').map((word, index) => (
+                  <span 
+                    key={index}
+                    className="block text-4xl sm:text-5xl md:text-7xl lg:text-8xl xl:text-9xl font-bold bg-gradient-to-r from-blue-900 via-indigo-800 to-purple-900 bg-clip-text text-transparent"
+                  >
+                    {word}
+                  </span>
+                ))}
               </h1>
             </div>
           </div>
@@ -94,7 +114,7 @@ const ChurchHeader = () => {
           <div className="mb-8 sm:mb-10">
             <div className="bg-white/60 backdrop-blur-sm rounded-2xl px-6 sm:px-8 py-4 sm:py-6 mx-auto max-w-2xl border border-blue-100/50 shadow-lg">
               <p className="text-2xl sm:text-3xl md:text-4xl font-bold font-playfair text-blue-900 mb-2">
-                Lugar de Refúgio e Aliança
+                {churchHeadline}
               </p>
               <p className="text-lg sm:text-xl font-semibold font-inter text-blue-700 tracking-wide">
                 IBAMONTE
