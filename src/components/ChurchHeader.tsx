@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Sparkles, Star } from "lucide-react";
+import { Settings } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import UserMenu from "./auth/UserMenu";
@@ -17,9 +17,11 @@ interface Church {
 
 interface ChurchHeaderProps {
   church?: Church;
+  showCustomizeButton?: boolean;
+  onCustomize?: () => void;
 }
 
-const ChurchHeader = ({ church }: ChurchHeaderProps) => {
+const ChurchHeader = ({ church, showCustomizeButton = false, onCustomize }: ChurchHeaderProps) => {
   const navigate = useNavigate();
   const { user } = useAuth();
 
@@ -29,8 +31,19 @@ const ChurchHeader = ({ church }: ChurchHeaderProps) => {
 
   return (
     <div className="relative bg-gradient-to-r from-blue-50 via-purple-50 to-blue-50 border-b border-blue-100">
-      {/* User Menu no canto superior direito */}
-      <div className="absolute top-4 right-4 z-10">
+      {/* Botões no canto superior direito */}
+      <div className="absolute top-4 right-4 z-10 flex items-center gap-2">
+        {showCustomizeButton && onCustomize && (
+          <Button
+            onClick={onCustomize}
+            className="rounded-full shadow-lg"
+            size="lg"
+          >
+            <Settings className="h-5 w-5 mr-2" />
+            Personalizar
+          </Button>
+        )}
+        
         {user ? (
           <UserMenu />
         ) : (
