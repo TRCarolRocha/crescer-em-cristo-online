@@ -4,7 +4,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -15,7 +14,6 @@ interface Member {
   full_name: string;
   phone: string;
   address: string;
-  role: string;
   birth_date: string;
   department: string;
   ministry: string;
@@ -44,13 +42,13 @@ const EditMemberDialog: React.FC<EditMemberDialogProps> = ({
     full_name: member.full_name || '',
     phone: member.phone || '',
     address: member.address || '',
-    role: member.role || 'member',
     birth_date: member.birth_date || '',
     department: member.department || '',
     ministry: member.ministry || ''
   });
   const [selectedTags, setSelectedTags] = useState<string[]>(member.tags || []);
   const [isLider, setIsLider] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
@@ -58,6 +56,7 @@ const EditMemberDialog: React.FC<EditMemberDialogProps> = ({
     const loadRoles = async () => {
       const roles = await getUserRoles(member.id);
       setIsLider(roles.includes('lider'));
+      setIsAdmin(roles.includes('admin'));
     };
     loadRoles();
   }, [member.id]);
@@ -85,7 +84,6 @@ const EditMemberDialog: React.FC<EditMemberDialogProps> = ({
         full_name: formData.full_name.trim() || null,
         phone: formData.phone.trim() || null,
         address: formData.address.trim() || null,
-        role: formData.role,
         birth_date: formData.birth_date && formData.birth_date.trim() !== '' ? formData.birth_date : null,
         department: formData.department.trim() || null,
         ministry: formData.ministry.trim() || null,
@@ -105,18 +103,17 @@ const EditMemberDialog: React.FC<EditMemberDialogProps> = ({
         throw error;
       }
 
-      // Gerenciar role de líder
+      // Gerenciar roles (admin e lider) baseado nos checkboxes
+      if (isAdmin) {
+        await addRole(member.id, 'admin');
+      } else {
+        await removeRole(member.id, 'admin');
+      }
+      
       if (isLider) {
         await addRole(member.id, 'lider');
       } else {
         await removeRole(member.id, 'lider');
-      }
-
-      // Gerenciar role admin/member baseado no campo role
-      if (formData.role === 'admin') {
-        await addRole(member.id, 'admin');
-      } else {
-        await removeRole(member.id, 'admin');
       }
 
       console.log('Membro atualizado com sucesso');
@@ -176,18 +173,6 @@ const EditMemberDialog: React.FC<EditMemberDialogProps> = ({
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="role">Função</Label>
-              <Select value={formData.role} onValueChange={(value) => setFormData({ ...formData, role: value })}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione a função" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="member">Membro</SelectItem>
-                  <SelectItem value="admin">Administrador</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
               <Label htmlFor="birth_date">Data de Nascimento</Label>
               <Input
                 id="birth_date"
@@ -197,38 +182,52 @@ const EditMemberDialog: React.FC<EditMemberDialogProps> = ({
               />
               <p className="text-xs text-gray-500 mt-1">Deixe em branco se não souber a data</p>
             </div>
-          </div>
-
-          <div className="flex items-center space-x-2 p-4 bg-purple-50 rounded-lg border border-purple-200">
-            <Checkbox
-              id="is-lider"
-              checked={isLider}
-              onCheckedChange={(checked) => setIsLider(checked as boolean)}
-            />
-            <Label htmlFor="is-lider" className="font-medium cursor-pointer">
-              É Líder? (Líder de célula, ministério ou departamento)
-            </Label>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
             <div>
               <Label htmlFor="department">Departamento</Label>
               <Input
                 id="department"
                 value={formData.department}
                 onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-                placeholder="Ex: Diaconia, Louvor, Suporte, etc."
+                placeholder="Ex: Diaconia, Louvor, Suporte"
               />
             </div>
-            <div>
-              <Label htmlFor="ministry">Ministério</Label>
-              <Input
-                id="ministry"
-                value={formData.ministry}
-                onChange={(e) => setFormData({ ...formData, ministry: e.target.value })}
-                placeholder="Ex: Música, Ensino, etc."
+          </div>
+
+          {/* Checkboxes de Roles */}
+          <div className="space-y-2">
+            <Label className="text-sm font-semibold">Permissões</Label>
+            
+            <div className="flex items-center space-x-2 p-4 bg-orange-50 rounded-lg border border-orange-200">
+              <Checkbox
+                id="is-admin"
+                checked={isAdmin}
+                onCheckedChange={(checked) => setIsAdmin(checked as boolean)}
               />
+              <Label htmlFor="is-admin" className="font-medium cursor-pointer">
+                Administrador da igreja (acesso total ao painel administrativo)
+              </Label>
             </div>
+
+            <div className="flex items-center space-x-2 p-4 bg-purple-50 rounded-lg border border-purple-200">
+              <Checkbox
+                id="is-lider"
+                checked={isLider}
+                onCheckedChange={(checked) => setIsLider(checked as boolean)}
+              />
+              <Label htmlFor="is-lider" className="font-medium cursor-pointer">
+                Líder (líder de célula, ministério ou departamento)
+              </Label>
+            </div>
+          </div>
+
+          <div>
+            <Label htmlFor="ministry">Ministério</Label>
+            <Input
+              id="ministry"
+              value={formData.ministry}
+              onChange={(e) => setFormData({ ...formData, ministry: e.target.value })}
+              placeholder="Ex: Música, Ensino, etc."
+            />
           </div>
 
           {ministeriosDepartamentos.length > 0 && (

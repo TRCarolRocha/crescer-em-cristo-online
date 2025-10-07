@@ -17,7 +17,6 @@ interface Member {
   full_name: string;
   phone: string;
   address: string;
-  role: string;
   avatar_url: string;
   birth_date: string;
   department: string;
@@ -101,7 +100,8 @@ const AdminMembros = () => {
 
   const filteredMembers = members.filter(member =>
     member.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    member.role?.toLowerCase().includes(searchTerm.toLowerCase())
+    member.department?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    member.ministry?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const getTagNameById = (tagId: string) => {

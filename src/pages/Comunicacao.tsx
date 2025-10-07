@@ -24,7 +24,6 @@ interface Message {
     tags: string[] | null;
     department: string | null;
     ministry: string | null;
-    role: string | null;
   } | null;
   likes_count: number;
   comments_count: number;
@@ -82,7 +81,7 @@ const Comunicacao = () => {
         const authorIds = [...new Set(messagesData.map(msg => msg.author_id))];
         const { data: profilesData, error: profilesError } = await supabase
           .from('profiles')
-          .select('id, full_name, avatar_url, tags, department, ministry, role')
+          .select('id, full_name, avatar_url, tags, department, ministry')
           .in('id', authorIds);
 
         if (profilesError) throw profilesError;
@@ -413,14 +412,7 @@ const Comunicacao = () => {
                           />
                         ))}
                         
-                        {/* Mostrar role se nenhuma das opções anteriores existir */}
-                        {!message.profiles?.department && 
-                         !message.profiles?.ministry && 
-                         (!message.profiles?.tags || message.profiles.tags.length === 0) && (
-                          <span className="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded-full">
-                            {getRoleDisplayName(message.profiles?.role || 'member')}
-                          </span>
-                        )}
+                        {/* Remover exibição de role - não existe mais */}
                       </div>
                       
                       <p className="text-xs text-gray-500">{formatTimeAgo(message.created_at)}</p>

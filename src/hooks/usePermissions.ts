@@ -3,11 +3,13 @@ import { useAuth } from '@/contexts/AuthContext';
 import { getUserRoles } from '@/utils/roleUtils';
 import { supabase } from '@/integrations/supabase/client';
 
-export type PermissionLevel = 'super_admin' | 'church_admin' | 'user' | 'public';
+export type PermissionLevel = 'super_admin' | 'church_admin' | 'lider' | 'member' | 'visitor' | 'public';
 
 interface UsePermissionsReturn {
   isSuperAdmin: boolean;
   isChurchAdmin: boolean;
+  isLider: boolean;
+  isVisitor: boolean;
   isUser: boolean;
   permissionLevel: PermissionLevel;
   loading: boolean;
@@ -18,6 +20,8 @@ export const usePermissions = (): UsePermissionsReturn => {
   const { user } = useAuth();
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [isChurchAdmin, setIsChurchAdmin] = useState(false);
+  const [isLider, setIsLider] = useState(false);
+  const [isVisitor, setIsVisitor] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -25,18 +29,33 @@ export const usePermissions = (): UsePermissionsReturn => {
       if (!user) {
         setIsSuperAdmin(false);
         setIsChurchAdmin(false);
+        setIsLider(false);
+        setIsVisitor(false);
         setLoading(false);
         return;
       }
 
       try {
         const roles = await getUserRoles(user.id);
-        setIsSuperAdmin(roles.includes('super_admin'));
-        setIsChurchAdmin(roles.includes('admin'));
+        
+        // Usuário sem role = visitor
+        if (roles.length === 0) {
+          setIsVisitor(true);
+          setIsSuperAdmin(false);
+          setIsChurchAdmin(false);
+          setIsLider(false);
+        } else {
+          setIsSuperAdmin(roles.includes('super_admin'));
+          setIsChurchAdmin(roles.includes('admin'));
+          setIsLider(roles.includes('lider'));
+          setIsVisitor(false);
+        }
       } catch (error) {
         console.error('Error checking permissions:', error);
         setIsSuperAdmin(false);
         setIsChurchAdmin(false);
+        setIsLider(false);
+        setIsVisitor(false);
       } finally {
         setLoading(false);
       }
@@ -49,8 +68,12 @@ export const usePermissions = (): UsePermissionsReturn => {
     ? 'super_admin'
     : isChurchAdmin
     ? 'church_admin'
+    : isLider
+    ? 'lider'
+    : isVisitor
+    ? 'visitor'
     : user
-    ? 'user'
+    ? 'member'
     : 'public';
 
   const canManageChurch = async (churchId: string): Promise<boolean> => {
@@ -93,6 +116,8 @@ export const usePermissions = (): UsePermissionsReturn => {
   return {
     isSuperAdmin,
     isChurchAdmin,
+    isLider,
+    isVisitor,
     isUser: !!user,
     permissionLevel,
     loading,

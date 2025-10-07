@@ -1,25 +1,60 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { BookOpen, Users, Compass, ArrowRight, Home, Settings, MessageCircle } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { BookOpen, Users, Compass, ArrowRight, Home, Settings, MessageCircle, Info } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useChurch } from "@/contexts/ChurchContext";
 import { usePermissions } from "@/hooks/usePermissions";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import UserMenu from "@/components/auth/UserMenu";
 
 const IndividualDashboard = () => {
   const navigate = useNavigate();
   const { church } = useChurch();
-  const { isSuperAdmin, isChurchAdmin } = usePermissions();
+  const { isSuperAdmin, isChurchAdmin, isVisitor } = usePermissions();
 
+  // Buscar conteúdos públicos para visitors
+  const { data: publicDevocionais } = useQuery({
+    queryKey: ['public-devocionais'],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('devocionais')
+        .select('*')
+        .eq('is_public', true)
+        .order('data', { ascending: false })
+        .limit(5);
+      return data;
+    },
+    enabled: isVisitor
+  });
+
+  const { data: publicTracks } = useQuery({
+    queryKey: ['public-tracks'],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('discipleship_tracks')
+        .select('*')
+        .eq('is_public', true)
+        .limit(5);
+      return data;
+    },
+    enabled: isVisitor
+  });
+
+  // Cards condicionais baseados em role
   const navigationCards = [
-    ...(church ? [{
+    // Cards para usuários com igreja
+    ...(church && !isVisitor ? [{
       icon: Home,
       title: "Minha Igreja",
       description: `Voltar para ${church.name}`,
       color: "from-blue-500 to-cyan-500",
       action: () => navigate(`/igreja/${church.slug}`)
     }] : []),
+    
+    // Cards administrativos
     ...(isChurchAdmin || isSuperAdmin ? [{
       icon: Settings,
       title: "Gerenciar Igreja",
@@ -34,24 +69,32 @@ const IndividualDashboard = () => {
       color: "from-purple-500 to-pink-500",
       action: () => navigate('/admin/hodos')
     }] : []),
-    {
+    
+    // Cards disponíveis para todos (exceto visitors em alguns casos)
+    ...(!isVisitor ? [{
       icon: Users,
       title: "Meu Perfil",
       description: "Gerenciar suas informações",
       color: "from-green-500 to-emerald-500",
       action: () => navigate('/perfil')
-    },
+    }] : []),
+    
+    // Cards públicos (disponíveis para visitors)
     {
       icon: BookOpen,
-      title: "Devocionais",
-      description: "Acessar devocionais diários",
+      title: isVisitor ? "Devocionais Públicos" : "Devocionais",
+      description: isVisitor 
+        ? `${publicDevocionais?.length || 0} devocionais disponíveis`
+        : "Acessar devocionais diários",
       color: "from-indigo-500 to-blue-500",
       action: () => navigate('/devocional')
     },
     {
       icon: Compass,
-      title: "Trilhas",
-      description: "Explorar trilhas de discipulado",
+      title: isVisitor ? "Trilhas Abertas" : "Trilhas",
+      description: isVisitor
+        ? `${publicTracks?.length || 0} trilhas públicas`
+        : "Explorar trilhas de discipulado",
       color: "from-teal-500 to-cyan-500",
       action: () => navigate('/trilhas')
     }
@@ -85,9 +128,23 @@ const IndividualDashboard = () => {
             Bem-vindo ao Seu Espaço
           </h2>
           <p className="text-xl text-white/70 max-w-2xl mx-auto">
-            Seu hub central de navegação no Hodos
+            {isVisitor 
+              ? "Explore conteúdos públicos do Hodos"
+              : "Seu hub central de navegação no Hodos"
+            }
           </p>
         </section>
+
+        {/* Alert para Visitors */}
+        {isVisitor && (
+          <Alert className="max-w-2xl mx-auto bg-blue-500/10 border-blue-500/30">
+            <Info className="h-4 w-4 text-blue-400" />
+            <AlertTitle className="text-white">Bem-vindo ao Hodos!</AlertTitle>
+            <AlertDescription className="text-white/70">
+              Você está visualizando conteúdo público. Para acessar recursos completos e conectar-se a uma igreja, entre em contato com um administrador.
+            </AlertDescription>
+          </Alert>
+        )}
 
         {/* Navigation Cards */}
         <section className="space-y-8">

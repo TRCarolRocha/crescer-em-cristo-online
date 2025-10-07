@@ -42,6 +42,7 @@ const queryClient = new QueryClient();
 const HomeRedirect = () => {
   const { user, loading } = useAuth();
   const [roles, setRoles] = useState<string[]>([]);
+  const [churchSlug, setChurchSlug] = useState<string | null>(null);
   const [checkingRoles, setCheckingRoles] = useState(true);
 
   useEffect(() => {
@@ -52,13 +53,33 @@ const HomeRedirect = () => {
       }
 
       try {
-        const { data, error } = await supabase
+        // Buscar roles do usuário
+        const { data: rolesData, error: rolesError } = await supabase
           .from('user_roles')
-          .select('role')
+          .select('role, church_id, churches(slug)')
           .eq('user_id', user.id);
 
-        if (!error && data) {
-          setRoles(data.map(r => r.role));
+        if (!rolesError && rolesData) {
+          setRoles(rolesData.map(r => r.role));
+
+          // Se for admin, buscar slug da igreja
+          const adminRole = rolesData.find(r => r.role === 'admin');
+          if (adminRole?.churches?.slug) {
+            setChurchSlug(adminRole.churches.slug);
+          }
+        }
+
+        // Se não é admin, buscar igreja do perfil (para member/lider)
+        if (!rolesData?.some(r => r.role === 'admin')) {
+          const { data: profileData } = await supabase
+            .from('profiles')
+            .select('church_id, churches(slug)')
+            .eq('id', user.id)
+            .single();
+
+          if (profileData?.churches?.slug) {
+            setChurchSlug(profileData.churches.slug);
+          }
         }
       } catch (error) {
         console.error('Error fetching roles:', error);
@@ -84,14 +105,23 @@ const HomeRedirect = () => {
       return <Navigate to="/admin/hodos" replace />;
     }
     
-    // Church Admin -> Verificar se tem igreja e redirecionar
+    // Church Admin -> Dashboard da igreja
     if (roles.includes('admin')) {
-      // TODO: Buscar igreja do admin e redirecionar para /admin/igrejas/:slug
-      // Por enquanto, redireciona para meu-espaco
+      if (churchSlug) {
+        return <Navigate to={`/admin/igrejas/${churchSlug}`} replace />;
+      }
+      return <Navigate to="/admin/hodos/igrejas" replace />;
+    }
+    
+    // Member/Lider -> Página da igreja
+    if (roles.includes('member') || roles.includes('lider')) {
+      if (churchSlug) {
+        return <Navigate to={`/igreja/${churchSlug}`} replace />;
+      }
       return <Navigate to="/meu-espaco" replace />;
     }
     
-    // Usuário comum -> Meu Espaço
+    // Visitor ou sem role -> Meu Espaço (conteúdo público)
     return <Navigate to="/meu-espaco" replace />;
   }
 
