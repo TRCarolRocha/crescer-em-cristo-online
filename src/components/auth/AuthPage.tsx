@@ -47,20 +47,36 @@ const AuthPage = () => {
         description: "Bem-vindo"
       });
       
-      // Fetch user church and redirect
+      // Fetch user roles and church, then redirect
       setTimeout(async () => {
         const { data: { user: currentUser } } = await supabase.auth.getUser();
         if (currentUser) {
+          // Get user roles
+          const { data: rolesData } = await supabase
+            .from('user_roles')
+            .select('role')
+            .eq('user_id', currentUser.id);
+
+          const roles = rolesData?.map(r => r.role) || [];
+
+          // Get user profile with church
           const { data: profile } = await supabase
             .from('profiles')
             .select('church_id, churches(slug)')
             .eq('id', currentUser.id)
             .single();
 
-          if (profile?.churches?.slug) {
-            navigate(`/igreja/${(profile.churches as any).slug}`);
+          const churchSlug = (profile?.churches as any)?.slug || 'monte-hebrom';
+
+          // Redirect based on role
+          if (roles.includes('super_admin')) {
+            navigate('/admin/hodos');
+          } else if (roles.includes('admin')) {
+            navigate(`/admin/igrejas/${churchSlug}`);
+          } else if (profile?.church_id) {
+            navigate(`/igreja/${churchSlug}`);
           } else {
-            navigate('/meu-espaco');
+            navigate('/');
           }
         }
         setLoading(false);

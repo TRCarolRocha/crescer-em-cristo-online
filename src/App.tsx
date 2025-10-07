@@ -8,6 +8,7 @@ import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { ChurchProvider } from "@/contexts/ChurchContext";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { ChurchSidebar } from "@/components/layout/ChurchSidebar";
+import { AdminSidebar } from "@/components/layout/AdminSidebar";
 import { BottomNav } from "@/components/layout/BottomNav";
 import LandingPage from "./pages/LandingPage";
 import ChurchHomePage from "./pages/ChurchHomePage";
@@ -69,24 +70,52 @@ const App = () => (
               {/* Super Admin Routes */}
               <Route path="/admin/hodos" element={
                 <SuperAdminRoute>
-                  <SuperAdminDashboard />
+                  <SidebarProvider>
+                    <div className="flex min-h-screen w-full">
+                      <AdminSidebar />
+                      <main className="flex-1">
+                        <SuperAdminDashboard />
+                      </main>
+                    </div>
+                  </SidebarProvider>
                 </SuperAdminRoute>
               } />
               <Route path="/admin/hodos/igrejas" element={
                 <SuperAdminRoute>
-                  <ChurchList />
+                  <SidebarProvider>
+                    <div className="flex min-h-screen w-full">
+                      <AdminSidebar />
+                      <main className="flex-1">
+                        <ChurchList />
+                      </main>
+                    </div>
+                  </SidebarProvider>
                 </SuperAdminRoute>
               } />
               <Route path="/admin/hodos/conteudos" element={
                 <SuperAdminRoute>
-                  <PublicContent />
+                  <SidebarProvider>
+                    <div className="flex min-h-screen w-full">
+                      <AdminSidebar />
+                      <main className="flex-1">
+                        <PublicContent />
+                      </main>
+                    </div>
+                  </SidebarProvider>
                 </SuperAdminRoute>
               } />
               
               {/* Church Admin Routes */}
               <Route path="/admin/igrejas/:churchSlug" element={
                 <ChurchAdminRoute>
-                  <ChurchAdminDashboard />
+                  <SidebarProvider>
+                    <div className="flex min-h-screen w-full">
+                      <AdminSidebar />
+                      <main className="flex-1">
+                        <ChurchAdminDashboard />
+                      </main>
+                    </div>
+                  </SidebarProvider>
                 </ChurchAdminRoute>
               } />
               
