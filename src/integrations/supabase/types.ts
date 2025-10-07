@@ -858,7 +858,6 @@ export type Database = {
           id: string
           ministry: string | null
           phone: string | null
-          role: string | null
           tags: string[] | null
           updated_at: string | null
         }
@@ -873,7 +872,6 @@ export type Database = {
           id: string
           ministry?: string | null
           phone?: string | null
-          role?: string | null
           tags?: string[] | null
           updated_at?: string | null
         }
@@ -888,7 +886,6 @@ export type Database = {
           id?: string
           ministry?: string | null
           phone?: string | null
-          role?: string | null
           tags?: string[] | null
           updated_at?: string | null
         }
@@ -1326,6 +1323,10 @@ export type Database = {
         Args: { p_target_level: string; p_user_id: string }
         Returns: boolean
       }
+      get_user_church_id: {
+        Args: { p_user_id?: string }
+        Returns: string
+      }
       get_user_roles: {
         Args: { _user_id?: string }
         Returns: {
@@ -1347,6 +1348,10 @@ export type Database = {
         Args: { p_church_id: string }
         Returns: boolean
       }
+      is_group_leader: {
+        Args: { p_user_id?: string }
+        Returns: boolean
+      }
       is_lider: {
         Args: Record<PropertyKey, never>
         Returns: boolean
@@ -1361,7 +1366,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "lider" | "member" | "super_admin"
+      app_role: "admin" | "lider" | "member" | "super_admin" | "visitor"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1489,7 +1494,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "lider", "member", "super_admin"],
+      app_role: ["admin", "lider", "member", "super_admin", "visitor"],
     },
   },
 } as const
