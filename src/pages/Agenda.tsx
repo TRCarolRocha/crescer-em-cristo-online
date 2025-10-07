@@ -134,29 +134,29 @@ const Agenda = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8">
         {/* Header */}
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 sm:mb-8 gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Agenda da Igreja</h1>
-            <p className="text-gray-600 mt-2">Programações e eventos da Monte Hebrom</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Agenda da Igreja</h1>
+            <p className="text-sm sm:text-base text-gray-600 mt-1 sm:mt-2">Programações e eventos da Monte Hebrom</p>
           </div>
-          <Button onClick={() => navigate('/')} variant="outline">
+          <Button onClick={() => navigate('/')} variant="outline" className="w-full sm:w-auto">
             Voltar ao Início
           </Button>
         </div>
 
         {/* Aniversários do Mês */}
         {birthdays.length > 0 && (
-          <div className="space-y-4 mb-8">
-            <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
-              <Cake className="h-6 w-6 text-pink-600" />
+          <div className="space-y-4 mb-6 sm:mb-8">
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
+              <Cake className="h-5 w-5 sm:h-6 sm:w-6 text-pink-600" />
               🎂 Aniversários do Mês
             </h2>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
               {birthdays.map((birthday) => (
-                <Card key={birthday.id} className="bg-gradient-to-br from-pink-50 to-purple-50 border-pink-200 hover:shadow-lg transition-shadow">
+                <Card key={birthday.id} className="bg-gradient-to-br from-pink-50 to-purple-50 border-pink-200 hover:shadow-lg transition-shadow min-h-[100px]">
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between">
                       <div>
@@ -184,17 +184,17 @@ const Agenda = () => {
         )}
 
         {/* Lista de Eventos */}
-        <div className="space-y-4">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">Próximos Eventos</h2>
+        <div className="space-y-3 sm:space-y-4">
+          <h2 className="text-lg sm:text-xl font-semibold text-gray-800 mb-4">Próximos Eventos</h2>
           
           {eventos.length === 0 ? (
-            <Card className="text-center p-8">
+            <Card className="text-center p-6 sm:p-8">
               <CardContent>
-                <Calendar className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                <Calendar className="mx-auto h-10 w-10 sm:h-12 sm:w-12 text-gray-400 mb-4" />
+                <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">
                   Nenhum evento programado
                 </h3>
-                <p className="text-gray-600">
+                <p className="text-sm sm:text-base text-gray-600">
                   Novos eventos serão exibidos aqui quando forem adicionados.
                 </p>
               </CardContent>
@@ -202,31 +202,33 @@ const Agenda = () => {
           ) : (
             eventos.map((evento) => (
               <Card key={evento.id} className="hover:shadow-lg transition-shadow">
-                <CardContent className="p-6">
-                  <div className="flex justify-between items-start mb-4">
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900">{evento.titulo}</h3>
+                <CardContent className="p-4 sm:p-6">
+                  <div className="flex flex-col sm:flex-row justify-between items-start mb-4 gap-3">
+                    <div className="flex-1">
+                      <h3 className="text-base sm:text-lg font-semibold text-gray-900">{evento.titulo}</h3>
                       {evento.descricao && (
                         <p className="text-gray-600 text-sm mt-1">{evento.descricao}</p>
                       )}
                     </div>
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${getEventTypeColor(evento.titulo)}`}>
+                    <span className={`px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap ${getEventTypeColor(evento.titulo)}`}>
                       Evento
                     </span>
                   </div>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
-                    <div className="flex items-center">
-                      <Calendar className="h-4 w-4 mr-2 text-blue-600" />
-                      {formatDate(evento.data_inicio)}
-                      {evento.data_fim && evento.data_fim !== evento.data_inicio && (
-                        <span className="ml-2">até {formatDate(evento.data_fim)}</span>
-                      )}
+                  <div className="grid grid-cols-1 gap-3 text-sm text-gray-600">
+                    <div className="flex items-start sm:items-center">
+                      <Calendar className="h-4 w-4 mr-2 text-blue-600 flex-shrink-0 mt-0.5 sm:mt-0" />
+                      <span className="break-words">
+                        {formatDate(evento.data_inicio)}
+                        {evento.data_fim && evento.data_fim !== evento.data_inicio && (
+                          <span className="ml-2">até {formatDate(evento.data_fim)}</span>
+                        )}
+                      </span>
                     </div>
                     {evento.local && (
-                      <div className="flex items-center">
-                        <MapPin className="h-4 w-4 mr-2 text-red-600" />
-                        {evento.local}
+                      <div className="flex items-start sm:items-center">
+                        <MapPin className="h-4 w-4 mr-2 text-red-600 flex-shrink-0 mt-0.5 sm:mt-0" />
+                        <span className="break-words">{evento.local}</span>
                       </div>
                     )}
                   </div>

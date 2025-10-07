@@ -1,4 +1,4 @@
-import { Building2, Users, ArrowRight, Eye, Settings, Power } from 'lucide-react';
+import { Building2, Users, ArrowRight, Eye, Settings, Power, Church } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { GradientButton } from '@/components/common/GradientButton';
 import { Button } from '@/components/ui/button';
@@ -62,56 +62,60 @@ const ChurchList = () => {
             </div>
           ) : (
             churches.map((church) => (
-              <Card
-                key={church.id}
-                className="hover:shadow-lg transition-all group overflow-hidden"
-              >
-                <CardHeader>
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex items-center gap-3">
-                      {church.logo_url ? (
-                        <img 
-                          src={church.logo_url} 
-                          alt={church.name}
-                          className="h-12 w-12 rounded-lg object-cover"
-                        />
-                      ) : (
-                        <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-[#7b2ff7] to-[#f107a3] flex items-center justify-center">
-                          <Building2 className="h-6 w-6 text-white" />
-                        </div>
-                      )}
-                      <div className="flex-1 min-w-0">
-                        <CardTitle className="text-lg truncate">{church.name}</CardTitle>
-                        <p className="text-xs text-muted-foreground mt-1 truncate">
-                          @{church.slug}
-                        </p>
+              <Card key={church.id} className="hover:shadow-xl transition-all duration-300 border-2 border-transparent hover:border-[#7b2ff7]/20 bg-gradient-to-br from-white to-purple-50/30">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-4 mb-4">
+                    {church.logo_url ? (
+                      <img 
+                        src={church.logo_url} 
+                        alt={church.name}
+                        className="h-16 w-16 rounded-full object-cover shadow-md"
+                      />
+                    ) : (
+                      <div className="h-16 w-16 rounded-full bg-gradient-to-br from-[#7b2ff7] to-[#f107a3] flex items-center justify-center shadow-md">
+                        <Church className="h-8 w-8 text-white" />
                       </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      {church.name.length > 20 ? (
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-semibold text-gray-900 truncate">@{church.slug}</span>
+                        </div>
+                      ) : (
+                        <CardTitle className="text-lg font-bold truncate">{church.name}</CardTitle>
+                      )}
+                      {church.name.length <= 20 && (
+                        <p className="text-sm text-muted-foreground truncate">@{church.slug}</p>
+                      )}
+                      <Badge 
+                        variant={church.is_active ? "default" : "secondary"}
+                        className="mt-2 bg-gradient-to-r from-[#7b2ff7] to-[#f107a3]"
+                      >
+                        {church.is_active ? "Ativa" : "Inativa"}
+                      </Badge>
                     </div>
-                    <Badge variant={church.is_active ? "default" : "secondary"}>
-                      {church.is_active ? 'Ativa' : 'Inativa'}
-                    </Badge>
                   </div>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {/* Action Buttons */}
-                  <div className="grid grid-cols-2 gap-2">
+
+                  <div className="grid grid-cols-2 gap-3">
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => navigate(`/igreja/${church.slug}`)}
-                      className="w-full"
+                      className="w-full hover:bg-purple-50"
                     >
                       <Eye className="h-4 w-4 mr-2" />
-                      Ver Página
+                      <span className="hidden sm:inline">Ver Página</span>
+                      <span className="sm:hidden">Ver</span>
                     </Button>
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => navigate(`/admin/igrejas/${church.slug}`)}
-                      className="w-full"
+                      className="w-full hover:bg-purple-50"
                     >
                       <Settings className="h-4 w-4 mr-2" />
-                      Dashboard
+                      <span className="hidden sm:inline">Dashboard</span>
+                      <span className="sm:hidden">Admin</span>
                     </Button>
                   </div>
                 </CardContent>

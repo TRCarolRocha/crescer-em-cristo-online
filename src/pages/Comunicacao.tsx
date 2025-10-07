@@ -276,55 +276,55 @@ const Comunicacao = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-4xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8">
         {/* Header */}
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 sm:mb-8 gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Comunidade da Fé</h1>
-            <p className="text-gray-600 mt-2">Compartilhe momentos e se conecte com a família Monte Hebrom</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Comunidade da Fé</h1>
+            <p className="text-sm sm:text-base text-gray-600 mt-1 sm:mt-2">Compartilhe momentos e se conecte com a família Monte Hebrom</p>
           </div>
-          <Button onClick={() => navigate('/')} variant="outline">
+          <Button onClick={() => navigate('/')} variant="outline" className="w-full sm:w-auto">
             Voltar ao Início
           </Button>
         </div>
 
         {/* Estatísticas da Comunidade */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-3 gap-3 sm:gap-6 mb-6 sm:mb-8">
           <Card>
-            <CardContent className="p-6 text-center">
-              <Users className="h-8 w-8 text-blue-600 mx-auto mb-2" />
-              <div className="text-2xl font-bold text-gray-900">Ativos</div>
-              <div className="text-sm text-gray-600">Membros Online</div>
+            <CardContent className="p-4 sm:p-6 text-center">
+              <Users className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600 mx-auto mb-2" />
+              <div className="text-lg sm:text-2xl font-bold text-gray-900">Ativos</div>
+              <div className="text-xs sm:text-sm text-gray-600">Membros Online</div>
             </CardContent>
           </Card>
           <Card>
-            <CardContent className="p-6 text-center">
-              <MessageCircle className="h-8 w-8 text-green-600 mx-auto mb-2" />
-              <div className="text-2xl font-bold text-gray-900">{messages.length}</div>
-              <div className="text-sm text-gray-600">Posts Recentes</div>
+            <CardContent className="p-4 sm:p-6 text-center">
+              <MessageCircle className="h-6 w-6 sm:h-8 sm:w-8 text-green-600 mx-auto mb-2" />
+              <div className="text-lg sm:text-2xl font-bold text-gray-900">{messages.length}</div>
+              <div className="text-xs sm:text-sm text-gray-600">Posts Recentes</div>
             </CardContent>
           </Card>
           <Card>
-            <CardContent className="p-6 text-center">
-              <Heart className="h-8 w-8 text-red-600 mx-auto mb-2" />
-              <div className="text-2xl font-bold text-gray-900">Unidos</div>
-              <div className="text-sm text-gray-600">Em Comunhão</div>
+            <CardContent className="p-4 sm:p-6 text-center">
+              <Heart className="h-6 w-6 sm:h-8 sm:w-8 text-red-600 mx-auto mb-2" />
+              <div className="text-lg sm:text-2xl font-bold text-gray-900">Unidos</div>
+              <div className="text-xs sm:text-sm text-gray-600">Em Comunhão</div>
             </CardContent>
           </Card>
         </div>
 
         {/* Criar Novo Post */}
-        <Card className="mb-8">
+        <Card className="mb-6 sm:mb-8">
           <CardHeader>
-            <CardTitle className="text-lg">Compartilhar com a Comunidade</CardTitle>
+            <CardTitle className="text-base sm:text-lg">Compartilhar com a Comunidade</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               <Textarea
                 placeholder="Compartilhe algo especial com a família Monte Hebrom..."
                 value={novoPost}
                 onChange={(e) => setNovoPost(e.target.value)}
-                className="min-h-[100px]"
+                className="min-h-[80px] sm:min-h-[100px] text-sm sm:text-base"
               />
               
               <ImageUpload
@@ -337,7 +337,7 @@ const Comunicacao = () => {
                 <Button 
                   onClick={handleSubmitPost}
                   disabled={(!novoPost.trim() && !selectedImage) || posting}
-                  className="bg-blue-600 hover:bg-blue-700 flex items-center gap-2"
+                  className="bg-blue-600 hover:bg-blue-700 flex items-center gap-2 min-h-[44px] w-full sm:w-auto"
                 >
                   <Send className="h-4 w-4" />
                   {posting ? "Publicando..." : "Publicar"}
@@ -368,10 +368,10 @@ const Comunicacao = () => {
           ) : (
             messages.map((message) => (
               <Card key={message.id} className="hover:shadow-lg transition-shadow">
-                <CardContent className="p-6">
+                <CardContent className="p-4 sm:p-6">
                   {/* Header do Post */}
                   <div className="flex items-start space-x-3 mb-4">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold">
+                    <div className="w-12 h-12 sm:w-10 sm:h-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold flex-shrink-0">
                       {message.profiles?.full_name?.charAt(0) || 'U'}
                     </div>
                     <div className="flex-1">

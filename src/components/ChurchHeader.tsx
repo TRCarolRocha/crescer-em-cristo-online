@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Settings } from "lucide-react";
+import { Paintbrush } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import UserMenu from "./auth/UserMenu";
@@ -31,19 +31,8 @@ const ChurchHeader = ({ church, showCustomizeButton = false, onCustomize }: Chur
 
   return (
     <div className="relative bg-gradient-to-r from-blue-50 via-purple-50 to-blue-50 border-b border-blue-100">
-      {/* Botões no canto superior direito */}
-      <div className="absolute top-4 right-4 z-10 flex items-center gap-2">
-        {showCustomizeButton && onCustomize && (
-          <Button
-            onClick={onCustomize}
-            className="rounded-full shadow-lg"
-            size="lg"
-          >
-            <Settings className="h-5 w-5 mr-2" />
-            Personalizar
-          </Button>
-        )}
-        
+      {/* UserMenu no canto superior direito */}
+      <div className="absolute top-4 right-4 z-10">
         {user ? (
           <UserMenu />
         ) : (
@@ -79,6 +68,17 @@ const ChurchHeader = ({ church, showCustomizeButton = false, onCustomize }: Chur
           </div>
         </div>
       </div>
+
+      {/* Botão Personalizar no canto inferior direito */}
+      {showCustomizeButton && onCustomize && (
+        <button
+          onClick={onCustomize}
+          className="absolute bottom-4 right-4 p-3 rounded-full bg-gradient-to-r from-[#7b2ff7] to-[#f107a3] text-white shadow-lg hover:shadow-xl transition-all hover:scale-110"
+          aria-label="Personalizar igreja"
+        >
+          <Paintbrush className="h-5 w-5" />
+        </button>
+      )}
     </div>
   );
 };

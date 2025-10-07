@@ -1,13 +1,122 @@
+import { useState, useEffect } from 'react';
 import { Users, BookOpen, TrendingUp, Calendar, FileText } from 'lucide-react';
 import { CardMetric } from '@/components/common/CardMetric';
 import { ChartCard } from '@/components/common/ChartCard';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useParams } from 'react-router-dom';
-import { mockChurchStats, mockChurchRecentContent, mockEngagementData } from '@/data/mock';
+import { useParams, useNavigate } from 'react-router-dom';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { supabase } from '@/integrations/supabase/client';
+import { usePermissions } from '@/hooks/usePermissions';
 
 const ChurchAdminDashboard = () => {
   const { churchSlug } = useParams();
+  const navigate = useNavigate();
+  const { canManageChurch, loading: permissionsLoading } = usePermissions();
+  const [churchId, setChurchId] = useState<string | null>(null);
+  const [stats, setStats] = useState({
+    totalMembers: 0,
+    activeDiscipleships: 0,
+    engagement: 0,
+    eventsThisMonth: 0
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const checkAccess = async () => {
+      if (!churchSlug || permissionsLoading) return;
+
+      // Buscar igreja pelo slug
+      const { data: church, error } = await supabase
+        .from('churches')
+        .select('id')
+        .eq('slug', churchSlug)
+        .single();
+
+      if (error || !church) {
+        navigate('/');
+        return;
+      }
+
+      setChurchId(church.id);
+
+      // Verificar permissão
+      const hasAccess = await canManageChurch(church.id);
+      if (!hasAccess) {
+        navigate('/');
+        return;
+      }
+
+      // Buscar dados reais
+      await fetchChurchStats(church.id);
+    };
+
+    checkAccess();
+  }, [churchSlug, permissionsLoading, canManageChurch, navigate]);
+
+  const fetchChurchStats = async (id: string) => {
+    try {
+      // Total de membros
+      const { count: membersCount } = await supabase
+        .from('profiles')
+        .select('*', { count: 'exact', head: true })
+        .eq('church_id', id);
+
+      // Trilhas ativas (isso depende da sua lógica)
+      const { data: tracks } = await supabase
+        .from('discipleship_tracks')
+        .select('id')
+        .not('allowed_groups', 'is', null);
+
+      // Eventos deste mês
+      const now = new Date();
+      const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+      const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString();
+
+      const { data: events } = await supabase
+        .from('events')
+        .select('id, created_by')
+        .gte('event_date', firstDay)
+        .lte('event_date', lastDay);
+
+      // Filtrar eventos criados por membros da igreja
+      const { data: churchMembers } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('church_id', id);
+
+      const memberIds = churchMembers?.map(m => m.id) || [];
+      const churchEvents = events?.filter(e => memberIds.includes(e.created_by)) || [];
+
+      // Calcular engajamento (exemplo: % de membros com atividade recente)
+      const { data: recentActivity } = await supabase
+        .from('devocional_historico')
+        .select('user_id')
+        .in('user_id', memberIds)
+        .gte('created_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString());
+
+      const activeUsers = new Set(recentActivity?.map(a => a.user_id) || []).size;
+      const engagement = membersCount ? Math.round((activeUsers / membersCount) * 100) : 0;
+
+      setStats({
+        totalMembers: membersCount || 0,
+        activeDiscipleships: tracks?.length || 0,
+        engagement,
+        eventsThisMonth: churchEvents.length
+      });
+    } catch (error) {
+      console.error('Erro ao buscar estatísticas:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (permissionsLoading || loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#7b2ff7]"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-purple-50 p-8">
@@ -26,48 +135,25 @@ const ChurchAdminDashboard = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <CardMetric
             title="Discipulados Ativos"
-            value={mockChurchStats.activeDiscipleships}
+            value={stats.activeDiscipleships}
             icon={BookOpen}
           />
           <CardMetric
             title="Membros Cadastrados"
-            value={mockChurchStats.totalMembers}
+            value={stats.totalMembers}
             icon={Users}
-            trend={{ value: 3, isPositive: true }}
           />
           <CardMetric
             title="Engajamento"
-            value={`${mockChurchStats.engagement}%`}
+            value={`${stats.engagement}%`}
             icon={TrendingUp}
-            trend={{ value: 5, isPositive: true }}
           />
           <CardMetric
             title="Eventos Este Mês"
-            value={mockChurchStats.eventsThisMonth}
+            value={stats.eventsThisMonth}
             icon={Calendar}
           />
         </div>
-
-        {/* Chart */}
-        <ChartCard
-          title="Engajamento da Comunidade"
-          description="Evolução do engajamento nos últimos meses"
-        >
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={mockEngagementData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="month" />
-              <YAxis />
-              <Tooltip />
-              <Line
-                type="monotone"
-                dataKey="value"
-                stroke="#7b2ff7"
-                strokeWidth={2}
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        </ChartCard>
 
         {/* Management Tabs */}
         <Tabs defaultValue="members" className="w-full">
@@ -172,27 +258,9 @@ const ChurchAdminDashboard = () => {
 
           <TabsContent value="content" className="space-y-4">
             <ChartCard title="Conteúdos Publicados">
-              <div className="space-y-4">
-                {mockChurchRecentContent.map((content) => (
-                  <div
-                    key={content.id}
-                    className="flex items-center justify-between p-3 rounded-lg hover:bg-purple-50 transition-colors"
-                  >
-                    <div className="flex items-center gap-3">
-                      <FileText className="h-5 w-5 text-[#7b2ff7]" />
-                      <div>
-                        <p className="font-medium">{content.title}</p>
-                        <p className="text-xs text-muted-foreground">
-                          Publicado em {content.published_at}
-                        </p>
-                      </div>
-                    </div>
-                    <span className="text-sm text-muted-foreground">
-                      {content.views} visualizações
-                    </span>
-                  </div>
-                ))}
-              </div>
+              <p className="text-muted-foreground">
+                Gerenciar trilhas, devocionais e avisos da igreja.
+              </p>
             </ChartCard>
           </TabsContent>
 
