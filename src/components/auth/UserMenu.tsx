@@ -14,10 +14,12 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { LogOut, User, Settings, Shield } from 'lucide-react';
 import { getUserProfile } from '@/utils/adminUtils';
+import { usePermissions } from '@/hooks/usePermissions';
 
 const UserMenu = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const { isSuperAdmin, isChurchAdmin } = usePermissions();
   const [userProfile, setUserProfile] = useState<any>(null);
 
   useEffect(() => {
@@ -46,7 +48,7 @@ const UserMenu = () => {
     return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
   };
 
-  const isAdmin = userProfile?.role === 'admin';
+  const isAdmin = isSuperAdmin || isChurchAdmin;
 
   return (
     <DropdownMenu>

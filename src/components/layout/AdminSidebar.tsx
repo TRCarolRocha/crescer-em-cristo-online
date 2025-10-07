@@ -111,8 +111,8 @@ export function AdminSidebar() {
                   {displayChurches.map((church) => (
                     <SidebarMenuItem key={church.id}>
                       <SidebarMenuButton
-                        onClick={() => navigate(`/igreja/${church.slug}`)}
-                        isActive={location.pathname === `/igreja/${church.slug}`}
+                        onClick={() => navigate(`/admin/igrejas/${church.slug}`)}
+                        isActive={location.pathname === `/admin/igrejas/${church.slug}`}
                         className="w-full justify-start"
                       >
                         <Church className="mr-2 h-4 w-4" />
