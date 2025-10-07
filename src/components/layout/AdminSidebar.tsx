@@ -10,7 +10,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { LayoutDashboard, Building2, FileText, Home, Church } from 'lucide-react';
+import { LayoutDashboard, Building2, FileText, Home, Church, ArrowLeft } from 'lucide-react';
 import { usePermissions } from '@/hooks/usePermissions';
 import { HeaderLogo } from '@/components/common/HeaderLogo';
 
@@ -33,7 +33,7 @@ export function AdminSidebar() {
     <Sidebar className="border-r border-purple-200 bg-white">
       <SidebarHeader
         className="p-4 border-b cursor-pointer hover:bg-purple-50/50 transition-colors"
-        onClick={() => navigate('/')}
+        onClick={() => navigate('/meu-espaco')}
       >
         <div className="flex items-center gap-3">
           <HeaderLogo size="sm" />
@@ -96,11 +96,20 @@ export function AdminSidebar() {
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton
+                  onClick={() => navigate('/meu-espaco')}
+                  className="w-full justify-start"
+                >
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  <span>Meu Espaço</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton
                   onClick={() => navigate('/')}
                   className="w-full justify-start"
                 >
                   <Home className="mr-2 h-4 w-4" />
-                  <span>Voltar ao Início</span>
+                  <span>Página Inicial</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>

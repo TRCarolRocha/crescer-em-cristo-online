@@ -1,4 +1,4 @@
-import { Home, BookOpen, Map, Calendar, MessageCircle, Settings } from 'lucide-react';
+import { Home, BookOpen, Map, Calendar, MessageCircle, ArrowLeft } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Sidebar,
@@ -30,7 +30,7 @@ export function ChurchSidebar() {
     <Sidebar className="border-r border-purple-200 bg-white">
       <SidebarHeader 
         className="p-4 border-b cursor-pointer hover:bg-purple-50/50 transition-colors"
-        onClick={() => navigate('/')}
+        onClick={() => navigate('/meu-espaco')}
       >
         <div className="flex items-center gap-3">
           <HeaderLogo size="sm" />
@@ -48,6 +48,17 @@ export function ChurchSidebar() {
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
+              {/* Botão Meu Espaço */}
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  onClick={() => navigate('/meu-espaco')}
+                  className="hover:bg-purple-50 hover:text-purple-600"
+                >
+                  <ArrowLeft className="mr-2 h-5 w-5" />
+                  <span>Meu Espaço</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              
               {menuItems.map((item) => {
                 const isActive = location.pathname === item.url;
                 return (

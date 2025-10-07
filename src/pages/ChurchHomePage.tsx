@@ -2,14 +2,16 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { BookOpen, Users, Calendar, MessageCircle } from "lucide-react";
+import { BookOpen, Users, Calendar, MessageCircle, Settings } from "lucide-react";
 import ChurchHeader from "@/components/ChurchHeader";
 import CarrosselAvisos from "@/components/CarrosselAvisos";
 import DevocionalNotification from "@/components/DevocionalNotification";
 import BirthdaySection from "@/components/BirthdaySection";
 import DevocionalDashboard from "@/components/DevocionalDashboard";
 import { useAuth } from "@/contexts/AuthContext";
+import { usePermissions } from "@/hooks/usePermissions";
 import { supabase } from "@/integrations/supabase/client";
+import { ChurchCustomizationDialog } from "@/components/admin/ChurchCustomizationDialog";
 
 interface Church {
   id: string;
@@ -26,10 +28,12 @@ const ChurchHomePage = () => {
   const navigate = useNavigate();
   const { churchSlug } = useParams();
   const { user } = useAuth();
+  const { isChurchAdmin, isSuperAdmin } = usePermissions();
   const [church, setChurch] = useState<Church | null>(null);
   const [loading, setLoading] = useState(true);
   const [hoveredFeature, setHoveredFeature] = useState<number | null>(null);
   const [hasCompletedDiagnostic, setHasCompletedDiagnostic] = useState(false);
+  const [customizationOpen, setCustomizationOpen] = useState(false);
 
   useEffect(() => {
     const fetchChurch = async () => {
@@ -126,6 +130,29 @@ const ChurchHomePage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
       <ChurchHeader church={church} />
+      
+      {/* Botão de Personalização (apenas para admins) */}
+      {(isChurchAdmin || isSuperAdmin) && church && (
+        <>
+          <Button
+            onClick={() => setCustomizationOpen(true)}
+            className="fixed top-24 right-6 z-50 rounded-full shadow-lg"
+            size="lg"
+          >
+            <Settings className="h-5 w-5 mr-2" />
+            Personalizar
+          </Button>
+          <ChurchCustomizationDialog
+            open={customizationOpen}
+            onOpenChange={setCustomizationOpen}
+            church={church}
+            onSuccess={() => {
+              // Recarregar dados da igreja
+              window.location.reload();
+            }}
+          />
+        </>
+      )}
       
       <main className="container mx-auto px-4 py-12 space-y-16">
         {/* Hero Section */}

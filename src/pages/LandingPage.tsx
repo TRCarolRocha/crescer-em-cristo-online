@@ -53,12 +53,15 @@ const LandingPage = () => {
       {/* Hero Section */}
       <section className="relative z-10 px-6 pt-20 pb-32">
         <div className="max-w-6xl mx-auto text-center space-y-8">
-          <div className="flex items-center justify-center gap-6 animate-float">
-            <HeaderLogo size="lg" />
-            <h1 className="hodos-title-light">
-              HODOS
-            </h1>
+          {/* Logo pequena */}
+          <div className="flex justify-center mb-4">
+            <HeaderLogo size="md" />
           </div>
+          
+          {/* Palavra HODOS gigante com gradiente */}
+          <h1 className="text-7xl md:text-9xl font-bold font-playfair bg-gradient-to-r from-[#7b2ff7] via-purple-500 to-[#f107a3] bg-clip-text text-transparent animate-float" style={{ letterSpacing: '0.05em' }}>
+            HODOS
+          </h1>
           
           <p className="text-2xl md:text-3xl font-light text-purple-200 max-w-3xl mx-auto">
             Hub de Discipulado Digital

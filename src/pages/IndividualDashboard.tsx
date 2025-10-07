@@ -1,33 +1,59 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { BookOpen, Users, Compass, ArrowRight } from "lucide-react";
+import { BookOpen, Users, Compass, ArrowRight, Home, Settings, MessageCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import hodosLogo from "@/assets/hodos-logo.png";
+import { useAuth } from "@/contexts/AuthContext";
+import { useChurch } from "@/contexts/ChurchContext";
+import { usePermissions } from "@/hooks/usePermissions";
+import UserMenu from "@/components/auth/UserMenu";
 
 const IndividualDashboard = () => {
   const navigate = useNavigate();
+  const { church } = useChurch();
+  const { isSuperAdmin, isChurchAdmin } = usePermissions();
 
-  const publicFeatures = [
+  const navigationCards = [
+    ...(church ? [{
+      icon: Home,
+      title: "Minha Igreja",
+      description: `Voltar para ${church.name}`,
+      color: "from-blue-500 to-cyan-500",
+      action: () => navigate(`/igreja/${church.slug}`)
+    }] : []),
+    ...(isChurchAdmin || isSuperAdmin ? [{
+      icon: Settings,
+      title: "Gerenciar Igreja",
+      description: "Acessar painel administrativo",
+      color: "from-orange-500 to-red-500",
+      action: () => navigate(isSuperAdmin ? '/admin/hodos' : '/admin/igrejas/monte-hebrom')
+    }] : []),
+    ...(isSuperAdmin ? [{
+      icon: Settings,
+      title: "Dashboard Hodos",
+      description: "Gerenciar plataforma completa",
+      color: "from-purple-500 to-pink-500",
+      action: () => navigate('/admin/hodos')
+    }] : []),
+    {
+      icon: Users,
+      title: "Meu Perfil",
+      description: "Gerenciar suas informações",
+      color: "from-green-500 to-emerald-500",
+      action: () => navigate('/perfil')
+    },
     {
       icon: BookOpen,
-      title: "Devocionais Públicos",
-      description: "Acesse conteúdo devocional gratuito",
-      color: "from-blue-500 to-cyan-500",
+      title: "Devocionais",
+      description: "Acessar devocionais diários",
+      color: "from-indigo-500 to-blue-500",
       action: () => navigate('/devocional')
     },
     {
-      icon: Users,
-      title: "Trilhas de Discipulado",
-      description: "Comece sua jornada espiritual",
-      color: "from-purple-500 to-pink-500",
-      action: () => navigate('/trilhas')
-    },
-    {
       icon: Compass,
-      title: "Procurar Igrejas",
-      description: "Encontre uma comunidade perto de você",
-      color: "from-green-500 to-emerald-500",
-      action: () => {} // TODO: Implement church search
+      title: "Trilhas",
+      description: "Explorar trilhas de discipulado",
+      color: "from-teal-500 to-cyan-500",
+      action: () => navigate('/trilhas')
     }
   ];
 
@@ -36,20 +62,19 @@ const IndividualDashboard = () => {
       {/* Header */}
       <header className="border-b border-white/10 bg-white/5 backdrop-blur-sm">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <img src={hodosLogo} alt="Hodos" className="h-10 w-10 object-contain" />
+          <button 
+            onClick={() => navigate('/')}
+            className="flex items-center gap-3 hover:opacity-80 transition-opacity"
+          >
+            <div className="h-10 w-10 rounded-full bg-gradient-to-r from-[#7b2ff7] to-[#f107a3] flex items-center justify-center">
+              <span className="text-white font-bold text-xl">H</span>
+            </div>
             <div>
               <h1 className="text-xl font-bold text-white">Hodos</h1>
-              <p className="text-xs text-white/60">Seu Espaço Pessoal</p>
+              <p className="text-xs text-white/60">Meu Espaço</p>
             </div>
-          </div>
-          <Button
-            variant="outline"
-            onClick={() => navigate('/perfil')}
-            className="border-white/30 bg-white/5 text-white hover:bg-white/10"
-          >
-            Perfil
-          </Button>
+          </button>
+          <UserMenu />
         </div>
       </header>
 
@@ -60,15 +85,15 @@ const IndividualDashboard = () => {
             Bem-vindo ao Seu Espaço
           </h2>
           <p className="text-xl text-white/70 max-w-2xl mx-auto">
-            Explore conteúdos de discipulado, devocionais e encontre sua comunidade de fé
+            Seu hub central de navegação no Hodos
           </p>
         </section>
 
-        {/* Public Features */}
+        {/* Navigation Cards */}
         <section className="space-y-8">
-          <h3 className="text-3xl font-bold text-center text-white">Recursos Disponíveis</h3>
-          <div className="grid md:grid-cols-3 gap-6">
-            {publicFeatures.map((feature, index) => (
+          <h3 className="text-3xl font-bold text-center text-white">Acesso Rápido</h3>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {navigationCards.map((feature, index) => (
               <Card
                 key={index}
                 className="feature-card cursor-pointer hover:scale-105 transition-all duration-300"
@@ -93,20 +118,24 @@ const IndividualDashboard = () => {
         </section>
 
         {/* CTA Section */}
-        <section className="text-center py-12 space-y-6">
-          <Card className="p-12 bg-gradient-to-br from-blue-500/10 to-purple-500/10 border-2 border-blue-500/20">
-            <h3 className="text-3xl font-bold mb-4">Procurando uma Igreja?</h3>
-            <p className="text-lg text-muted-foreground mb-6 max-w-2xl mx-auto">
-              Conecte-se com uma comunidade local e experimente o discipulado em comunhão
-            </p>
-            <Button 
-              size="lg"
-              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-            >
-              Explorar Igrejas Cadastradas
-            </Button>
-          </Card>
-        </section>
+        {!church && (
+          <section className="text-center py-12 space-y-6">
+            <Card className="p-12 bg-gradient-to-br from-blue-500/10 to-purple-500/10 border-2 border-blue-500/20">
+              <MessageCircle className="h-16 w-16 mx-auto mb-4 text-blue-400" />
+              <h3 className="text-3xl font-bold mb-4 text-white">Procurando uma Igreja?</h3>
+              <p className="text-lg text-slate-300 mb-6 max-w-2xl mx-auto">
+                Entre em contato conosco para conectar sua comunidade ao Hodos
+              </p>
+              <Button 
+                size="lg"
+                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                onClick={() => navigate('/fale-com-lideranca')}
+              >
+                Falar com o Suporte
+              </Button>
+            </Card>
+          </section>
+        )}
       </main>
     </div>
   );
