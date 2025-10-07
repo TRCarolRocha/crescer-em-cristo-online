@@ -55,25 +55,39 @@ export const usePermissions = (): UsePermissionsReturn => {
 
   const canManageChurch = async (churchId: string): Promise<boolean> => {
     if (!user) return false;
-    
+
     // Super admin pode gerenciar qualquer igreja
     if (isSuperAdmin) return true;
-    
-    // Verificar se é admin da igreja específica
-    const { data, error } = await supabase
+
+    try {
+      // Tenta usar a função RPC que já considera admin global (church_id IS NULL) e super_admin
+      const { data: rpcResult, error: rpcError } = await supabase.rpc('is_church_admin', { p_church_id: churchId });
+      if (!rpcError && typeof rpcResult === 'boolean') {
+        return rpcResult;
+      }
+      if (rpcError) {
+        console.warn('RPC is_church_admin falhou, usando fallback:', rpcError.message);
+      }
+    } catch (e) {
+      console.warn('Erro ao chamar RPC is_church_admin, usando fallback:', e);
+    }
+
+    // Fallback: verificar se é admin da igreja específica OU admin global (church_id IS NULL)
+    const { data: roleRow, error } = await supabase
       .from('user_roles')
-      .select('church_id')
+      .select('id')
       .eq('user_id', user.id)
       .eq('role', 'admin')
-      .eq('church_id', churchId)
+      .or(`church_id.eq.${churchId},church_id.is.null`)
+      .limit(1)
       .maybeSingle();
-    
+
     if (error) {
-      console.error('Error checking church admin permission:', error);
+      console.error('Error checking church admin permission (fallback):', error);
       return false;
     }
-    
-    return !!data;
+
+    return !!roleRow;
   };
 
   return {

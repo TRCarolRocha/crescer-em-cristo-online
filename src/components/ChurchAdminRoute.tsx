@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Navigate, useParams } from 'react-router-dom';
 import { usePermissions } from '@/hooks/usePermissions';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/hooks/use-toast';
 
 interface ChurchAdminRouteProps {
   children: React.ReactNode;
@@ -31,17 +32,30 @@ const ChurchAdminRoute: React.FC<ChurchAdminRouteProps> = ({ children }) => {
           .from('churches')
           .select('id')
           .eq('slug', churchSlug)
-          .single();
+          .maybeSingle();
 
         if (error || !church) {
+          console.warn('Igreja não encontrada para o slug:', churchSlug, error?.message);
           setHasAccess(false);
           setLoading(false);
+          toast({
+            title: 'Acesso negado',
+            description: 'Igreja não encontrada ou você não tem permissão.',
+            variant: 'destructive'
+          });
           return;
         }
 
         setChurchId(church.id);
         const canManage = await canManageChurch(church.id);
         setHasAccess(canManage);
+        if (!canManage) {
+          toast({
+            title: 'Acesso negado',
+            description: 'Você não possui permissão para gerenciar esta igreja.',
+            variant: 'destructive'
+          });
+        }
       } else {
         setHasAccess(false);
       }
@@ -61,7 +75,7 @@ const ChurchAdminRoute: React.FC<ChurchAdminRouteProps> = ({ children }) => {
   }
 
   if (!hasAccess) {
-    return <Navigate to="/igreja/monte-hebrom" replace />;
+    return <Navigate to="/admin/hodos/igrejas" replace />;
   }
 
   return <>{children}</>;
