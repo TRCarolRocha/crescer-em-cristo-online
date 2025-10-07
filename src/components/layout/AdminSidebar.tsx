@@ -13,11 +13,24 @@ import {
 import { LayoutDashboard, Building2, FileText, Home, Church, ArrowLeft } from 'lucide-react';
 import { usePermissions } from '@/hooks/usePermissions';
 import { HeaderLogo } from '@/components/common/HeaderLogo';
+import { useChurches } from '@/hooks/useChurches';
+import { useChurch } from '@/contexts/ChurchContext';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui/button';
 
 export function AdminSidebar() {
   const navigate = useNavigate();
   const location = useLocation();
   const { isSuperAdmin, isChurchAdmin } = usePermissions();
+  const { churches, loading: churchesLoading } = useChurches();
+  const { church: userChurch } = useChurch();
+
+  // Determinar quais igrejas exibir
+  const displayChurches = isSuperAdmin 
+    ? churches // Super admin vê todas
+    : userChurch 
+      ? [userChurch] // Admin vê apenas a sua
+      : []; // Nenhuma igreja
 
   const superAdminItems = [
     { title: 'Dashboard Hodos', url: '/admin/hodos', icon: LayoutDashboard },
@@ -25,9 +38,6 @@ export function AdminSidebar() {
     { title: 'Conteúdos Públicos', url: '/admin/hodos/conteudos', icon: FileText },
   ];
 
-  const churchAdminItems = [
-    { title: 'Dashboard Igreja', url: '/admin/igrejas/monte-hebrom', icon: Church },
-  ];
 
   return (
     <Sidebar className="border-r border-purple-200 bg-white">
@@ -71,22 +81,47 @@ export function AdminSidebar() {
 
         {(isSuperAdmin || isChurchAdmin) && (
           <SidebarGroup>
-            <SidebarGroupLabel>Igreja</SidebarGroupLabel>
+            <SidebarGroupLabel>
+              {isSuperAdmin ? 'Igrejas' : 'Minha Igreja'}
+            </SidebarGroupLabel>
             <SidebarGroupContent>
-              <SidebarMenu>
-                {churchAdminItems.map((item) => (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton
-                      onClick={() => navigate(item.url)}
-                      isActive={location.pathname.includes('/admin/igrejas')}
-                      className="w-full justify-start"
+              {churchesLoading ? (
+                <div className="px-2 space-y-2">
+                  <Skeleton className="h-8 w-full" />
+                  <Skeleton className="h-8 w-full" />
+                </div>
+              ) : displayChurches.length === 0 ? (
+                <div className="px-2 py-2">
+                  <p className="text-sm text-muted-foreground mb-2">
+                    Nenhuma igreja cadastrada
+                  </p>
+                  {isSuperAdmin && (
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => navigate('/admin/hodos/igrejas')}
+                      className="w-full"
                     >
-                      <item.icon className="mr-2 h-4 w-4" />
-                      <span>{item.title}</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
+                      + Cadastrar Igreja
+                    </Button>
+                  )}
+                </div>
+              ) : (
+                <SidebarMenu>
+                  {displayChurches.map((church) => (
+                    <SidebarMenuItem key={church.id}>
+                      <SidebarMenuButton
+                        onClick={() => navigate(`/igreja/${church.slug}`)}
+                        isActive={location.pathname === `/igreja/${church.slug}`}
+                        className="w-full justify-start"
+                      >
+                        <Church className="mr-2 h-4 w-4" />
+                        <span className="truncate">{church.name}</span>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              )}
             </SidebarGroupContent>
           </SidebarGroup>
         )}
