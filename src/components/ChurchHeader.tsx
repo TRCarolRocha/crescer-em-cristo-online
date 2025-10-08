@@ -46,22 +46,22 @@ const ChurchHeader = ({ church, showCustomizeButton = false, onCustomize }: Chur
         )}
       </div>
       
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 py-4 sm:py-6">
-        <div className="flex items-center gap-3 sm:gap-6">
+      <div className="max-w-7xl mx-auto px-6 py-6">
+        <div className="flex items-center gap-6">
           {/* Logo */}
           <img 
             src={churchLogo}
             alt={churchName} 
-            className="h-12 w-12 sm:h-16 sm:w-16 object-contain flex-shrink-0" 
+            className="h-16 w-16 object-contain" 
           />
           
           {/* Informações da Igreja */}
-          <div className="flex-1 min-w-0">
-            <h1 className="text-lg sm:text-2xl md:text-3xl font-bold font-playfair text-blue-900 truncate">
+          <div className="flex-1">
+            <h1 className="text-3xl font-bold font-playfair text-blue-900">
               {churchName}
             </h1>
             {churchHeadline && (
-              <p className="text-sm sm:text-base md:text-lg font-semibold text-blue-700 mt-0.5 sm:mt-1 truncate">
+              <p className="text-lg font-semibold text-blue-700 mt-1">
                 {churchHeadline}
               </p>
             )}
