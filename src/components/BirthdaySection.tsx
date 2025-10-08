@@ -87,18 +87,18 @@ const BirthdaySection = () => {
           Aniversários Próximos
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-2.5">
+      <CardContent className="space-y-2 px-3 sm:px-4">
         {birthdays.map((birthday) => (
-          <div key={birthday.id} className="flex items-center justify-between bg-white/70 rounded-lg p-3">
-            <div className="flex items-center gap-3">
-              <div className="bg-pink-100 p-2 rounded-full">
-                <Gift className="h-4 w-4 text-pink-600" />
+          <div key={birthday.id} className="flex items-center justify-between bg-white/70 rounded-lg p-2 sm:p-2.5">
+            <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+              <div className="bg-pink-100 p-1.5 sm:p-2 rounded-full flex-shrink-0">
+                <Gift className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-pink-600" />
               </div>
-              <div>
-                <p className="font-medium text-gray-900 text-sm">
+              <div className="min-w-0 flex-1">
+                <p className="font-medium text-gray-900 text-xs sm:text-sm truncate">
                   {birthday.full_name}
                 </p>
-                <p className="text-xs text-gray-600">
+                <p className="text-xs text-gray-600 truncate">
                   {new Date(birthday.birth_date).toLocaleDateString('pt-BR', {
                     day: '2-digit',
                     month: 'long'
@@ -109,7 +109,7 @@ const BirthdaySection = () => {
             
             <Badge 
               variant="outline" 
-              className={`text-xs ${
+              className={`text-xs flex-shrink-0 ml-2 ${
                 birthday.days_until === 0 
                   ? 'bg-pink-100 text-pink-700 border-pink-300' 
                   : birthday.days_until <= 7
@@ -127,7 +127,7 @@ const BirthdaySection = () => {
           </div>
         ))}
         
-        <div className="text-center mt-4">
+        <div className="text-center mt-3 sm:mt-4">
           <p className="text-xs text-gray-500">
             <Calendar className="h-3 w-3 inline mr-1" />
             Próximos 30 dias

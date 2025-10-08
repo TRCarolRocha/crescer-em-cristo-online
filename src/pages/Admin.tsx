@@ -21,13 +21,13 @@ const Admin = () => {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8">
         {/* Header */}
-        <div className="bg-white/80 backdrop-blur-sm border-b sticky top-0 z-10 -mx-4 px-4 py-3 mb-4 md:mb-8 md:relative md:bg-transparent md:backdrop-blur-none md:border-0">
-          <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-3">
-            <div>
-              <h1 className="text-xl md:text-3xl font-bold text-gray-900">Administrativo</h1>
-              <p className="text-xs md:text-sm text-gray-600 mt-1">Gestão da Igreja Monte Hebrom</p>
+        <div className="bg-white/80 backdrop-blur-sm border-b sticky top-0 z-10 -mx-4 px-3 sm:px-4 py-3 mb-4 md:mb-8 md:relative md:bg-transparent md:backdrop-blur-none md:border-0">
+          <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-2 sm:gap-3">
+            <div className="min-w-0 flex-1">
+              <h1 className="text-base sm:text-lg md:text-3xl font-bold text-gray-900 truncate">Administrativo</h1>
+              <p className="text-xs md:text-sm text-gray-600 mt-0.5 sm:mt-1 truncate">Gestão da Igreja Monte Hebrom</p>
             </div>
-            <Button onClick={() => navigate('/')} variant="outline" size="sm" className="md:h-auto">
+            <Button onClick={() => navigate('/')} variant="outline" size="sm" className="md:h-auto flex-shrink-0">
               ← Voltar
             </Button>
           </div>
@@ -36,17 +36,17 @@ const Admin = () => {
         {/* Mobile: Select dropdown */}
         <div className="md:hidden mb-4">
           <Select value={activeTab} onValueChange={setActiveTab}>
-            <SelectTrigger className="w-full z-50">
+            <SelectTrigger className="w-full max-w-full text-sm z-50">
               <SelectValue placeholder="Selecione uma seção" />
             </SelectTrigger>
-            <SelectContent className="z-50">
-              <SelectItem value="membros">👥 Membros</SelectItem>
-              <SelectItem value="grupos">👨‍👩‍👧‍👦 Grupos</SelectItem>
-              <SelectItem value="trilhas">📚 Trilhas</SelectItem>
-              <SelectItem value="visibilidade">👁️ Visibilidade</SelectItem>
-              <SelectItem value="devocionais">❤️ Devocionais</SelectItem>
-              <SelectItem value="avisos">💬 Avisos</SelectItem>
-              <SelectItem value="agenda">⚙️ Agenda</SelectItem>
+            <SelectContent className="z-50 bg-white">
+              <SelectItem value="membros" className="text-sm">👥 Membros</SelectItem>
+              <SelectItem value="grupos" className="text-sm">👨‍👩‍👧‍👦 Grupos</SelectItem>
+              <SelectItem value="trilhas" className="text-sm">📚 Trilhas</SelectItem>
+              <SelectItem value="visibilidade" className="text-sm">👁️ Visibilidade</SelectItem>
+              <SelectItem value="devocionais" className="text-sm">❤️ Devocionais</SelectItem>
+              <SelectItem value="avisos" className="text-sm">💬 Avisos</SelectItem>
+              <SelectItem value="agenda" className="text-sm">⚙️ Agenda</SelectItem>
             </SelectContent>
           </Select>
         </div>

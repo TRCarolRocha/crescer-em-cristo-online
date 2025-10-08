@@ -156,7 +156,7 @@ const ChurchHomePage = () => {
         />
       )}
       
-      <main className="container mx-auto max-w-7xl px-4 py-6 md:py-12 pb-24 md:pb-12 space-y-8 md:space-y-16">
+      <main className="container mx-auto max-w-7xl px-3 sm:px-4 py-6 md:py-12 pb-24 md:pb-12 space-y-6 sm:space-y-8 md:space-y-16 overflow-x-hidden">
         {/* Search Bar - Mobile only */}
         <div className="md:hidden">
           <div className="relative">
@@ -169,17 +169,17 @@ const ChurchHomePage = () => {
         </div>
 
         {/* Hero Section */}
-        <section className="text-center space-y-4 md:space-y-6 py-6 md:py-12">
-          <h2 className="text-3xl md:text-5xl font-bold bg-gradient-to-r from-primary via-purple-600 to-pink-600 bg-clip-text text-transparent animate-fade-in">
+        <section className="text-center space-y-3 sm:space-y-4 md:space-y-6 py-4 sm:py-6 md:py-12">
+          <h2 className="text-xl sm:text-2xl md:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-primary via-purple-600 to-pink-600 bg-clip-text text-transparent animate-fade-in px-2">
             Bem-vindo à Sua Jornada de Discipulado
           </h2>
-          <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-sm sm:text-base md:text-lg lg:text-xl text-muted-foreground max-w-2xl mx-auto px-2">
             Uma experiência transformadora de crescimento espiritual
           </p>
           <Button 
             size="lg" 
             onClick={handleContinueJourney}
-            className="bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90 text-white px-6 md:px-8 py-3 md:py-6 text-base md:text-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 w-full md:w-auto"
+            className="bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90 text-white px-4 sm:px-6 md:px-8 py-2.5 sm:py-3 md:py-6 text-sm sm:text-base md:text-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 w-full md:w-auto"
           >
             {hasCompletedDiagnostic ? "Continuar Jornada" : "Descobrir Seu Nível Espiritual"}
           </Button>
@@ -187,7 +187,7 @@ const ChurchHomePage = () => {
 
         {/* User-specific content */}
         {user && (
-          <div className="grid md:grid-cols-2 gap-4 md:gap-6">
+          <div className="grid md:grid-cols-2 gap-3 sm:gap-4 md:gap-6">
             <DevocionalNotification />
             <BirthdaySection />
           </div>
@@ -200,8 +200,8 @@ const ChurchHomePage = () => {
         {user && <DevocionalDashboard />}
 
         {/* Features - Mobile: Pills / Desktop: Grid */}
-        <section className="space-y-6">
-          <h3 className="text-2xl md:text-3xl font-bold text-center">Recursos Disponíveis</h3>
+        <section className="space-y-4 sm:space-y-6">
+          <h3 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-center">Recursos Disponíveis</h3>
           
           {/* Mobile: Horizontal Pills */}
           <div className="md:hidden overflow-x-auto scrollbar-hide -mx-4 px-4">
@@ -242,12 +242,13 @@ const ChurchHomePage = () => {
         </section>
 
         {/* Footer CTA */}
-        <section className="text-center py-8 md:py-12 space-y-3 md:space-y-4">
-          <h3 className="text-2xl font-bold">Precisa Falar com a Liderança?</h3>
+        <section className="text-center py-6 sm:py-8 md:py-12 space-y-2.5 sm:space-y-3 md:space-y-4">
+          <h3 className="text-lg sm:text-xl md:text-2xl font-bold px-2">Precisa Falar com a Liderança?</h3>
           <Button 
             variant="outline" 
             size="lg"
             onClick={() => navigate('/fale-com-lideranca')}
+            className="text-sm sm:text-base"
           >
             Enviar Mensagem
           </Button>
