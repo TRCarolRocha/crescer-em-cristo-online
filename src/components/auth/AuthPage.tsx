@@ -9,6 +9,8 @@ import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { Eye, EyeOff, LogIn, UserPlus } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { HeaderLogo } from '@/components/common/HeaderLogo';
+import { GradientButton } from '@/components/common/GradientButton';
 
 const AuthPage = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -120,39 +122,35 @@ const AuthPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-fuchsia-900 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        {/* Logo e Nome da Igreja */}
-        <div className="text-center mb-8">
-          <img 
-            src="/lovable-uploads/a989c536-6a58-44f9-a982-3a6b3847a288.png" 
-            alt="Monte Hebrom" 
-            className="h-20 w-20 mx-auto mb-4 drop-shadow-lg object-cover" 
-          />
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-900 to-purple-900 bg-clip-text text-transparent">
-            MONTE HEBROM
+        {/* Logo e Nome HODOS */}
+        <div className="text-center mb-8 flex flex-col items-center">
+          <HeaderLogo size="lg" className="mb-4" />
+          <h1 className="text-4xl font-bold text-white mb-2 tracking-tight">
+            HODOS
           </h1>
-          <p className="text-gray-600">Lugar de Refúgio e Aliança</p>
+          <p className="text-purple-200 text-lg font-light">Hub de Discipulado Digital</p>
         </div>
 
-        <Card className="shadow-2xl border-0 bg-white/95 backdrop-blur-sm">
+        <Card className="shadow-2xl border-0 bg-white/10 backdrop-blur-md border border-white/20">
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl">Acesso à Plataforma</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-2xl text-white">Acesso à Plataforma</CardTitle>
+            <CardDescription className="text-purple-200">
               Entre em sua conta ou cadastre-se para começar sua jornada
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="login" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="login">Entrar</TabsTrigger>
-                <TabsTrigger value="signup">Cadastrar</TabsTrigger>
+              <TabsList className="grid w-full grid-cols-2 bg-white/20">
+                <TabsTrigger value="login" className="data-[state=active]:bg-white/90 data-[state=active]:text-purple-900">Entrar</TabsTrigger>
+                <TabsTrigger value="signup" className="data-[state=active]:bg-white/90 data-[state=active]:text-purple-900">Cadastrar</TabsTrigger>
               </TabsList>
               
               <TabsContent value="login">
                 <form onSubmit={handleLogin} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="login-email">Email</Label>
+                    <Label htmlFor="login-email" className="text-white">Email</Label>
                     <Input 
                       id="login-email" 
                       type="email" 
@@ -163,7 +161,7 @@ const AuthPage = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="login-password">Senha</Label>
+                    <Label htmlFor="login-password" className="text-white">Senha</Label>
                     <div className="relative">
                       <Input 
                         id="login-password" 
@@ -184,21 +182,21 @@ const AuthPage = () => {
                       </Button>
                     </div>
                   </div>
-                  <Button type="submit" className="w-full" disabled={loading}>
+                  <GradientButton type="submit" className="w-full" disabled={loading}>
                     {loading ? "Entrando..." : (
                       <>
                         <LogIn className="mr-2 h-4 w-4" />
                         Entrar
                       </>
                     )}
-                  </Button>
+                  </GradientButton>
                 </form>
               </TabsContent>
               
               <TabsContent value="signup">
                 <form onSubmit={handleSignup} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="signup-name">Nome Completo</Label>
+                    <Label htmlFor="signup-name" className="text-white">Nome Completo</Label>
                     <Input 
                       id="signup-name" 
                       type="text" 
@@ -209,7 +207,7 @@ const AuthPage = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="signup-email">Email</Label>
+                    <Label htmlFor="signup-email" className="text-white">Email</Label>
                     <Input 
                       id="signup-email" 
                       type="email" 
@@ -220,7 +218,7 @@ const AuthPage = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="signup-password">Senha</Label>
+                    <Label htmlFor="signup-password" className="text-white">Senha</Label>
                     <div className="relative">
                       <Input 
                         id="signup-password" 
@@ -242,7 +240,7 @@ const AuthPage = () => {
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="signup-confirm">Confirmar Senha</Label>
+                    <Label htmlFor="signup-confirm" className="text-white">Confirmar Senha</Label>
                     <Input 
                       id="signup-confirm" 
                       type={showPassword ? "text" : "password"} 
@@ -252,14 +250,14 @@ const AuthPage = () => {
                       required 
                     />
                   </div>
-                  <Button type="submit" className="w-full" disabled={loading}>
+                  <GradientButton type="submit" className="w-full" disabled={loading}>
                     {loading ? "Cadastrando..." : (
                       <>
                         <UserPlus className="mr-2 h-4 w-4" />
                         Criar Conta
                       </>
                     )}
-                  </Button>
+                  </GradientButton>
                 </form>
               </TabsContent>
             </Tabs>
@@ -270,7 +268,7 @@ const AuthPage = () => {
           <Button 
             variant="ghost" 
             onClick={() => navigate('/')} 
-            className="text-gray-600 hover:text-gray-900"
+            className="text-white hover:text-purple-200 hover:bg-white/10"
           >
             ← Voltar ao início
           </Button>
