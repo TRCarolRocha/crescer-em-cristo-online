@@ -100,28 +100,7 @@ const HomeRedirect = () => {
   }
 
   if (user) {
-    // Super Admin -> Dashboard Hodos
-    if (roles.includes('super_admin')) {
-      return <Navigate to="/admin/hodos" replace />;
-    }
-    
-    // Church Admin -> Dashboard da igreja
-    if (roles.includes('admin')) {
-      if (churchSlug) {
-        return <Navigate to={`/admin/igrejas/${churchSlug}`} replace />;
-      }
-      return <Navigate to="/admin/hodos/igrejas" replace />;
-    }
-    
-    // Member/Lider -> Página da igreja
-    if (roles.includes('member') || roles.includes('lider')) {
-      if (churchSlug) {
-        return <Navigate to={`/igreja/${churchSlug}`} replace />;
-      }
-      return <Navigate to="/meu-espaco" replace />;
-    }
-    
-    // Visitor ou sem role -> Meu Espaço (conteúdo público)
+    // Todos os usuários autenticados vão para /meu-espaco por padrão
     return <Navigate to="/meu-espaco" replace />;
   }
 

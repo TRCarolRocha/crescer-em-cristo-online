@@ -1,18 +1,26 @@
 import { useState, useEffect } from 'react';
-import { Users, BookOpen, TrendingUp, Calendar, FileText } from 'lucide-react';
+import { Users, BookOpen, TrendingUp, Calendar } from 'lucide-react';
 import { CardMetric } from '@/components/common/CardMetric';
 import { ChartCard } from '@/components/common/ChartCard';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useParams, useNavigate } from 'react-router-dom';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { supabase } from '@/integrations/supabase/client';
 import { usePermissions } from '@/hooks/usePermissions';
+import AdminMembros from '@/components/admin/AdminMembros';
+import AdminGrupos from '@/components/admin/AdminGrupos';
+import AdminTrilhas from '@/components/admin/AdminTrilhas';
+import AdminVisibilidadeTrilhas from '@/components/admin/AdminVisibilidadeTrilhas';
+import AdminDevocionais from '@/components/admin/AdminDevocionais';
+import AdminAvisos from '@/components/admin/AdminAvisos';
+import AdminAgenda from '@/components/admin/AdminAgenda';
+import { ChurchCustomizationDialog } from '@/components/admin/ChurchCustomizationDialog';
 
 const ChurchAdminDashboard = () => {
   const { churchSlug } = useParams();
   const navigate = useNavigate();
   const { canManageChurch, loading: permissionsLoading } = usePermissions();
   const [churchId, setChurchId] = useState<string | null>(null);
+  const [church, setChurch] = useState<any>(null);
   const [stats, setStats] = useState({
     totalMembers: 0,
     activeDiscipleships: 0,
@@ -20,34 +28,36 @@ const ChurchAdminDashboard = () => {
     eventsThisMonth: 0
   });
   const [loading, setLoading] = useState(true);
+  const [isCustomizationOpen, setIsCustomizationOpen] = useState(false);
 
   useEffect(() => {
     const checkAccess = async () => {
       if (!churchSlug || permissionsLoading) return;
 
       // Buscar igreja pelo slug
-      const { data: church, error } = await supabase
+      const { data: churchData, error } = await supabase
         .from('churches')
-        .select('id')
+        .select('*')
         .eq('slug', churchSlug)
         .single();
 
-      if (error || !church) {
+      if (error || !churchData) {
         navigate('/');
         return;
       }
 
-      setChurchId(church.id);
+      setChurchId(churchData.id);
+      setChurch(churchData);
 
       // Verificar permissão
-      const hasAccess = await canManageChurch(church.id);
+      const hasAccess = await canManageChurch(churchData.id);
       if (!hasAccess) {
         navigate('/');
         return;
       }
 
       // Buscar dados reais
-      await fetchChurchStats(church.id);
+      await fetchChurchStats(churchData.id);
     };
 
     checkAccess();
@@ -157,121 +167,73 @@ const ChurchAdminDashboard = () => {
 
         {/* Management Tabs */}
         <Tabs defaultValue="members" className="w-full">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-7">
             <TabsTrigger value="profile">Perfil</TabsTrigger>
             <TabsTrigger value="members">Membros</TabsTrigger>
-            <TabsTrigger value="discipleships">Discipulados</TabsTrigger>
-            <TabsTrigger value="content">Conteúdos</TabsTrigger>
+            <TabsTrigger value="groups">Grupos</TabsTrigger>
+            <TabsTrigger value="tracks">Trilhas</TabsTrigger>
+            <TabsTrigger value="devotionals">Devocionais</TabsTrigger>
+            <TabsTrigger value="notices">Avisos</TabsTrigger>
             <TabsTrigger value="agenda">Agenda</TabsTrigger>
           </TabsList>
 
           <TabsContent value="profile" className="space-y-4">
             <ChartCard title="Perfil da Igreja">
-              <div className="space-y-6">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Logo da Igreja</label>
-                  <input 
-                    type="file" 
-                    accept="image/*"
-                    className="block w-full text-sm text-muted-foreground
-                      file:mr-4 file:py-2 file:px-4
-                      file:rounded-md file:border-0
-                      file:text-sm file:font-semibold
-                      file:bg-gradient-to-r file:from-[#7b2ff7] file:to-[#f107a3]
-                      file:text-white hover:file:opacity-90"
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Nome da Igreja</label>
-                  <input 
-                    type="text"
-                    defaultValue={churchSlug?.replace('-', ' ')}
-                    className="w-full px-3 py-2 border rounded-md"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Descrição/Headline</label>
-                  <textarea 
-                    rows={3}
-                    placeholder="Uma breve descrição da igreja..."
-                    className="w-full px-3 py-2 border rounded-md"
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Cor Primária</label>
-                    <input 
-                      type="color"
-                      defaultValue="#7b2ff7"
-                      className="w-full h-10 rounded-md cursor-pointer"
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Cor Secundária</label>
-                    <input 
-                      type="color"
-                      defaultValue="#f107a3"
-                      className="w-full h-10 rounded-md cursor-pointer"
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Slug Personalizado</label>
-                  <input 
-                    type="text"
-                    defaultValue={churchSlug}
-                    className="w-full px-3 py-2 border rounded-md"
-                    placeholder="igreja-nome"
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    URL: /igreja/{churchSlug || 'seu-slug'}
-                  </p>
-                </div>
-
-                <button className="px-6 py-2 bg-gradient-to-r from-[#7b2ff7] to-[#f107a3] text-white rounded-md hover:opacity-90 transition-opacity">
-                  Salvar Alterações
-                </button>
-              </div>
+              <button 
+                onClick={() => setIsCustomizationOpen(true)}
+                className="px-6 py-2 bg-gradient-to-r from-[#7b2ff7] to-[#f107a3] text-white rounded-md hover:opacity-90 transition-opacity"
+              >
+                Editar Configurações da Igreja
+              </button>
             </ChartCard>
           </TabsContent>
 
           <TabsContent value="members" className="space-y-4">
-            <ChartCard title="Gestão de Membros">
-              <p className="text-muted-foreground">
-                Gerenciar membros da igreja, adicionar novos, editar perfis e monitorar participação.
-              </p>
-            </ChartCard>
+            <AdminMembros />
           </TabsContent>
 
-          <TabsContent value="discipleships" className="space-y-4">
-            <ChartCard title="Discipulados Ativos">
-              <p className="text-muted-foreground">
-                Criar e gerenciar trilhas de discipulado, acompanhar progresso dos membros.
-              </p>
-            </ChartCard>
+          <TabsContent value="groups" className="space-y-4">
+            <AdminGrupos />
           </TabsContent>
 
-          <TabsContent value="content" className="space-y-4">
-            <ChartCard title="Conteúdos Publicados">
-              <p className="text-muted-foreground">
-                Gerenciar trilhas, devocionais e avisos da igreja.
-              </p>
-            </ChartCard>
+          <TabsContent value="tracks" className="space-y-4">
+            <AdminTrilhas />
+            <AdminVisibilidadeTrilhas />
+          </TabsContent>
+
+          <TabsContent value="devotionals" className="space-y-4">
+            <AdminDevocionais />
+          </TabsContent>
+
+          <TabsContent value="notices" className="space-y-4">
+            <AdminAvisos />
           </TabsContent>
 
           <TabsContent value="agenda" className="space-y-4">
-            <ChartCard title="Eventos e Agenda">
-              <p className="text-muted-foreground">
-                Gerenciar eventos, cultos e atividades da igreja.
-              </p>
-            </ChartCard>
+            <AdminAgenda />
           </TabsContent>
         </Tabs>
+
+        {/* Church Customization Dialog */}
+        {church && (
+          <ChurchCustomizationDialog
+            open={isCustomizationOpen}
+            onOpenChange={setIsCustomizationOpen}
+            church={church}
+            onSuccess={() => {
+              // Recarregar dados da igreja
+              const reloadChurch = async () => {
+                const { data } = await supabase
+                  .from('churches')
+                  .select('*')
+                  .eq('id', churchId)
+                  .single();
+                if (data) setChurch(data);
+              };
+              reloadChurch();
+            }}
+          />
+        )}
       </div>
     </div>
   );

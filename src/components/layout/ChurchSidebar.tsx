@@ -1,5 +1,6 @@
-import { Home, BookOpen, Map, Calendar, MessageCircle, ArrowLeft } from 'lucide-react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Home, BookOpen, Map, Calendar, MessageCircle, ArrowLeft, Settings } from 'lucide-react';
+import { useNavigate, useLocation, useParams } from 'react-router-dom';
 import {
   Sidebar,
   SidebarContent,
@@ -12,6 +13,7 @@ import {
 } from '@/components/ui/sidebar';
 import { HeaderLogo } from '@/components/common/HeaderLogo';
 import { useChurch } from '@/contexts/ChurchContext';
+import { usePermissions } from '@/hooks/usePermissions';
 
 const menuItems = [
   { title: 'Início', icon: Home, url: '/igreja/monte-hebrom' },
@@ -24,7 +26,19 @@ const menuItems = [
 export function ChurchSidebar() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { churchSlug } = useParams();
   const { church } = useChurch();
+  const { isSuperAdmin, isChurchAdmin, canManageChurch } = usePermissions();
+  const [canManage, setCanManage] = useState(false);
+
+  useEffect(() => {
+    const checkManagement = async () => {
+      if (!church?.id) return;
+      const hasAccess = await canManageChurch(church.id);
+      setCanManage(hasAccess || isSuperAdmin);
+    };
+    checkManagement();
+  }, [church, canManageChurch, isSuperAdmin]);
 
   return (
     <Sidebar className="border-r border-purple-200 bg-white">
@@ -75,6 +89,19 @@ export function ChurchSidebar() {
                   </SidebarMenuItem>
                 );
               })}
+
+              {/* Admin Management Link */}
+              {canManage && churchSlug && (
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    onClick={() => navigate(`/admin/igrejas/${churchSlug}`)}
+                    className="hover:bg-purple-50 hover:text-purple-600"
+                  >
+                    <Settings className="mr-2 h-5 w-5" />
+                    <span>Gerenciar Igreja</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              )}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
