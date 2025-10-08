@@ -3,6 +3,7 @@ import { Users, Building2, FileText, TrendingUp, Plus } from 'lucide-react';
 import { CardMetric } from '@/components/common/CardMetric';
 import { ChartCard } from '@/components/common/ChartCard';
 import { GradientButton } from '@/components/common/GradientButton';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useNavigate } from 'react-router-dom';
 import { mockSuperAdminStats, mockRecentActivities, mockEngagementData } from '@/data/mock';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
@@ -24,28 +25,66 @@ const SuperAdminDashboard = () => {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-purple-50 p-8">
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-[#7b2ff7] to-[#f107a3] bg-clip-text text-transparent">
+            <h1 className="text-2xl md:text-4xl font-bold bg-gradient-to-r from-[#7b2ff7] to-[#f107a3] bg-clip-text text-transparent">
               Dashboard Hodos
             </h1>
-            <p className="text-muted-foreground mt-2">
+            <p className="text-sm text-muted-foreground mt-1 md:mt-2">
               Visão geral da plataforma
             </p>
           </div>
-          <div className="flex gap-3">
-            <GradientButton onClick={() => setCreateChurchOpen(true)}>
-              <Plus className="h-5 w-5 mr-2" />
-              Cadastrar Nova Igreja
+          <div className="flex flex-col md:flex-row gap-2">
+            <GradientButton onClick={() => setCreateChurchOpen(true)} size="sm" className="md:h-auto">
+              <Plus className="h-4 w-4 mr-2" />
+              Nova Igreja
             </GradientButton>
-            <GradientButton onClick={() => navigate('/admin/hodos/igrejas')} variant="outline">
-              Ver Todas as Igrejas
+            <GradientButton onClick={() => navigate('/admin/hodos/igrejas')} variant="outline" size="sm">
+              Ver Todas
             </GradientButton>
           </div>
         </div>
 
-        {/* Metrics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* Metrics Cards - Mobile: Scroll horizontal / Desktop: Grid */}
+        {/* Mobile */}
+        <div className="md:hidden overflow-x-auto snap-x scrollbar-hide -mx-4 px-4">
+          <div className="flex gap-4 pb-4">
+            <div className="min-w-[180px] snap-center flex-shrink-0">
+              <CardMetric
+                title="Igrejas"
+                value={mockSuperAdminStats.totalChurches}
+                icon={Building2}
+                trend={{ value: 12, isPositive: true }}
+              />
+            </div>
+            <div className="min-w-[180px] snap-center flex-shrink-0">
+              <CardMetric
+                title="Usuários"
+                value={mockSuperAdminStats.activeUsers}
+                icon={Users}
+                trend={{ value: 8, isPositive: true }}
+              />
+            </div>
+            <div className="min-w-[180px] snap-center flex-shrink-0">
+              <CardMetric
+                title="Conteúdos"
+                value={mockSuperAdminStats.publicContent}
+                icon={FileText}
+              />
+            </div>
+            <div className="min-w-[180px] snap-center flex-shrink-0">
+              <CardMetric
+                title="Engajamento"
+                value={`${mockSuperAdminStats.engagementRate}%`}
+                icon={TrendingUp}
+                trend={{ value: 5, isPositive: true }}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Desktop - Grid normal */}
+        <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-4 gap-6">
           <CardMetric
             title="Igrejas Cadastradas"
             value={mockSuperAdminStats.totalChurches}
@@ -71,8 +110,63 @@ const SuperAdminDashboard = () => {
           />
         </div>
 
-        {/* Charts */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Charts - Mobile: Tabs / Desktop: Side by side */}
+        {/* Mobile: Tabs */}
+        <div className="md:hidden">
+          <Tabs defaultValue="engagement" className="w-full">
+            <TabsList className="w-full grid grid-cols-2">
+              <TabsTrigger value="engagement">Engajamento</TabsTrigger>
+              <TabsTrigger value="activities">Atividades</TabsTrigger>
+            </TabsList>
+            <TabsContent value="engagement" className="mt-4">
+              <ChartCard
+                title="Engajamento Mensal"
+                description="Taxa dos últimos 6 meses"
+              >
+                <ResponsiveContainer width="100%" height={250}>
+                  <LineChart data={mockEngagementData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="month" tick={{ fontSize: 12 }} />
+                    <YAxis tick={{ fontSize: 12 }} />
+                    <Tooltip />
+                    <Line
+                      type="monotone"
+                      dataKey="value"
+                      stroke="#7b2ff7"
+                      strokeWidth={2}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </ChartCard>
+            </TabsContent>
+            <TabsContent value="activities" className="mt-4">
+              <ChartCard
+                title="Atividades Recentes"
+                description="Últimas ações na plataforma"
+              >
+                <div className="space-y-4">
+                  {mockRecentActivities.map((activity) => (
+                    <div
+                      key={activity.id}
+                      className="flex items-start gap-3 p-3 rounded-lg hover:bg-purple-50 transition-colors"
+                    >
+                      <div className="h-2 w-2 rounded-full bg-[#7b2ff7] mt-2 flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium">{activity.description}</p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {new Date(activity.timestamp).toLocaleString('pt-BR')}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </ChartCard>
+            </TabsContent>
+          </Tabs>
+        </div>
+
+        {/* Desktop: Side by side */}
+        <div className="hidden md:grid md:grid-cols-2 gap-6">
           <ChartCard
             title="Engajamento Mensal"
             description="Taxa de engajamento dos últimos 6 meses"
@@ -116,23 +210,23 @@ const SuperAdminDashboard = () => {
           </ChartCard>
         </div>
 
-        {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Quick Actions - Mobile: Full width / Desktop: Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
           <GradientButton
             onClick={() => navigate('/admin/hodos/igrejas')}
-            className="h-20"
+            className="h-16 md:h-20"
           >
             Gerenciar Igrejas
           </GradientButton>
           <GradientButton
             onClick={() => navigate('/admin/hodos/conteudos')}
-            className="h-20"
+            className="h-16 md:h-20"
           >
             Conteúdos Públicos
           </GradientButton>
           <GradientButton
             onClick={() => navigate('/membros')}
-            className="h-20"
+            className="h-16 md:h-20"
           >
             Ver Todos os Usuários
           </GradientButton>

@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { BookOpen, Users, Calendar, MessageCircle, Settings } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { BookOpen, Users, Calendar, MessageCircle, Settings, Search } from "lucide-react";
 import ChurchHeader from "@/components/ChurchHeader";
 import CarrosselAvisos from "@/components/CarrosselAvisos";
 import DevocionalNotification from "@/components/DevocionalNotification";
@@ -155,19 +156,30 @@ const ChurchHomePage = () => {
         />
       )}
       
-      <main className="container mx-auto px-4 py-12 pb-24 md:pb-12 space-y-16">
+      <main className="container mx-auto px-4 py-6 md:py-12 pb-24 md:pb-12 space-y-8 md:space-y-16">
+        {/* Search Bar - Mobile only */}
+        <div className="md:hidden">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input 
+              placeholder="Buscar eventos, trilhas..." 
+              className="pl-10"
+            />
+          </div>
+        </div>
+
         {/* Hero Section */}
-        <section className="text-center space-y-6 py-12">
-          <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-primary via-purple-600 to-pink-600 bg-clip-text text-transparent animate-fade-in">
+        <section className="text-center space-y-4 md:space-y-6 py-6 md:py-12">
+          <h2 className="text-3xl md:text-5xl font-bold bg-gradient-to-r from-primary via-purple-600 to-pink-600 bg-clip-text text-transparent animate-fade-in">
             Bem-vindo à Sua Jornada de Discipulado
           </h2>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
             Uma experiência transformadora de crescimento espiritual
           </p>
           <Button 
             size="lg" 
             onClick={handleContinueJourney}
-            className="bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90 text-white px-8 py-6 text-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+            className="bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90 text-white px-6 md:px-8 py-4 md:py-6 text-base md:text-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 w-full md:w-auto"
           >
             {hasCompletedDiagnostic ? "Continuar Jornada" : "Descobrir Seu Nível Espiritual"}
           </Button>
@@ -187,10 +199,30 @@ const ChurchHomePage = () => {
         {/* Devotional Dashboard */}
         {user && <DevocionalDashboard />}
 
-        {/* Features Grid */}
-        <section className="space-y-8">
-          <h3 className="text-3xl font-bold text-center">Recursos Disponíveis</h3>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* Features - Mobile: Pills / Desktop: Grid */}
+        <section className="space-y-6">
+          <h3 className="text-2xl md:text-3xl font-bold text-center">Recursos Disponíveis</h3>
+          
+          {/* Mobile: Horizontal Pills */}
+          <div className="md:hidden overflow-x-auto scrollbar-hide -mx-4 px-4">
+            <div className="flex gap-3 pb-2">
+              {features.map((feature, index) => (
+                <button
+                  key={index}
+                  onClick={feature.action}
+                  className="min-w-[120px] flex-shrink-0 flex flex-col items-center gap-2 p-4 rounded-2xl bg-card hover:bg-accent transition-colors"
+                >
+                  <div className={`h-12 w-12 rounded-2xl bg-gradient-to-br ${feature.color} flex items-center justify-center`}>
+                    <feature.icon className="h-6 w-6 text-white" />
+                  </div>
+                  <span className="text-xs font-medium text-center">{feature.title}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Desktop: Grid normal */}
+          <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {features.map((feature, index) => (
               <Card
                 key={index}

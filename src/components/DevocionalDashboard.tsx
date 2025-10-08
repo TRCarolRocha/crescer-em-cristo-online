@@ -139,20 +139,76 @@ const DevocionalDashboard = () => {
   return (
     <div className="space-y-6">
       {/* Header com título e botão de histórico */}
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-gray-900">Seu Progresso Devocional</h2>
+      <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-3">
+        <h2 className="text-xl md:text-2xl font-bold text-gray-900">Seu Progresso Devocional</h2>
         <Button
           variant="outline"
           onClick={() => navigate('/historico-devocional')}
-          className="flex items-center gap-2"
+          className="flex items-center gap-2 md:w-auto"
+          size="sm"
         >
           <History className="h-4 w-4" />
           Ver Histórico
         </Button>
       </div>
 
-      {/* Cards de estatísticas */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* Cards de estatísticas - Mobile: Scroll horizontal / Desktop: Grid */}
+      {/* Mobile */}
+      <div className="md:hidden overflow-x-auto scrollbar-hide -mx-4 px-4">
+        <div className="flex gap-3 pb-2">
+          <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 min-w-[140px] flex-shrink-0">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Target className="h-4 w-4 text-blue-600" />
+                <p className="text-xs font-medium text-blue-800">Sequência</p>
+              </div>
+              <div className="text-2xl font-bold text-blue-900">{loading ? '...' : stats.streak_atual}</div>
+              <p className="text-xs text-blue-600">dias</p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200 min-w-[140px] flex-shrink-0">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Trophy className="h-4 w-4 text-green-600" />
+                <p className="text-xs font-medium text-green-800">Recorde</p>
+              </div>
+              <div className="text-2xl font-bold text-green-900">{loading ? '...' : stats.melhor_streak}</div>
+              <p className="text-xs text-green-600">dias</p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200 min-w-[140px] flex-shrink-0">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <BookOpen className="h-4 w-4 text-purple-600" />
+                <p className="text-xs font-medium text-purple-800">Total</p>
+              </div>
+              <div className="text-2xl font-bold text-purple-900">{loading ? '...' : stats.total_completados}</div>
+              <p className="text-xs text-purple-600">feitos</p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200 min-w-[140px] flex-shrink-0">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Calendar className="h-4 w-4 text-orange-600" />
+                <p className="text-xs font-medium text-orange-800">Último</p>
+              </div>
+              <div className="text-xs font-bold text-orange-900">
+                {loading ? '...' : stats.ultimo_devocional ? 
+                  new Date(stats.ultimo_devocional).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }) : 
+                  'Nenhum'
+                }
+              </div>
+              <p className="text-xs text-orange-600">data</p>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
+      {/* Desktop - Grid normal */}
+      <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-blue-800">Sequência Atual</CardTitle>

@@ -3,6 +3,7 @@ import { Users, BookOpen, TrendingUp, Calendar } from 'lucide-react';
 import { CardMetric } from '@/components/common/CardMetric';
 import { ChartCard } from '@/components/common/ChartCard';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { usePermissions } from '@/hooks/usePermissions';
@@ -29,6 +30,7 @@ const ChurchAdminDashboard = () => {
   });
   const [loading, setLoading] = useState(true);
   const [isCustomizationOpen, setIsCustomizationOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState('members');
 
   useEffect(() => {
     const checkAccess = async () => {
@@ -133,16 +135,51 @@ const ChurchAdminDashboard = () => {
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
         <div>
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-[#7b2ff7] to-[#f107a3] bg-clip-text text-transparent">
+          <h1 className="text-xl md:text-2xl font-bold bg-gradient-to-r from-[#7b2ff7] to-[#f107a3] bg-clip-text text-transparent">
             Dashboard - {churchSlug?.replace('-', ' ')}
           </h1>
-          <p className="text-muted-foreground mt-2">
+          <p className="text-sm text-muted-foreground mt-1 md:mt-2">
             Gestão completa da sua comunidade
           </p>
         </div>
 
-        {/* Metrics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* Metrics Cards - Mobile: Scroll horizontal / Desktop: Grid */}
+        {/* Mobile */}
+        <div className="md:hidden overflow-x-auto snap-x scrollbar-hide -mx-4 px-4">
+          <div className="flex gap-4 pb-4">
+            <div className="min-w-[160px] snap-center flex-shrink-0">
+              <CardMetric
+                title="Discipulados"
+                value={stats.activeDiscipleships}
+                icon={BookOpen}
+              />
+            </div>
+            <div className="min-w-[160px] snap-center flex-shrink-0">
+              <CardMetric
+                title="Membros"
+                value={stats.totalMembers}
+                icon={Users}
+              />
+            </div>
+            <div className="min-w-[160px] snap-center flex-shrink-0">
+              <CardMetric
+                title="Engajamento"
+                value={`${stats.engagement}%`}
+                icon={TrendingUp}
+              />
+            </div>
+            <div className="min-w-[160px] snap-center flex-shrink-0">
+              <CardMetric
+                title="Eventos"
+                value={stats.eventsThisMonth}
+                icon={Calendar}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Desktop - Grid normal */}
+        <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-4 gap-6">
           <CardMetric
             title="Discipulados Ativos"
             value={stats.activeDiscipleships}
@@ -165,9 +202,28 @@ const ChurchAdminDashboard = () => {
           />
         </div>
 
-        {/* Management Tabs */}
-        <Tabs defaultValue="members" className="w-full">
-          <TabsList className="grid w-full grid-cols-7">
+        {/* Management Tabs - Mobile: Dropdown / Desktop: Tabs */}
+        {/* Mobile: Select dropdown */}
+        <div className="md:hidden mb-4">
+          <Select value={activeTab} onValueChange={setActiveTab}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Selecione uma seção" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="profile">📋 Perfil</SelectItem>
+              <SelectItem value="members">👥 Membros</SelectItem>
+              <SelectItem value="groups">👨‍👩‍👧‍👦 Grupos</SelectItem>
+              <SelectItem value="tracks">📚 Trilhas</SelectItem>
+              <SelectItem value="devotionals">❤️ Devocionais</SelectItem>
+              <SelectItem value="notices">📢 Avisos</SelectItem>
+              <SelectItem value="agenda">📅 Agenda</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Desktop: Normal Tabs */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="hidden md:grid md:grid-cols-7 w-full">
             <TabsTrigger value="profile">Perfil</TabsTrigger>
             <TabsTrigger value="members">Membros</TabsTrigger>
             <TabsTrigger value="groups">Grupos</TabsTrigger>
@@ -177,7 +233,7 @@ const ChurchAdminDashboard = () => {
             <TabsTrigger value="agenda">Agenda</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="profile" className="space-y-4">
+          <TabsContent value="profile" className="space-y-4 mt-4 md:mt-6">
             <ChartCard title="Perfil da Igreja">
               <button 
                 onClick={() => setIsCustomizationOpen(true)}
@@ -188,28 +244,30 @@ const ChurchAdminDashboard = () => {
             </ChartCard>
           </TabsContent>
 
-          <TabsContent value="members" className="space-y-4">
+          <TabsContent value="members" className="space-y-4 mt-4 md:mt-6">
             <AdminMembros />
           </TabsContent>
 
-          <TabsContent value="groups" className="space-y-4">
+          <TabsContent value="groups" className="space-y-4 mt-4 md:mt-6">
             <AdminGrupos />
           </TabsContent>
 
-          <TabsContent value="tracks" className="space-y-4">
-            <AdminTrilhas />
-            <AdminVisibilidadeTrilhas />
+          <TabsContent value="tracks" className="space-y-4 mt-4 md:mt-6">
+            <div className="overflow-x-auto">
+              <AdminTrilhas />
+              <AdminVisibilidadeTrilhas />
+            </div>
           </TabsContent>
 
-          <TabsContent value="devotionals" className="space-y-4">
+          <TabsContent value="devotionals" className="space-y-4 mt-4 md:mt-6">
             <AdminDevocionais />
           </TabsContent>
 
-          <TabsContent value="notices" className="space-y-4">
+          <TabsContent value="notices" className="space-y-4 mt-4 md:mt-6">
             <AdminAvisos />
           </TabsContent>
 
-          <TabsContent value="agenda" className="space-y-4">
+          <TabsContent value="agenda" className="space-y-4 mt-4 md:mt-6">
             <AdminAgenda />
           </TabsContent>
         </Tabs>
