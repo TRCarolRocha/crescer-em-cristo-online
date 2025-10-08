@@ -22,7 +22,7 @@ const SuperAdminDashboard = () => {
           // Atualizar lista se necessário
         }}
       />
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-purple-50 p-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-purple-50 p-4 md:p-8">
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">

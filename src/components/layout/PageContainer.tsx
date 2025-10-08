@@ -23,7 +23,7 @@ export const PageContainer = ({
   maxWidth = '6xl' 
 }: PageContainerProps) => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-secondary/5">
+    <div className="min-h-screen overflow-x-hidden bg-gradient-to-br from-background via-accent/5 to-secondary/5">
       <div className={`container mx-auto py-6 sm:py-8 px-4 sm:px-6 lg:px-8 ${maxWidthClasses[maxWidth]} ${className}`}>
         {children}
       </div>

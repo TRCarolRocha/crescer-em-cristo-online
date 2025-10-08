@@ -95,11 +95,11 @@ const CarrosselAvisos = () => {
 
   return (
     <>
-      <div className="py-16 bg-gradient-to-b from-white to-gray-50">
+      <div className="py-8 md:py-16 bg-gradient-to-b from-white to-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Avisos em Destaque</h2>
-            <p className="text-xl text-gray-600">Fique por dentro das novidades da nossa igreja</p>
+          <div className="text-center mb-6 md:mb-12">
+            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">Avisos em Destaque</h2>
+            <p className="text-base md:text-xl text-gray-600">Fique por dentro das novidades da nossa igreja</p>
             {!user && (
               <p className="text-sm text-blue-600 mt-2">
                 Faça login para ver mais detalhes dos avisos
@@ -108,7 +108,7 @@ const CarrosselAvisos = () => {
           </div>
 
           <Carousel 
-            className="w-full max-w-5xl mx-auto"
+            className="w-full max-w-5xl mx-auto px-4 md:px-0"
             plugins={[
               Autoplay({
                 delay: 4000,

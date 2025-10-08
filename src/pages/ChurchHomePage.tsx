@@ -156,7 +156,7 @@ const ChurchHomePage = () => {
         />
       )}
       
-      <main className="container mx-auto px-4 py-6 md:py-12 pb-24 md:pb-12 space-y-8 md:space-y-16">
+      <main className="container mx-auto max-w-7xl px-4 py-6 md:py-12 pb-24 md:pb-12 space-y-8 md:space-y-16">
         {/* Search Bar - Mobile only */}
         <div className="md:hidden">
           <div className="relative">
@@ -187,7 +187,7 @@ const ChurchHomePage = () => {
 
         {/* User-specific content */}
         {user && (
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid md:grid-cols-2 gap-4 md:gap-6">
             <DevocionalNotification />
             <BirthdaySection />
           </div>
@@ -242,7 +242,7 @@ const ChurchHomePage = () => {
         </section>
 
         {/* Footer CTA */}
-        <section className="text-center py-12 space-y-4">
+        <section className="text-center py-8 md:py-12 space-y-3 md:space-y-4">
           <h3 className="text-2xl font-bold">Precisa Falar com a Liderança?</h3>
           <Button 
             variant="outline" 

@@ -87,7 +87,7 @@ const BirthdaySection = () => {
           Aniversários Próximos
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-3">
+      <CardContent className="space-y-2.5">
         {birthdays.map((birthday) => (
           <div key={birthday.id} className="flex items-center justify-between bg-white/70 rounded-lg p-3">
             <div className="flex items-center gap-3">
