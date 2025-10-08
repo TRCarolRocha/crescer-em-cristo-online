@@ -3,50 +3,40 @@ import { useNavigate } from "react-router-dom";
 import { useRef } from "react";
 import { GradientButton } from "@/components/common/GradientButton";
 import { HeaderLogo } from "@/components/common/HeaderLogo";
-
 const LandingPage = () => {
   const navigate = useNavigate();
   const featuresRef = useRef<HTMLElement>(null);
-
   const scrollToFeatures = () => {
-    featuresRef.current?.scrollIntoView({ behavior: 'smooth' });
+    featuresRef.current?.scrollIntoView({
+      behavior: 'smooth'
+    });
   };
-
-  const features = [
-    {
-      icon: BookOpen,
-      title: "Devocionais Diários",
-      description: "Reflexões profundas para fortalecer sua caminhada espiritual",
-    },
-    {
-      icon: Map,
-      title: "Trilhas de Discipulado",
-      description: "Jornadas personalizadas para cada etapa da sua fé",
-    },
-    {
-      icon: Users,
-      title: "Comunidade Conectada",
-      description: "Grupos e comunicação para fortalecer laços espirituais",
-    },
-    {
-      icon: Calendar,
-      title: "Agenda de Eventos",
-      description: "Acompanhe cultos, eventos e atividades da sua igreja",
-    },
-    {
-      icon: MessageCircle,
-      title: "Comunicação Interna",
-      description: "Canal direto entre membros e liderança",
-    },
-    {
-      icon: Building2,
-      title: "Gestão Multi-Igrejas",
-      description: "Plataforma completa para administradores e líderes",
-    },
-  ];
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white overflow-hidden relative">
+  const features = [{
+    icon: BookOpen,
+    title: "Devocionais Diários",
+    description: "Reflexões profundas para fortalecer sua caminhada espiritual"
+  }, {
+    icon: Map,
+    title: "Trilhas de Discipulado",
+    description: "Jornadas personalizadas para cada etapa da sua fé"
+  }, {
+    icon: Users,
+    title: "Comunidade Conectada",
+    description: "Grupos e comunicação para fortalecer laços espirituais"
+  }, {
+    icon: Calendar,
+    title: "Agenda de Eventos",
+    description: "Acompanhe cultos, eventos e atividades da sua igreja"
+  }, {
+    icon: MessageCircle,
+    title: "Comunicação Interna",
+    description: "Canal direto entre membros e liderança"
+  }, {
+    icon: Building2,
+    title: "Gestão Multi-Igrejas",
+    description: "Plataforma completa para administradores e líderes"
+  }];
+  return <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white overflow-hidden relative">
       {/* Animated Background */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#7b2ff720_1px,transparent_1px),linear-gradient(to_bottom,#f107a320_1px,transparent_1px)] bg-[size:40px_40px] animate-[grid-flow_20s_linear_infinite]" />
 
@@ -54,14 +44,12 @@ const LandingPage = () => {
       <section className="relative z-10 px-6 pt-20 pb-32">
         <div className="max-w-6xl mx-auto text-center space-y-8">
           {/* Logo pequena */}
-          <div className="flex justify-center mb-4">
-            <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-4 shadow-lg">
-              <HeaderLogo size="md" />
-            </div>
-          </div>
+          
           
           {/* Palavra HODOS gigante com gradiente */}
-          <h1 className="text-7xl md:text-9xl font-bold font-playfair bg-gradient-to-r from-[#7b2ff7] via-purple-500 to-[#f107a3] bg-clip-text text-transparent animate-float" style={{ letterSpacing: '0.05em' }}>
+          <h1 style={{
+          letterSpacing: '0.05em'
+        }} className="text-7xl font-bold font-playfair bg-gradient-to-r from-[#FFAEF1] via-purple-500 via-purple-500 via-purple-500 animate-float text-purple-100 md:text-9xl">
             HODOS
           </h1>
           
@@ -74,16 +62,10 @@ const LandingPage = () => {
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-8">
-            <GradientButton
-              onClick={() => navigate("/auth")}
-              className="px-8 py-4 text-lg"
-            >
+            <GradientButton onClick={() => navigate("/auth")} className="px-8 py-4 text-lg">
               Entrar
             </GradientButton>
-            <button
-              onClick={scrollToFeatures}
-              className="px-8 py-4 border-2 border-purple-400/50 backdrop-blur-sm rounded-xl font-semibold text-lg hover:bg-white/10 hover:border-purple-400 transform hover:scale-105 transition-all duration-300"
-            >
+            <button onClick={scrollToFeatures} className="px-8 py-4 border-2 border-purple-400/50 backdrop-blur-sm rounded-xl font-semibold text-lg hover:bg-white/10 hover:border-purple-400 transform hover:scale-105 transition-all duration-300">
               Explorar o Hodos
             </button>
           </div>
@@ -101,18 +83,11 @@ const LandingPage = () => {
           </p>
           
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {features.map((feature, index) => (
-              <div
-                key={index}
-                className="p-8 rounded-2xl border-2 border-purple-500/30 bg-white/10 backdrop-blur-md transition-all duration-300 hover:bg-white/20 hover:border-purple-400 group cursor-pointer"
-                style={{
-                  animationDelay: `${index * 0.1}s`,
-                  animation: "fade-in 0.5s ease-out forwards",
-                }}
-              >
-                <div 
-                  className="h-16 w-16 rounded-2xl flex items-center justify-center mb-6 transform group-hover:scale-110 transition-transform duration-300 bg-gradient-to-br from-[#7b2ff7] to-[#f107a3]"
-                >
+            {features.map((feature, index) => <div key={index} className="p-8 rounded-2xl border-2 border-purple-500/30 bg-white/10 backdrop-blur-md transition-all duration-300 hover:bg-white/20 hover:border-purple-400 group cursor-pointer" style={{
+            animationDelay: `${index * 0.1}s`,
+            animation: "fade-in 0.5s ease-out forwards"
+          }}>
+                <div className="h-16 w-16 rounded-2xl flex items-center justify-center mb-6 transform group-hover:scale-110 transition-transform duration-300 bg-gradient-to-br from-[#7b2ff7] to-[#f107a3]">
                   <feature.icon className="h-8 w-8 text-white" />
                 </div>
                 
@@ -123,8 +98,7 @@ const LandingPage = () => {
                 <p className="text-slate-300 leading-relaxed">
                   {feature.description}
                 </p>
-              </div>
-            ))}
+              </div>)}
           </div>
         </div>
       </section>
@@ -176,8 +150,6 @@ const LandingPage = () => {
           </div>
         </div>
       </footer>
-    </div>
-  );
+    </div>;
 };
-
 export default LandingPage;
