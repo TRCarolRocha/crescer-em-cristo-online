@@ -135,7 +135,7 @@ const ChurchAdminDashboard = () => {
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
         <div>
-          <h1 className="text-xl md:text-2xl font-bold bg-gradient-to-r from-[#7b2ff7] to-[#f107a3] bg-clip-text text-transparent">
+          <h1 className="text-xl md:text-2xl font-bold bg-gradient-to-r from-[#7b2ff7] to-[#f107a3] bg-clip-text text-transparent truncate max-w-[200px] md:max-w-full">
             Dashboard - {churchSlug?.replace('-', ' ')}
           </h1>
           <p className="text-sm text-muted-foreground mt-1 md:mt-2">
@@ -147,28 +147,28 @@ const ChurchAdminDashboard = () => {
         {/* Mobile */}
         <div className="md:hidden overflow-x-auto snap-x scrollbar-hide -mx-4 px-4">
           <div className="flex gap-4 pb-4">
-            <div className="min-w-[160px] snap-center flex-shrink-0">
+            <div className="min-w-[170px] snap-center flex-shrink-0">
               <CardMetric
                 title="Discipulados"
                 value={stats.activeDiscipleships}
                 icon={BookOpen}
               />
             </div>
-            <div className="min-w-[160px] snap-center flex-shrink-0">
+            <div className="min-w-[170px] snap-center flex-shrink-0">
               <CardMetric
                 title="Membros"
                 value={stats.totalMembers}
                 icon={Users}
               />
             </div>
-            <div className="min-w-[160px] snap-center flex-shrink-0">
+            <div className="min-w-[170px] snap-center flex-shrink-0">
               <CardMetric
                 title="Engajamento"
                 value={`${stats.engagement}%`}
                 icon={TrendingUp}
               />
             </div>
-            <div className="min-w-[160px] snap-center flex-shrink-0">
+            <div className="min-w-[170px] snap-center flex-shrink-0">
               <CardMetric
                 title="Eventos"
                 value={stats.eventsThisMonth}
@@ -206,10 +206,10 @@ const ChurchAdminDashboard = () => {
         {/* Mobile: Select dropdown */}
         <div className="md:hidden mb-4">
           <Select value={activeTab} onValueChange={setActiveTab}>
-            <SelectTrigger className="w-full">
+            <SelectTrigger className="w-full z-50 bg-background">
               <SelectValue placeholder="Selecione uma seção" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="z-50">
               <SelectItem value="profile">📋 Perfil</SelectItem>
               <SelectItem value="members">👥 Membros</SelectItem>
               <SelectItem value="groups">👨‍👩‍👧‍👦 Grupos</SelectItem>
@@ -233,7 +233,7 @@ const ChurchAdminDashboard = () => {
             <TabsTrigger value="agenda">Agenda</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="profile" className="space-y-4 mt-4 md:mt-6">
+          <TabsContent value="profile" className="space-y-4 mt-4 md:mt-6 px-2 md:px-0">
             <ChartCard title="Perfil da Igreja">
               <button 
                 onClick={() => setIsCustomizationOpen(true)}

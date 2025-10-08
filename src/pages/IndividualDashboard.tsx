@@ -193,7 +193,7 @@ const IndividualDashboard = () => {
               className="bg-gradient-to-br from-blue-500/20 to-purple-500/20 border-blue-500/30 cursor-pointer hover:scale-[1.02] transition-transform"
               onClick={() => navigate(`/igreja/${church.slug}`)}
             >
-              <CardContent className="p-6">
+              <CardContent className="p-5">
                 <div className="flex items-center gap-4">
                   <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center flex-shrink-0">
                     <Home className="h-7 w-7 text-white" />
@@ -237,7 +237,7 @@ const IndividualDashboard = () => {
           <div className="mb-3 flex items-center justify-between">
             <h3 className="text-lg font-semibold text-white">Minha Jornada</h3>
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-2.5">
             {journeyCards.map((card, index) => (
               <Card
                 key={index}
@@ -266,7 +266,7 @@ const IndividualDashboard = () => {
             <div className="mb-3 flex items-center justify-between">
               <h3 className="text-lg font-semibold text-white">Administrativo</h3>
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-2.5">
               {adminCards.map((card, index) => (
                 <Card
                   key={index}

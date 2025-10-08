@@ -163,7 +163,7 @@ const ChurchHomePage = () => {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input 
               placeholder="Buscar eventos, trilhas..." 
-              className="pl-10"
+              className="pl-10 h-10"
             />
           </div>
         </div>
@@ -179,7 +179,7 @@ const ChurchHomePage = () => {
           <Button 
             size="lg" 
             onClick={handleContinueJourney}
-            className="bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90 text-white px-6 md:px-8 py-4 md:py-6 text-base md:text-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 w-full md:w-auto"
+            className="bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90 text-white px-6 md:px-8 py-3 md:py-6 text-base md:text-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 w-full md:w-auto"
           >
             {hasCompletedDiagnostic ? "Continuar Jornada" : "Descobrir Seu Nível Espiritual"}
           </Button>
@@ -205,14 +205,14 @@ const ChurchHomePage = () => {
           
           {/* Mobile: Horizontal Pills */}
           <div className="md:hidden overflow-x-auto scrollbar-hide -mx-4 px-4">
-            <div className="flex gap-3 pb-2">
+            <div className="flex gap-2.5 pb-2">
               {features.map((feature, index) => (
                 <button
                   key={index}
                   onClick={feature.action}
-                  className="min-w-[120px] flex-shrink-0 flex flex-col items-center gap-2 p-4 rounded-2xl bg-card hover:bg-accent transition-colors"
+                  className="min-w-[100px] flex-shrink-0 flex flex-col items-center gap-2 p-4 rounded-2xl bg-card hover:bg-accent transition-colors"
                 >
-                  <div className={`h-12 w-12 rounded-2xl bg-gradient-to-br ${feature.color} flex items-center justify-center`}>
+                  <div className={`h-14 w-14 rounded-2xl bg-gradient-to-br ${feature.color} flex items-center justify-center`}>
                     <feature.icon className="h-6 w-6 text-white" />
                   </div>
                   <span className="text-xs font-medium text-center">{feature.title}</span>

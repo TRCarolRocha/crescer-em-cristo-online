@@ -27,7 +27,7 @@ const SuperAdminDashboard = () => {
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
-            <h1 className="text-2xl md:text-4xl font-bold bg-gradient-to-r from-[#7b2ff7] to-[#f107a3] bg-clip-text text-transparent">
+            <h1 className="text-xl md:text-4xl font-bold bg-gradient-to-r from-[#7b2ff7] to-[#f107a3] bg-clip-text text-transparent">
               Dashboard Hodos
             </h1>
             <p className="text-sm text-muted-foreground mt-1 md:mt-2">
@@ -49,7 +49,7 @@ const SuperAdminDashboard = () => {
         {/* Mobile */}
         <div className="md:hidden overflow-x-auto snap-x scrollbar-hide -mx-4 px-4">
           <div className="flex gap-4 pb-4">
-            <div className="min-w-[180px] snap-center flex-shrink-0">
+            <div className="min-w-[170px] snap-center flex-shrink-0">
               <CardMetric
                 title="Igrejas"
                 value={mockSuperAdminStats.totalChurches}
@@ -57,7 +57,7 @@ const SuperAdminDashboard = () => {
                 trend={{ value: 12, isPositive: true }}
               />
             </div>
-            <div className="min-w-[180px] snap-center flex-shrink-0">
+            <div className="min-w-[170px] snap-center flex-shrink-0">
               <CardMetric
                 title="Usuários"
                 value={mockSuperAdminStats.activeUsers}
@@ -65,14 +65,14 @@ const SuperAdminDashboard = () => {
                 trend={{ value: 8, isPositive: true }}
               />
             </div>
-            <div className="min-w-[180px] snap-center flex-shrink-0">
+            <div className="min-w-[170px] snap-center flex-shrink-0">
               <CardMetric
                 title="Conteúdos"
                 value={mockSuperAdminStats.publicContent}
                 icon={FileText}
               />
             </div>
-            <div className="min-w-[180px] snap-center flex-shrink-0">
+            <div className="min-w-[170px] snap-center flex-shrink-0">
               <CardMetric
                 title="Engajamento"
                 value={`${mockSuperAdminStats.engagementRate}%`}
@@ -115,15 +115,15 @@ const SuperAdminDashboard = () => {
         <div className="md:hidden">
           <Tabs defaultValue="engagement" className="w-full">
             <TabsList className="w-full grid grid-cols-2">
-              <TabsTrigger value="engagement">Engajamento</TabsTrigger>
-              <TabsTrigger value="activities">Atividades</TabsTrigger>
+              <TabsTrigger value="engagement" className="text-sm">Engajamento</TabsTrigger>
+              <TabsTrigger value="activities" className="text-sm">Atividades</TabsTrigger>
             </TabsList>
             <TabsContent value="engagement" className="mt-4">
               <ChartCard
                 title="Engajamento Mensal"
                 description="Taxa dos últimos 6 meses"
               >
-                <ResponsiveContainer width="100%" height={250}>
+                <ResponsiveContainer width="100%" height={300}>
                   <LineChart data={mockEngagementData}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="month" tick={{ fontSize: 12 }} />
@@ -214,19 +214,19 @@ const SuperAdminDashboard = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
           <GradientButton
             onClick={() => navigate('/admin/hodos/igrejas')}
-            className="h-16 md:h-20"
+            className="h-14 md:h-20"
           >
             Gerenciar Igrejas
           </GradientButton>
           <GradientButton
             onClick={() => navigate('/admin/hodos/conteudos')}
-            className="h-16 md:h-20"
+            className="h-14 md:h-20"
           >
             Conteúdos Públicos
           </GradientButton>
           <GradientButton
             onClick={() => navigate('/membros')}
-            className="h-16 md:h-20"
+            className="h-14 md:h-20"
           >
             Ver Todos os Usuários
           </GradientButton>

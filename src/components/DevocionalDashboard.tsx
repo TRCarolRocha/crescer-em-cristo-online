@@ -140,7 +140,7 @@ const DevocionalDashboard = () => {
     <div className="space-y-6">
       {/* Header com título e botão de histórico */}
       <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-3">
-        <h2 className="text-xl md:text-2xl font-bold text-gray-900">Seu Progresso Devocional</h2>
+        <h2 className="text-lg md:text-2xl font-bold text-gray-900">Seu Progresso Devocional</h2>
         <Button
           variant="outline"
           onClick={() => navigate('/historico-devocional')}
@@ -157,7 +157,7 @@ const DevocionalDashboard = () => {
       <div className="md:hidden overflow-x-auto scrollbar-hide -mx-4 px-4">
         <div className="flex gap-3 pb-2">
           <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 min-w-[140px] flex-shrink-0">
-            <CardContent className="p-4">
+            <CardContent className="p-3.5">
               <div className="flex items-center gap-2 mb-2">
                 <Target className="h-4 w-4 text-blue-600" />
                 <p className="text-xs font-medium text-blue-800">Sequência</p>
@@ -168,7 +168,7 @@ const DevocionalDashboard = () => {
           </Card>
 
           <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200 min-w-[140px] flex-shrink-0">
-            <CardContent className="p-4">
+            <CardContent className="p-3.5">
               <div className="flex items-center gap-2 mb-2">
                 <Trophy className="h-4 w-4 text-green-600" />
                 <p className="text-xs font-medium text-green-800">Recorde</p>
@@ -179,7 +179,7 @@ const DevocionalDashboard = () => {
           </Card>
 
           <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200 min-w-[140px] flex-shrink-0">
-            <CardContent className="p-4">
+            <CardContent className="p-3.5">
               <div className="flex items-center gap-2 mb-2">
                 <BookOpen className="h-4 w-4 text-purple-600" />
                 <p className="text-xs font-medium text-purple-800">Total</p>
@@ -190,7 +190,7 @@ const DevocionalDashboard = () => {
           </Card>
 
           <Card className="bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200 min-w-[140px] flex-shrink-0">
-            <CardContent className="p-4">
+            <CardContent className="p-3.5">
               <div className="flex items-center gap-2 mb-2">
                 <Calendar className="h-4 w-4 text-orange-600" />
                 <p className="text-xs font-medium text-orange-800">Último</p>

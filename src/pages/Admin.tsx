@@ -21,7 +21,7 @@ const Admin = () => {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8">
         {/* Header */}
-        <div className="bg-white/80 backdrop-blur-sm border-b sticky top-0 z-10 -mx-4 px-4 py-4 mb-6 md:mb-8 md:relative md:bg-transparent md:backdrop-blur-none md:border-0">
+        <div className="bg-white/80 backdrop-blur-sm border-b sticky top-0 z-10 -mx-4 px-4 py-3 mb-4 md:mb-8 md:relative md:bg-transparent md:backdrop-blur-none md:border-0">
           <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-3">
             <div>
               <h1 className="text-xl md:text-3xl font-bold text-gray-900">Administrativo</h1>
@@ -36,10 +36,10 @@ const Admin = () => {
         {/* Mobile: Select dropdown */}
         <div className="md:hidden mb-4">
           <Select value={activeTab} onValueChange={setActiveTab}>
-            <SelectTrigger className="w-full">
+            <SelectTrigger className="w-full z-50">
               <SelectValue placeholder="Selecione uma seção" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="z-50">
               <SelectItem value="membros">👥 Membros</SelectItem>
               <SelectItem value="grupos">👨‍👩‍👧‍👦 Grupos</SelectItem>
               <SelectItem value="trilhas">📚 Trilhas</SelectItem>
