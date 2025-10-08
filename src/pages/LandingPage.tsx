@@ -51,7 +51,7 @@ const LandingPage = () => {
           {/* Palavra HODOS gigante com gradiente */}
           <h1 style={{
           letterSpacing: '0.05em'
-        }} className="text-7xl font-bold font-playfair bg-gradient-to-r from-[#FFAEF1] via-purple-500 via-purple-500 via-purple-500 animate-float text-purple-100 md:text-9xl">
+        }} className="text-7xl font-bold font-playfair md:text-9xl">
             HODOS
           </h1>
           
