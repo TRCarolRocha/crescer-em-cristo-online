@@ -142,10 +142,20 @@ const AuthPage = () => {
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="login" className="w-full">
-              <TabsList className="grid w-full grid-cols-2 bg-white/20">
-                <TabsTrigger value="login" className="data-[state=active]:bg-white/90 data-[state=active]:text-purple-900">Entrar</TabsTrigger>
-                <TabsTrigger value="signup" className="data-[state=active]:bg-white/90 data-[state=active]:text-purple-900">Cadastrar</TabsTrigger>
-              </TabsList>
+          <TabsList className="grid w-full grid-cols-2 bg-white/30 backdrop-blur-sm border border-white/40">
+            <TabsTrigger 
+              value="login" 
+              className="data-[state=active]:bg-white/90 data-[state=active]:text-purple-900 data-[state=inactive]:text-white/90 data-[state=inactive]:hover:bg-white/20"
+            >
+              Entrar
+            </TabsTrigger>
+            <TabsTrigger 
+              value="signup" 
+              className="data-[state=active]:bg-white/90 data-[state=active]:text-purple-900 data-[state=inactive]:text-white/90 data-[state=inactive]:hover:bg-white/20"
+            >
+              Cadastrar
+            </TabsTrigger>
+          </TabsList>
               
               <TabsContent value="login">
                 <form onSubmit={handleLogin} className="space-y-4">

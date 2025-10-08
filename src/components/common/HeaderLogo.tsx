@@ -24,7 +24,7 @@ export const HeaderLogo: React.FC<HeaderLogoProps> = ({ size = 'md', className }
         className
       )}
       style={{
-        filter: 'drop-shadow(0 0 15px rgba(123, 47, 247, 0.3))',
+        filter: 'brightness(1.3) drop-shadow(0 0 20px rgba(255, 255, 255, 0.4)) drop-shadow(0 0 40px rgba(168, 85, 247, 0.2))',
       }}
     />
   );
