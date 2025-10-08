@@ -55,7 +55,9 @@ const LandingPage = () => {
         <div className="max-w-6xl mx-auto text-center space-y-8">
           {/* Logo pequena */}
           <div className="flex justify-center mb-4">
-            <HeaderLogo size="md" />
+            <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-4 shadow-lg">
+              <HeaderLogo size="md" />
+            </div>
           </div>
           
           {/* Palavra HODOS gigante com gradiente */}
