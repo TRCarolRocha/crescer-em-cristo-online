@@ -12,6 +12,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { usePermissions } from "@/hooks/usePermissions";
 import { supabase } from "@/integrations/supabase/client";
 import { ChurchCustomizationDialog } from "@/components/admin/ChurchCustomizationDialog";
+import { BottomNav } from "@/components/layout/BottomNav";
 
 interface Church {
   id: string;
@@ -154,7 +155,7 @@ const ChurchHomePage = () => {
         />
       )}
       
-      <main className="container mx-auto px-4 py-12 space-y-16">
+      <main className="container mx-auto px-4 py-12 pb-24 md:pb-12 space-y-16">
         {/* Hero Section */}
         <section className="text-center space-y-6 py-12">
           <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-primary via-purple-600 to-pink-600 bg-clip-text text-transparent animate-fade-in">
@@ -220,6 +221,9 @@ const ChurchHomePage = () => {
           </Button>
         </section>
       </main>
+
+      {/* Menu inferior mobile */}
+      <BottomNav churchSlug={church.slug} />
     </div>
   );
 };

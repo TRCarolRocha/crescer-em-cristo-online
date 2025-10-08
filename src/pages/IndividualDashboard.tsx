@@ -149,7 +149,36 @@ const IndividualDashboard = () => {
         {/* Navigation Cards */}
         <section className="space-y-8">
           <h3 className="text-3xl font-bold text-center text-white">Acesso Rápido</h3>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          
+          {/* Mobile: Carrossel horizontal */}
+          <div className="md:hidden overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-4">
+            <div className="flex gap-4 px-4">
+              {navigationCards.map((feature, index) => (
+                <Card
+                  key={index}
+                  className="min-w-[280px] snap-center flex-shrink-0 feature-card cursor-pointer hover:scale-105 transition-all duration-300"
+                  onClick={feature.action}
+                >
+                  <div className={`h-16 w-16 rounded-2xl bg-gradient-to-br ${feature.color} flex items-center justify-center mb-6`}>
+                    <feature.icon className="h-8 w-8 text-white" />
+                  </div>
+                  <h4 className="text-2xl font-bold text-foreground mb-3">
+                    {feature.title}
+                  </h4>
+                  <p className="text-muted-foreground mb-4">
+                    {feature.description}
+                  </p>
+                  <Button variant="ghost" className="group">
+                    Acessar
+                    <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                  </Button>
+                </Card>
+              ))}
+            </div>
+          </div>
+
+          {/* Desktop: Grid normal */}
+          <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {navigationCards.map((feature, index) => (
               <Card
                 key={index}
