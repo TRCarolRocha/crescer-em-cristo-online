@@ -43,11 +43,6 @@ const LandingPage = () => {
       {/* Hero Section */}
       <section className="relative z-10 px-6 pt-20 pb-32">
         <div className="max-w-6xl mx-auto text-center space-y-8">
-          {/* Logo pequena */}
-          <div className="flex justify-center mb-6">
-            <HeaderLogo size="md" />
-          </div>
-          
           {/* Palavra HODOS gigante com gradiente */}
           <h1 style={{
           letterSpacing: '0.05em'
