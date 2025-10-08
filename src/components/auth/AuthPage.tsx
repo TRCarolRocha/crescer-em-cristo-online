@@ -46,43 +46,12 @@ const AuthPage = () => {
     } else {
       toast({
         title: "Login realizado!",
-        description: "Bem-vindo"
+        description: "Bem-vindo ao HODOS"
       });
       
-      // Fetch user roles and church, then redirect
-      setTimeout(async () => {
-        const { data: { user: currentUser } } = await supabase.auth.getUser();
-        if (currentUser) {
-          // Get user roles
-          const { data: rolesData } = await supabase
-            .from('user_roles')
-            .select('role')
-            .eq('user_id', currentUser.id);
-
-          const roles = rolesData?.map(r => r.role) || [];
-
-          // Get user profile with church
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('church_id, churches(slug)')
-            .eq('id', currentUser.id)
-            .single();
-
-          const churchSlug = (profile?.churches as any)?.slug || 'monte-hebrom';
-
-          // Redirect based on role
-          if (roles.includes('super_admin')) {
-            navigate('/admin/hodos');
-          } else if (roles.includes('admin')) {
-            navigate(`/admin/igrejas/${churchSlug}`);
-          } else if (profile?.church_id) {
-            navigate(`/igreja/${churchSlug}`);
-          } else {
-            navigate('/');
-          }
-        }
-        setLoading(false);
-      }, 500);
+      // Redirecionamento universal para /meu-espaco
+      navigate('/meu-espaco');
+      setLoading(false);
     }
   };
 
