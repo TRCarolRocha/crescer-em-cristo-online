@@ -36,7 +36,7 @@ const LandingPage = () => {
     title: "Gestão Multi-Igrejas",
     description: "Plataforma completa para administradores e líderes"
   }];
-  return <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white overflow-hidden relative">
+  return <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white overflow-hidden relative">
       {/* Animated Background */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#7b2ff720_1px,transparent_1px),linear-gradient(to_bottom,#f107a320_1px,transparent_1px)] bg-[size:40px_40px] animate-[grid-flow_20s_linear_infinite]" />
 
@@ -44,7 +44,9 @@ const LandingPage = () => {
       <section className="relative z-10 px-6 pt-20 pb-32">
         <div className="max-w-6xl mx-auto text-center space-y-8">
           {/* Logo pequena */}
-          
+          <div className="flex justify-center mb-6">
+            <HeaderLogo size="md" />
+          </div>
           
           {/* Palavra HODOS gigante com gradiente */}
           <h1 style={{
