@@ -41,9 +41,9 @@ export function AdminSidebar() {
 
   return (
     <Sidebar className="border-r border-purple-200 bg-white">
-      <SidebarHeader 
+      <SidebarHeader
         className="p-4 border-b cursor-pointer hover:bg-purple-50/50 transition-colors"
-        onClick={() => navigate('/')}
+        onClick={() => navigate('/meu-espaco')}
       >
         <div className="flex items-center gap-3">
           <HeaderLogo size="sm" />
