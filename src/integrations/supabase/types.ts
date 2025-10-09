@@ -85,6 +85,9 @@ export type Database = {
       }
       churches: {
         Row: {
+          address: string | null
+          cnpj: string | null
+          cpf: string | null
           created_at: string | null
           description: string | null
           headline: string | null
@@ -94,11 +97,18 @@ export type Database = {
           logo_url: string | null
           name: string
           primary_color: string | null
+          responsible_email: string | null
+          responsible_name: string | null
+          responsible_phone: string | null
           secondary_color: string | null
           slug: string
+          subscription_id: string | null
           updated_at: string | null
         }
         Insert: {
+          address?: string | null
+          cnpj?: string | null
+          cpf?: string | null
           created_at?: string | null
           description?: string | null
           headline?: string | null
@@ -108,11 +118,18 @@ export type Database = {
           logo_url?: string | null
           name: string
           primary_color?: string | null
+          responsible_email?: string | null
+          responsible_name?: string | null
+          responsible_phone?: string | null
           secondary_color?: string | null
           slug: string
+          subscription_id?: string | null
           updated_at?: string | null
         }
         Update: {
+          address?: string | null
+          cnpj?: string | null
+          cpf?: string | null
           created_at?: string | null
           description?: string | null
           headline?: string | null
@@ -122,11 +139,23 @@ export type Database = {
           logo_url?: string | null
           name?: string
           primary_color?: string | null
+          responsible_email?: string | null
+          responsible_name?: string | null
+          responsible_phone?: string | null
           secondary_color?: string | null
           slug?: string
+          subscription_id?: string | null
           updated_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "churches_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       content_questions: {
         Row: {
@@ -846,6 +875,54 @@ export type Database = {
         }
         Relationships: []
       }
+      pending_payments: {
+        Row: {
+          amount: number
+          church_data: Json | null
+          confirmation_code: string
+          created_at: string
+          id: string
+          payment_method: string | null
+          plan_type: Database["public"]["Enums"]["subscription_plan_type"]
+          rejection_reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: Database["public"]["Enums"]["payment_status"]
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          amount: number
+          church_data?: Json | null
+          confirmation_code: string
+          created_at?: string
+          id?: string
+          payment_method?: string | null
+          plan_type: Database["public"]["Enums"]["subscription_plan_type"]
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["payment_status"]
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          amount?: number
+          church_data?: Json | null
+          confirmation_code?: string
+          created_at?: string
+          id?: string
+          payment_method?: string | null
+          plan_type?: Database["public"]["Enums"]["subscription_plan_type"]
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["payment_status"]
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           address: string | null
@@ -858,6 +935,7 @@ export type Database = {
           id: string
           ministry: string | null
           phone: string | null
+          subscription_id: string | null
           tags: string[] | null
           updated_at: string | null
         }
@@ -872,6 +950,7 @@ export type Database = {
           id: string
           ministry?: string | null
           phone?: string | null
+          subscription_id?: string | null
           tags?: string[] | null
           updated_at?: string | null
         }
@@ -886,6 +965,7 @@ export type Database = {
           id?: string
           ministry?: string | null
           phone?: string | null
+          subscription_id?: string | null
           tags?: string[] | null
           updated_at?: string | null
         }
@@ -895,6 +975,13 @@ export type Database = {
             columns: ["church_id"]
             isOneToOne: false
             referencedRelation: "churches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "subscriptions"
             referencedColumns: ["id"]
           },
         ]
@@ -1008,6 +1095,102 @@ export type Database = {
           name?: string
         }
         Relationships: []
+      }
+      subscription_plans: {
+        Row: {
+          created_at: string
+          description: string | null
+          features: Json | null
+          id: string
+          is_active: boolean
+          max_admins: number | null
+          max_members: number | null
+          name: string
+          plan_type: Database["public"]["Enums"]["subscription_plan_type"]
+          price_monthly: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          features?: Json | null
+          id?: string
+          is_active?: boolean
+          max_admins?: number | null
+          max_members?: number | null
+          name: string
+          plan_type: Database["public"]["Enums"]["subscription_plan_type"]
+          price_monthly?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          features?: Json | null
+          id?: string
+          is_active?: boolean
+          max_admins?: number | null
+          max_members?: number | null
+          name?: string
+          plan_type?: Database["public"]["Enums"]["subscription_plan_type"]
+          price_monthly?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      subscriptions: {
+        Row: {
+          cancelled_at: string | null
+          church_id: string | null
+          created_at: string
+          expires_at: string | null
+          id: string
+          plan_id: string
+          started_at: string
+          status: Database["public"]["Enums"]["subscription_status"]
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          cancelled_at?: string | null
+          church_id?: string | null
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          plan_id: string
+          started_at?: string
+          status?: Database["public"]["Enums"]["subscription_status"]
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          cancelled_at?: string | null
+          church_id?: string | null
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          plan_id?: string
+          started_at?: string
+          status?: Database["public"]["Enums"]["subscription_status"]
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscriptions_church_id_fkey"
+            columns: ["church_id"]
+            isOneToOne: false
+            referencedRelation: "churches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subscriptions_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "subscription_plans"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_achievements: {
         Row: {
@@ -1323,6 +1506,10 @@ export type Database = {
         Args: { p_target_level: string; p_user_id: string }
         Returns: boolean
       }
+      generate_confirmation_code: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       get_user_church_id: {
         Args: { p_user_id?: string }
         Returns: string
@@ -1332,6 +1519,10 @@ export type Database = {
         Returns: {
           role: Database["public"]["Enums"]["app_role"]
         }[]
+      }
+      has_content_access: {
+        Args: { p_content_type: string; p_user_id: string }
+        Returns: boolean
       }
       has_role: {
         Args: {
@@ -1367,6 +1558,14 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "lider" | "member" | "super_admin" | "visitor"
+      payment_status: "pending" | "approved" | "rejected" | "cancelled"
+      subscription_plan_type:
+        | "free"
+        | "individual"
+        | "church_simple"
+        | "church_plus"
+        | "church_premium"
+      subscription_status: "active" | "expired" | "cancelled" | "pending"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1495,6 +1694,15 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "lider", "member", "super_admin", "visitor"],
+      payment_status: ["pending", "approved", "rejected", "cancelled"],
+      subscription_plan_type: [
+        "free",
+        "individual",
+        "church_simple",
+        "church_plus",
+        "church_premium",
+      ],
+      subscription_status: ["active", "expired", "cancelled", "pending"],
     },
   },
 } as const
