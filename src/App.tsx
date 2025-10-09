@@ -30,6 +30,7 @@ import SuperAdminDashboard from "./pages/admin/SuperAdminDashboard";
 import ChurchAdminDashboard from "./pages/admin/ChurchAdminDashboard";
 import ChurchList from "./pages/admin/ChurchList";
 import PublicContent from "./pages/admin/PublicContent";
+import PendingPayments from "./pages/admin/PendingPayments";
 import AuthPage from "./components/auth/AuthPage";
 import Planos from "./pages/Planos";
 import AssinaturaFree from "./pages/assinatura/AssinaturaFree";
@@ -156,6 +157,18 @@ const App = () => (
                       <AdminSidebar />
                       <main className="flex-1">
                         <PublicContent />
+                      </main>
+                    </div>
+                  </SidebarProvider>
+                </SuperAdminRoute>
+              } />
+              <Route path="/admin/hodos/pagamentos" element={
+                <SuperAdminRoute>
+                  <SidebarProvider>
+                    <div className="flex min-h-screen w-full">
+                      <AdminSidebar />
+                      <main className="flex-1">
+                        <PendingPayments />
                       </main>
                     </div>
                   </SidebarProvider>

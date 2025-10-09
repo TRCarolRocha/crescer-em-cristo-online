@@ -1,1 +1,4 @@
 project_id = "ndmuamcrsozbhavnohle"
+
+[functions.send-subscription-email]
+verify_jwt = false

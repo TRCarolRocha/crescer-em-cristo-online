@@ -1,10 +1,14 @@
 import { useState } from 'react';
-import { Users, Building2, FileText, TrendingUp, Plus } from 'lucide-react';
+import { Users, Building2, FileText, TrendingUp, Plus, Clock } from 'lucide-react';
 import { CardMetric } from '@/components/common/CardMetric';
 import { ChartCard } from '@/components/common/ChartCard';
 import { GradientButton } from '@/components/common/GradientButton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 import { mockSuperAdminStats, mockRecentActivities, mockEngagementData } from '@/data/mock';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { CreateChurchDialog } from '@/components/admin/CreateChurchDialog';
@@ -12,6 +16,20 @@ import { CreateChurchDialog } from '@/components/admin/CreateChurchDialog';
 const SuperAdminDashboard = () => {
   const navigate = useNavigate();
   const [createChurchOpen, setCreateChurchOpen] = useState(false);
+
+  const { data: pendingPayments } = useQuery({
+    queryKey: ['pending-payments-count'],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('pending_payments')
+        .select('id, amount')
+        .eq('status', 'pending');
+      return data || [];
+    },
+    refetchInterval: 30000,
+  });
+
+  const pendingCount = pendingPayments?.length || 0;
 
   return (
     <>
@@ -97,11 +115,29 @@ const SuperAdminDashboard = () => {
             icon={Users}
             trend={{ value: 8, isPositive: true }}
           />
-          <CardMetric
-            title="Conteúdos Públicos"
-            value={mockSuperAdminStats.publicContent}
-            icon={FileText}
-          />
+          <div 
+            onClick={() => navigate('/admin/hodos/pagamentos')}
+            className="cursor-pointer transition-transform hover:scale-105"
+          >
+            <Card className="p-6">
+              <div className="flex items-center gap-3">
+                <div className="p-3 bg-yellow-500/10 rounded-lg">
+                  <Clock className="w-6 h-6 text-yellow-600" />
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Pagamentos</p>
+                  <div className="flex items-center gap-2">
+                    <p className="text-2xl font-bold">{pendingCount}</p>
+                    {pendingCount > 0 && (
+                      <Badge variant="outline" className="bg-yellow-500/10 text-yellow-600">
+                        Pendente
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </Card>
+          </div>
           <CardMetric
             title="Engajamento"
             value={`${mockSuperAdminStats.engagementRate}%`}
