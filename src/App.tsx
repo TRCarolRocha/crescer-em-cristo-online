@@ -31,6 +31,11 @@ import ChurchAdminDashboard from "./pages/admin/ChurchAdminDashboard";
 import ChurchList from "./pages/admin/ChurchList";
 import PublicContent from "./pages/admin/PublicContent";
 import AuthPage from "./components/auth/AuthPage";
+import Planos from "./pages/Planos";
+import AssinaturaFree from "./pages/assinatura/AssinaturaFree";
+import AssinaturaIndividual from "./pages/assinatura/AssinaturaIndividual";
+import AssinaturaIgreja from "./pages/assinatura/AssinaturaIgreja";
+import DiagnosticoPublico from "./pages/DiagnosticoPublico";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminRoute from "./components/AdminRoute";
 import SuperAdminRoute from "./components/SuperAdminRoute";
@@ -187,12 +192,17 @@ const App = () => (
               } />
               
               {/* Individual User Space */}
-              <Route path="/meu-espaco" element={
+            <Route path="/meu-espaco" element={
                 <ProtectedRoute>
                   <IndividualDashboard />
                 </ProtectedRoute>
               } />
             <Route path="/diagnostico" element={<Diagnostico />} />
+            <Route path="/diagnostico-publico" element={<DiagnosticoPublico />} />
+            <Route path="/planos" element={<Planos />} />
+            <Route path="/assinatura/free" element={<AssinaturaFree />} />
+            <Route path="/assinatura/individual" element={<AssinaturaIndividual />} />
+            <Route path="/assinatura/igreja" element={<AssinaturaIgreja />} />
             <Route path="/fale-com-lideranca" element={
               <ProtectedRoute>
                 <FaleComLideranca />

@@ -59,11 +59,11 @@ const LandingPage = () => {
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-8">
-            <GradientButton onClick={() => navigate("/auth")} className="px-8 py-4 text-lg">
-              Entrar
+            <GradientButton onClick={() => navigate("/planos")} className="px-8 py-4 text-lg">
+              Ver Planos
             </GradientButton>
-            <button onClick={scrollToFeatures} className="px-8 py-4 border-2 border-purple-400/50 backdrop-blur-sm rounded-xl font-semibold text-lg hover:bg-white/10 hover:border-purple-400 transform hover:scale-105 transition-all duration-300">
-              Explorar o Hodos
+            <button onClick={() => navigate("/auth")} className="px-8 py-4 border-2 border-purple-400/50 backdrop-blur-sm rounded-xl font-semibold text-lg hover:bg-white/10 hover:border-purple-400 transform hover:scale-105 transition-all duration-300">
+              Entrar
             </button>
           </div>
         </div>
@@ -114,11 +114,11 @@ const LandingPage = () => {
             </div>
             <div>
               <h4 className="font-bold text-lg mb-4 text-transparent bg-clip-text bg-gradient-to-r from-[#7b2ff7] to-[#f107a3]">
-                Igrejas Parceiras
+                Planos
               </h4>
-              <p className="text-slate-400 text-sm">
-                Descubra comunidades conectadas ao Hodos.
-              </p>
+              <button onClick={() => navigate('/planos')} className="text-slate-400 hover:text-purple-400 transition-colors text-sm block">
+                Ver todos os planos
+              </button>
             </div>
             <div>
               <h4 className="font-bold text-lg mb-4 text-transparent bg-clip-text bg-gradient-to-r from-[#7b2ff7] to-[#f107a3]">

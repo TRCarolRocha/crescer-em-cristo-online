@@ -1,3 +1,4 @@
+import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -11,11 +12,36 @@ import { supabase } from "@/integrations/supabase/client";
 import UserMenu from "@/components/auth/UserMenu";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { Input } from "@/components/ui/input";
+import { SubscriptionBanner } from '@/components/subscription/SubscriptionBanner';
 
 const IndividualDashboard = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { church } = useChurch();
   const { isSuperAdmin, isChurchAdmin, isVisitor } = usePermissions();
+  const [subscriptionStatus, setSubscriptionStatus] = React.useState<'active' | 'pending' | 'expired' | null>(null);
+  const [planType, setPlanType] = React.useState<string>('');
+
+  React.useEffect(() => {
+    const checkSubscription = async () => {
+      if (!user) return;
+
+      const { data: subscriptions } = await supabase
+        .from('subscriptions')
+        .select('status, subscription_plans(name)')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(1);
+
+      if (subscriptions && subscriptions.length > 0) {
+        const sub = subscriptions[0];
+        setSubscriptionStatus(sub.status as any);
+        setPlanType((sub.subscription_plans as any)?.name || '');
+      }
+    };
+
+    checkSubscription();
+  }, [user]);
 
   // Buscar conteúdos públicos para visitors
   const { data: publicDevocionais } = useQuery({
@@ -151,6 +177,23 @@ const IndividualDashboard = () => {
       </header>
 
       <main className="container mx-auto px-4 pb-24 md:pb-12 space-y-6">
+        {/* Subscription Banner */}
+        {subscriptionStatus === 'pending' && (
+          <div className="pt-6">
+            <SubscriptionBanner status="pending" planType={planType} />
+          </div>
+        )}
+        
+        {subscriptionStatus === 'expired' && (
+          <div className="pt-6">
+            <SubscriptionBanner 
+              status="expired" 
+              planType={planType}
+              onRenew={() => navigate('/planos')}
+            />
+          </div>
+        )}
+
         {/* Welcome Section - Compact for mobile */}
         <section className="text-center space-y-3 py-6">
           <h2 className="text-3xl md:text-5xl font-bold text-white animate-fade-in">
