@@ -36,18 +36,27 @@ export const SubscriptionBanner: React.FC<SubscriptionBannerProps> = ({
         <AlertTitle className="text-red-800 dark:text-red-200">
           Plano Expirado
         </AlertTitle>
-        <AlertDescription className="text-red-700 dark:text-red-300 flex items-center justify-between">
-          <span>Seu plano {planType} expirou. Renove agora para continuar acessando todos os recursos.</span>
-          {onRenew && (
-            <Button
-              variant="destructive"
-              size="sm"
-              onClick={onRenew}
-              className="ml-4"
-            >
-              Renovar
-            </Button>
-          )}
+        <AlertDescription className="text-red-700 dark:text-red-300">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="mb-2">
+                Seu plano {planType} expirou. Renove agora para continuar acessando todos os recursos.
+              </p>
+              <p className="text-sm">
+                Após 7 dias sem renovação, sua assinatura será cancelada e você retornará ao plano gratuito.
+              </p>
+            </div>
+            {onRenew && (
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={onRenew}
+                className="shrink-0"
+              >
+                Renovar Agora
+              </Button>
+            )}
+          </div>
         </AlertDescription>
       </Alert>
     );

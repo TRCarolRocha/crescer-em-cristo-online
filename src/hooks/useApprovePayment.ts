@@ -21,7 +21,7 @@ export const useApprovePayment = () => {
       // Get payment details
       const { data: payment, error: paymentError } = await supabase
         .from('pending_payments')
-        .select('*')
+        .select('id, plan_type, user_id, church_data, amount, status, confirmation_code')
         .eq('id', paymentId)
         .single();
 

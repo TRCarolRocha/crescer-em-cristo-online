@@ -516,6 +516,39 @@ export type Database = {
         }
         Relationships: []
       }
+      email_templates: {
+        Row: {
+          created_at: string | null
+          html_content: string
+          id: string
+          is_active: boolean | null
+          subject: string
+          template_key: string
+          updated_at: string | null
+          variables: Json | null
+        }
+        Insert: {
+          created_at?: string | null
+          html_content: string
+          id?: string
+          is_active?: boolean | null
+          subject: string
+          template_key: string
+          updated_at?: string | null
+          variables?: Json | null
+        }
+        Update: {
+          created_at?: string | null
+          html_content?: string
+          id?: string
+          is_active?: boolean | null
+          subject?: string
+          template_key?: string
+          updated_at?: string | null
+          variables?: Json | null
+        }
+        Relationships: []
+      }
       event_registrations: {
         Row: {
           event_id: string
@@ -875,6 +908,74 @@ export type Database = {
         }
         Relationships: []
       }
+      payment_settings: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          pix_key: string
+          pix_type: string
+          qr_code_url: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          pix_key: string
+          pix_type: string
+          qr_code_url?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          pix_key?: string
+          pix_type?: string
+          qr_code_url?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      payment_settings_history: {
+        Row: {
+          changed_at: string | null
+          changed_by: string | null
+          id: string
+          pix_key: string
+          pix_type: string
+          qr_code_url: string | null
+          setting_id: string | null
+        }
+        Insert: {
+          changed_at?: string | null
+          changed_by?: string | null
+          id?: string
+          pix_key: string
+          pix_type: string
+          qr_code_url?: string | null
+          setting_id?: string | null
+        }
+        Update: {
+          changed_at?: string | null
+          changed_by?: string | null
+          id?: string
+          pix_key?: string
+          pix_type?: string
+          qr_code_url?: string | null
+          setting_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_settings_history_setting_id_fkey"
+            columns: ["setting_id"]
+            isOneToOne: false
+            referencedRelation: "payment_settings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pending_payments: {
         Row: {
           amount: number
@@ -1140,11 +1241,13 @@ export type Database = {
       }
       subscriptions: {
         Row: {
+          auto_renew: boolean | null
           cancelled_at: string | null
           church_id: string | null
           created_at: string
           expires_at: string | null
           id: string
+          payment_method_id: string | null
           plan_id: string
           started_at: string
           status: Database["public"]["Enums"]["subscription_status"]
@@ -1152,11 +1255,13 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          auto_renew?: boolean | null
           cancelled_at?: string | null
           church_id?: string | null
           created_at?: string
           expires_at?: string | null
           id?: string
+          payment_method_id?: string | null
           plan_id: string
           started_at?: string
           status?: Database["public"]["Enums"]["subscription_status"]
@@ -1164,11 +1269,13 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          auto_renew?: boolean | null
           cancelled_at?: string | null
           church_id?: string | null
           created_at?: string
           expires_at?: string | null
           id?: string
+          payment_method_id?: string | null
           plan_id?: string
           started_at?: string
           status?: Database["public"]["Enums"]["subscription_status"]
