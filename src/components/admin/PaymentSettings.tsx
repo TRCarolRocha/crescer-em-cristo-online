@@ -25,7 +25,7 @@ export const PaymentSettings = () => {
     resolver: zodResolver(settingsSchema),
     defaultValues: {
       pix_key: settings?.pix_key || '',
-      pix_type: settings?.pix_type || 'email',
+      pix_type: (settings?.pix_type as 'cpf' | 'cnpj' | 'email' | 'phone' | 'random') || 'email',
     },
   });
 
