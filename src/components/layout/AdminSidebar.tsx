@@ -36,6 +36,7 @@ export function AdminSidebar() {
     { title: 'Dashboard Hodos', url: '/admin/hodos', icon: LayoutDashboard },
     { title: 'Gerenciar Igrejas', url: '/admin/hodos/igrejas', icon: Building2 },
     { title: 'Conteúdos Públicos', url: '/admin/hodos/conteudos', icon: FileText },
+    { title: 'Gerenciar Planos', url: '/admin/hodos/planos', icon: LayoutDashboard },
   ];
 
 

@@ -72,7 +72,20 @@ const IndividualDashboard = () => {
   });
 
   // Quick access pills (mais compactos)
-  const quickAccessItems = [
+  const quickAccessItems = isVisitor ? [
+    {
+      icon: BookOpen,
+      label: "Devocional",
+      color: "from-indigo-500 to-blue-500",
+      action: () => navigate('/devocional')
+    },
+    {
+      icon: TrendingUp,
+      label: "Histórico",
+      color: "from-orange-500 to-red-500",
+      action: () => navigate('/historico-devocional')
+    }
+  ] : [
     {
       icon: BookOpen,
       label: "Devocional",
@@ -121,19 +134,19 @@ const IndividualDashboard = () => {
       color: "from-indigo-500 to-blue-500",
       action: () => navigate('/devocional')
     },
-    {
+    ...(!isVisitor ? [{
       icon: Compass,
       title: "Trilhas",
-      description: isVisitor ? `${publicTracks?.length || 0} abertas` : "Discipulado",
+      description: "Discipulado",
       color: "from-teal-500 to-cyan-500",
       action: () => navigate('/trilhas')
-    },
+    }] : []),
     {
       icon: TrendingUp,
-      title: "Progresso",
-      description: "Sua jornada",
+      title: isVisitor ? "Histórico Devocional" : "Progresso",
+      description: isVisitor ? "Seus devocionais" : "Sua jornada",
       color: "from-orange-500 to-red-500",
-      action: () => navigate('/progresso')
+      action: () => navigate(isVisitor ? '/historico-devocional' : '/progresso')
     }
   ];
 
@@ -392,8 +405,8 @@ const IndividualDashboard = () => {
           </div>
         </section>
 
-        {/* CTA Section */}
-        {!church && (
+        {/* CTA Section - hidden for visitors */}
+        {!church && !isVisitor && (
           <section className="text-center py-8 px-4">
             <Card className="p-8 md:p-12 bg-gradient-to-br from-blue-500/10 to-purple-500/10 border-2 border-blue-500/20">
               <MessageCircle className="h-12 md:h-16 w-12 md:w-16 mx-auto mb-4 text-blue-400" />

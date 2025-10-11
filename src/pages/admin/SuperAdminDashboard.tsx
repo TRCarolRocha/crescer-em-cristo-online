@@ -261,10 +261,10 @@ const SuperAdminDashboard = () => {
             Conteúdos Públicos
           </GradientButton>
           <GradientButton
-            onClick={() => navigate('/membros')}
+            onClick={() => navigate('/admin/hodos/planos')}
             className="h-14 md:h-20"
           >
-            Ver Todos os Usuários
+            Gerenciar Planos
           </GradientButton>
         </div>
       </div>

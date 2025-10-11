@@ -247,6 +247,7 @@ export type Database = {
       }
       devocionais: {
         Row: {
+          church_id: string | null
           created_at: string
           data: string
           id: string
@@ -261,6 +262,7 @@ export type Database = {
           versiculo: string
         }
         Insert: {
+          church_id?: string | null
           created_at?: string
           data: string
           id?: string
@@ -275,6 +277,7 @@ export type Database = {
           versiculo: string
         }
         Update: {
+          church_id?: string | null
           created_at?: string
           data?: string
           id?: string
@@ -288,7 +291,15 @@ export type Database = {
           updated_at?: string
           versiculo?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "devocionais_church_id_fkey"
+            columns: ["church_id"]
+            isOneToOne: false
+            referencedRelation: "churches"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       devocional_historico: {
         Row: {
@@ -475,6 +486,7 @@ export type Database = {
         Row: {
           allowed_groups: string[] | null
           allowed_levels: string[] | null
+          church_id: string | null
           created_at: string | null
           description: string | null
           difficulty: string | null
@@ -489,6 +501,7 @@ export type Database = {
         Insert: {
           allowed_groups?: string[] | null
           allowed_levels?: string[] | null
+          church_id?: string | null
           created_at?: string | null
           description?: string | null
           difficulty?: string | null
@@ -503,6 +516,7 @@ export type Database = {
         Update: {
           allowed_groups?: string[] | null
           allowed_levels?: string[] | null
+          church_id?: string | null
           created_at?: string | null
           description?: string | null
           difficulty?: string | null
@@ -514,7 +528,15 @@ export type Database = {
           title?: string
           topics?: string[] | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "discipleship_tracks_church_id_fkey"
+            columns: ["church_id"]
+            isOneToOne: false
+            referencedRelation: "churches"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       email_templates: {
         Row: {

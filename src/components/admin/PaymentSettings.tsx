@@ -25,7 +25,7 @@ export const PaymentSettings = () => {
     resolver: zodResolver(settingsSchema),
     defaultValues: {
       pix_key: settings?.pix_key || '',
-      pix_type: settings?.pix_type || 'email',
+      pix_type: (settings?.pix_type as 'cpf' | 'cnpj' | 'email' | 'phone' | 'random') || 'email',
     },
   });
 
@@ -74,7 +74,7 @@ export const PaymentSettings = () => {
               <Label htmlFor="pix_type">Tipo de Chave</Label>
               <Select
                 value={watch('pix_type')}
-                onValueChange={(value) => setValue('pix_type', value as any)}
+                onValueChange={(value) => setValue('pix_type', value as 'cpf' | 'cnpj' | 'email' | 'phone' | 'random')}
               >
                 <SelectTrigger>
                   <SelectValue />
