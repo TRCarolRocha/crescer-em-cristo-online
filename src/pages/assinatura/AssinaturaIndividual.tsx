@@ -108,6 +108,7 @@ const AssinaturaIndividual = () => {
       <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20 flex items-center justify-center p-4">
         <PaymentConfirmation
           amount={Number(individualPlan?.price_monthly || 0)}
+          planId={individualPlan?.id}
           onConfirm={handlePaymentConfirmation}
           onBack={() => setStep('form')}
           loading={loading}

@@ -47,10 +47,32 @@ const AdminMembros = () => {
 
   const fetchMembers = async () => {
     try {
-      const { data, error } = await supabase
+      // Obter perfil do usuário atual para pegar church_id
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Usuário não autenticado');
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('church_id')
+        .eq('id', user.id)
+        .single();
+
+      // Verificar se é super admin
+      const roles = await getUserRoles(user.id);
+      const isSuperAdmin = roles.includes('super_admin');
+
+      // Construir query base
+      let query = supabase
         .from('profiles')
         .select('*')
         .order('full_name');
+
+      // Filtrar por igreja se não for super admin
+      if (!isSuperAdmin && profile?.church_id) {
+        query = query.eq('church_id', profile.church_id);
+      }
+
+      const { data, error } = await query;
 
       if (error) {
         console.error('Erro detalhado ao buscar membros:', error);

@@ -937,6 +937,7 @@ export type Database = {
           is_active: boolean | null
           pix_key: string
           pix_type: string
+          plan_id: string | null
           qr_code_url: string | null
           updated_at: string | null
         }
@@ -946,6 +947,7 @@ export type Database = {
           is_active?: boolean | null
           pix_key: string
           pix_type: string
+          plan_id?: string | null
           qr_code_url?: string | null
           updated_at?: string | null
         }
@@ -955,10 +957,19 @@ export type Database = {
           is_active?: boolean | null
           pix_key?: string
           pix_type?: string
+          plan_id?: string | null
           qr_code_url?: string | null
           updated_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "payment_settings_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "subscription_plans"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       payment_settings_history: {
         Row: {

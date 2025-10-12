@@ -67,39 +67,40 @@ const ChurchAdminDashboard = () => {
 
   const fetchChurchStats = async (id: string) => {
     try {
-      // Total de membros
+      // Total de membros DA IGREJA
       const { count: membersCount } = await supabase
         .from('profiles')
         .select('*', { count: 'exact', head: true })
         .eq('church_id', id);
 
-      // Trilhas ativas (isso depende da sua lógica)
+      // Trilhas da igreja
       const { data: tracks } = await supabase
         .from('discipleship_tracks')
         .select('id')
-        .not('allowed_groups', 'is', null);
+        .eq('church_id', id);
 
-      // Eventos deste mês
+      // Eventos deste mês criados por membros da igreja
       const now = new Date();
       const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
       const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString();
 
-      const { data: events } = await supabase
-        .from('events')
-        .select('id, created_by')
-        .gte('event_date', firstDay)
-        .lte('event_date', lastDay);
-
-      // Filtrar eventos criados por membros da igreja
+      // Buscar membros da igreja primeiro
       const { data: churchMembers } = await supabase
         .from('profiles')
         .select('id')
         .eq('church_id', id);
 
       const memberIds = churchMembers?.map(m => m.id) || [];
-      const churchEvents = events?.filter(e => memberIds.includes(e.created_by)) || [];
 
-      // Calcular engajamento (exemplo: % de membros com atividade recente)
+      // Buscar apenas eventos criados por membros da igreja
+      const { count: eventsCount } = await supabase
+        .from('events')
+        .select('id', { count: 'exact', head: true })
+        .in('created_by', memberIds)
+        .gte('event_date', firstDay)
+        .lte('event_date', lastDay);
+
+      // Calcular engajamento: % de membros com atividade devocional recente
       const { data: recentActivity } = await supabase
         .from('devocional_historico')
         .select('user_id')
@@ -113,7 +114,7 @@ const ChurchAdminDashboard = () => {
         totalMembers: membersCount || 0,
         activeDiscipleships: tracks?.length || 0,
         engagement,
-        eventsThisMonth: churchEvents.length
+        eventsThisMonth: eventsCount || 0
       });
     } catch (error) {
       console.error('Erro ao buscar estatísticas:', error);
