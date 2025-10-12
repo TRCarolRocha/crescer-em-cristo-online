@@ -37,7 +37,7 @@ export const EmailTemplates = () => {
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground">
-                Variáveis disponíveis: {JSON.parse(template.variables as string).join(', ')}
+                Variáveis disponíveis: {Array.isArray(template.variables) ? template.variables.join(', ') : 'Nenhuma'}
               </p>
             </CardContent>
           </Card>

@@ -43,6 +43,7 @@ import AdminRoute from "./components/AdminRoute";
 import SuperAdminRoute from "./components/SuperAdminRoute";
 import ChurchAdminRoute from "./components/ChurchAdminRoute";
 import NotFound from "./pages/NotFound";
+import ChurchInvite from "./pages/cadastro/ChurchInvite";
 
 const queryClient = new QueryClient();
 
@@ -125,6 +126,9 @@ const App = () => (
             <Routes>
               <Route path="/" element={<HomeRedirect />} />
               <Route path="/auth" element={<AuthPage />} />
+              
+              {/* Public Church Invite Route */}
+              <Route path="/cadastro/:churchSlug" element={<ChurchInvite />} />
               
               {/* Super Admin Routes */}
               <Route path="/admin/hodos" element={
