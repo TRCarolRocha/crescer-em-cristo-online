@@ -39,6 +39,10 @@ export const useChurchInvite = () => {
         }
       }
 
+      // Save church data to localStorage for linking after email confirmation
+      localStorage.setItem('pending_church_slug', churchSlug);
+      localStorage.setItem('pending_church_id', church.id);
+
       // Sign up user
       const { data: authData, error: signUpError } = await supabase.auth.signUp({
         email,
@@ -47,31 +51,38 @@ export const useChurchInvite = () => {
           data: {
             full_name: fullName,
           },
-          emailRedirectTo: `${window.location.origin}/igreja/${churchSlug}`,
+          emailRedirectTo: `${window.location.origin}/`,
         },
       });
 
       if (signUpError) throw signUpError;
       if (!authData.user) throw new Error('Erro ao criar usuário');
 
-      // Update profile with church_id
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .update({ church_id: church.id })
-        .eq('id', authData.user.id);
+      // If user is immediately confirmed (no email confirmation needed), link now
+      if (authData.session) {
+        // Update profile with church_id
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .update({ church_id: church.id })
+          .eq('id', authData.user.id);
 
-      if (profileError) throw profileError;
+        if (profileError) throw profileError;
 
-      // Add member role
-      const { error: roleError } = await supabase
-        .from('user_roles')
-        .insert({
-          user_id: authData.user.id,
-          role: 'member',
-          church_id: church.id,
-        });
+        // Add member role
+        const { error: roleError } = await supabase
+          .from('user_roles')
+          .insert({
+            user_id: authData.user.id,
+            role: 'member',
+            church_id: church.id,
+          });
 
-      if (roleError) throw roleError;
+        if (roleError) throw roleError;
+
+        // Clear localStorage since linking was successful
+        localStorage.removeItem('pending_church_slug');
+        localStorage.removeItem('pending_church_id');
+      }
 
       return { church, user: authData.user };
     }

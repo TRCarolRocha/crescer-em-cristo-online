@@ -30,10 +30,60 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      async (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
+
+        // Handle automatic church linking after email confirmation
+        if (event === 'SIGNED_IN' && session?.user) {
+          const pendingChurchId = localStorage.getItem('pending_church_id');
+          
+          if (pendingChurchId) {
+            try {
+              // Check if user already has church_id
+              const { data: profile } = await supabase
+                .from('profiles')
+                .select('church_id')
+                .eq('id', session.user.id)
+                .single();
+
+              // Only link if not already linked
+              if (!profile?.church_id) {
+                // Update profile with church_id
+                await supabase
+                  .from('profiles')
+                  .update({ church_id: pendingChurchId })
+                  .eq('id', session.user.id);
+
+                // Check if role already exists
+                const { data: existingRole } = await supabase
+                  .from('user_roles')
+                  .select('id')
+                  .eq('user_id', session.user.id)
+                  .eq('church_id', pendingChurchId)
+                  .maybeSingle();
+
+                // Add member role if it doesn't exist
+                if (!existingRole) {
+                  await supabase
+                    .from('user_roles')
+                    .insert({
+                      user_id: session.user.id,
+                      role: 'member',
+                      church_id: pendingChurchId
+                    });
+                }
+              }
+
+              // Clear localStorage after successful linking
+              localStorage.removeItem('pending_church_slug');
+              localStorage.removeItem('pending_church_id');
+            } catch (error) {
+              console.error('Error linking church after confirmation:', error);
+            }
+          }
+        }
       }
     );
 

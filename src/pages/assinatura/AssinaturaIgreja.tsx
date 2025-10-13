@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -14,21 +14,26 @@ import { useSubscriptionPlans } from '@/hooks/useSubscriptionPlans';
 import { useCreatePendingPayment } from '@/hooks/useCreatePendingPayment';
 import { PaymentConfirmation } from '@/components/subscription/PaymentConfirmation';
 import { ConfirmationCodeDisplay } from '@/components/subscription/ConfirmationCodeDisplay';
+import { EmailConfirmationPending } from '@/components/subscription/EmailConfirmationPending';
+import { useResendConfirmationEmail } from '@/hooks/useResendConfirmationEmail';
 import { churchSignupSchema, type ChurchSignupFormData } from '@/utils/subscriptionSchemas';
 import { Separator } from '@/components/ui/separator';
+import { supabase } from '@/integrations/supabase/client';
 
 const AssinaturaIgreja = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { signUp } = useAuth();
+  const { signUp, user, session } = useAuth();
   const { toast } = useToast();
   const { plans } = useSubscriptionPlans();
   const { createPendingPayment } = useCreatePendingPayment();
+  const { resendEmail, isResending, cooldown } = useResendConfirmationEmail();
   
-  const [step, setStep] = useState<'form' | 'payment' | 'confirmation'>('form');
+  const [step, setStep] = useState<'form' | 'payment' | 'confirmation' | 'email-confirmation'>('form');
   const [loading, setLoading] = useState(false);
   const [confirmationCode, setConfirmationCode] = useState('');
   const [formData, setFormData] = useState<ChurchSignupFormData | null>(null);
+  const [profile, setProfile] = useState<any>(null);
 
   const selectedPlanFromState = location.state?.selectedPlan;
   const churchPlans = plans?.filter(p => p.plan_type.startsWith('church_')) || [];
@@ -50,6 +55,47 @@ const AssinaturaIgreja = () => {
     }
   });
 
+  // Fetch user profile if logged in
+  useEffect(() => {
+    if (user && session) {
+      fetchUserProfile();
+    }
+  }, [user, session]);
+
+  const fetchUserProfile = async () => {
+    if (!user) return;
+
+    const { data } = await supabase
+      .from('profiles')
+      .select('full_name, church_id, phone, churches(name, cnpj, cpf, address)')
+      .eq('id', user.id)
+      .maybeSingle();
+    
+    if (data) {
+      setProfile(data);
+      
+      // Pre-fill form with existing data
+      form.reset({
+        ...form.getValues(),
+        responsibleName: data.full_name || '',
+        loginEmail: user.email || '',
+        responsiblePhone: data.phone || '',
+        // If church exists, pre-fill church data
+        ...(data.churches && {
+          churchName: (data.churches as any).name || '',
+          cnpj: (data.churches as any).cnpj || '',
+          cpf: (data.churches as any).cpf || '',
+          address: (data.churches as any).address || '',
+        })
+      });
+
+      // If user already has all needed data, skip to payment
+      if (data.full_name && data.churches) {
+        setStep('payment');
+      }
+    }
+  };
+
   const selectedPlanType = form.watch('planType');
   const selectedPlan = churchPlans.find(p => p.plan_type === selectedPlanType);
 
@@ -59,28 +105,44 @@ const AssinaturaIgreja = () => {
   };
 
   const handlePaymentConfirmation = async () => {
-    if (!formData || !selectedPlan) return;
+    if (!selectedPlan) return;
 
     setLoading(true);
     try {
-      // Create user account
-      const { error: signUpError } = await signUp(
-        formData.loginEmail,
-        formData.password,
-        formData.responsibleName
-      );
+      // If user is already logged in, skip signup
+      if (!user || !session) {
+        if (!formData) return;
 
-      if (signUpError) {
-        toast({
-          title: 'Erro no cadastro',
-          description: signUpError.message,
-          variant: 'destructive'
+        // Create user account
+        const { error: signUpError, data: signUpData } = await supabase.auth.signUp({
+          email: formData.loginEmail,
+          password: formData.password,
+          options: {
+            emailRedirectTo: `${window.location.origin}/`,
+            data: {
+              full_name: formData.responsibleName,
+            }
+          }
         });
-        return;
+
+        if (signUpError) {
+          toast({
+            title: 'Erro no cadastro',
+            description: signUpError.message,
+            variant: 'destructive'
+          });
+          return;
+        }
+
+        // Check if email confirmation is needed
+        if (signUpData && !signUpData.session) {
+          setStep('email-confirmation');
+          return;
+        }
       }
 
-      // Prepare church data
-      const churchData = {
+      // Prepare church data from form or existing profile
+      const churchData = formData ? {
         church_name: formData.churchName,
         cnpj: formData.cnpj || null,
         cpf: formData.cpf || null,
@@ -88,11 +150,19 @@ const AssinaturaIgreja = () => {
         responsible_name: formData.responsibleName,
         responsible_email: formData.responsibleEmail,
         responsible_phone: formData.responsiblePhone
-      };
+      } : profile?.churches ? {
+        church_name: profile.churches.name,
+        cnpj: profile.churches.cnpj,
+        cpf: profile.churches.cpf,
+        address: profile.churches.address,
+        responsible_name: profile.full_name,
+        responsible_email: user?.email,
+        responsible_phone: profile.phone
+      } : null;
 
       // Create pending payment
       const payment = await createPendingPayment({
-        planType: formData.planType,
+        planType: formData?.planType || selectedPlan.plan_type as any,
         amount: Number(selectedPlan.price_monthly),
         churchData
       });
@@ -115,6 +185,17 @@ const AssinaturaIgreja = () => {
       setLoading(false);
     }
   };
+
+  if (step === 'email-confirmation') {
+    return (
+      <EmailConfirmationPending
+        email={formData?.loginEmail || ''}
+        onResend={() => resendEmail(formData?.loginEmail || '')}
+        isResending={isResending}
+        cooldown={cooldown}
+      />
+    );
+  }
 
   if (step === 'confirmation') {
     return (

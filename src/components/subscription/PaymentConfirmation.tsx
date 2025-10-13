@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { ArrowLeft, QrCode } from 'lucide-react';
+import { ArrowLeft, QrCode, ExternalLink } from 'lucide-react';
+import { PixCopyButton } from './PixCopyButton';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -77,6 +78,23 @@ export const PaymentConfirmation: React.FC<PaymentConfirmationProps> = ({
                 </p>
               </div>
             )}
+
+            {/* Pix Copia e Cola */}
+            {settings?.pix_copia_cola && (
+              <PixCopyButton pixCode={settings.pix_copia_cola} />
+            )}
+
+            {/* Link de Pagamento Externo */}
+            {settings?.external_payment_link && (
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() => window.open(settings.external_payment_link!, '_blank')}
+              >
+                <ExternalLink className="mr-2 h-4 w-4" />
+                Pagar via Link Externo
+              </Button>
+            )}
           </>
         )}
 
@@ -85,7 +103,7 @@ export const PaymentConfirmation: React.FC<PaymentConfirmationProps> = ({
             <ol className="list-decimal list-inside space-y-2 text-sm">
               <li>Abra o app do seu banco</li>
               <li>Escolha a opção Pix</li>
-              <li>Escaneie o QR Code acima</li>
+              <li>Escaneie o QR Code, use a chave Pix ou o código Copia e Cola</li>
               <li>Confirme o pagamento de R$ {amount.toFixed(2)}</li>
               <li>Clique em "Já realizei o pagamento" abaixo</li>
             </ol>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -13,21 +13,31 @@ import { useSubscriptionPlans } from '@/hooks/useSubscriptionPlans';
 import { useCreatePendingPayment } from '@/hooks/useCreatePendingPayment';
 import { PaymentConfirmation } from '@/components/subscription/PaymentConfirmation';
 import { ConfirmationCodeDisplay } from '@/components/subscription/ConfirmationCodeDisplay';
-import { individualSignupSchema, type IndividualSignupFormData } from '@/utils/subscriptionSchemas';
+import { EmailConfirmationPending } from '@/components/subscription/EmailConfirmationPending';
+import { useResendConfirmationEmail } from '@/hooks/useResendConfirmationEmail';
+import { supabase } from '@/integrations/supabase/client';
 
 const AssinaturaIndividual = () => {
   const navigate = useNavigate();
-  const { signUp } = useAuth();
+  const { signUp, user, session } = useAuth();
   const { toast } = useToast();
   const { plans } = useSubscriptionPlans();
   const { createPendingPayment } = useCreatePendingPayment();
+  const { resendEmail, isResending, cooldown } = useResendConfirmationEmail();
   
-  const [step, setStep] = useState<'form' | 'payment' | 'confirmation'>('form');
+  const [step, setStep] = useState<'form' | 'payment' | 'confirmation' | 'email-confirmation'>('form');
   const [loading, setLoading] = useState(false);
   const [confirmationCode, setConfirmationCode] = useState('');
   const [formData, setFormData] = useState<IndividualSignupFormData | null>(null);
 
   const individualPlan = plans?.find(p => p.plan_type === 'individual');
+
+  // Skip form if user is already logged in
+  useEffect(() => {
+    if (user && session) {
+      setStep('payment');
+    }
+  }, [user, session]);
 
   const form = useForm<IndividualSignupFormData>({
     resolver: zodResolver(individualSignupSchema),
@@ -45,24 +55,40 @@ const AssinaturaIndividual = () => {
   };
 
   const handlePaymentConfirmation = async () => {
-    if (!formData || !individualPlan) return;
+    if (!individualPlan) return;
 
     setLoading(true);
     try {
-      // Create user account
-      const { error: signUpError } = await signUp(
-        formData.email,
-        formData.password,
-        formData.fullName
-      );
+      // If user is already logged in, skip signup
+      if (!user || !session) {
+        if (!formData) return;
 
-      if (signUpError) {
-        toast({
-          title: 'Erro no cadastro',
-          description: signUpError.message,
-          variant: 'destructive'
+        // Create user account
+        const { error: signUpError, data: signUpData } = await supabase.auth.signUp({
+          email: formData.email,
+          password: formData.password,
+          options: {
+            emailRedirectTo: `${window.location.origin}/`,
+            data: {
+              full_name: formData.fullName,
+            }
+          }
         });
-        return;
+
+        if (signUpError) {
+          toast({
+            title: 'Erro no cadastro',
+            description: signUpError.message,
+            variant: 'destructive'
+          });
+          return;
+        }
+
+        // Check if email confirmation is needed
+        if (signUpData && !signUpData.session) {
+          setStep('email-confirmation');
+          return;
+        }
       }
 
       // Create pending payment
@@ -89,6 +115,17 @@ const AssinaturaIndividual = () => {
       setLoading(false);
     }
   };
+
+  if (step === 'email-confirmation') {
+    return (
+      <EmailConfirmationPending
+        email={formData?.email || ''}
+        onResend={() => resendEmail(formData?.email || '')}
+        isResending={isResending}
+        cooldown={cooldown}
+      />
+    );
+  }
 
   if (step === 'confirmation') {
     return (

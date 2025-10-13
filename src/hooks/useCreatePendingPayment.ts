@@ -12,7 +12,10 @@ export const useCreatePendingPayment = () => {
     mutationFn: async ({ planType, amount, churchData }: PendingPaymentData) => {
       // Get current user
       const { data: { user }, error: userError } = await supabase.auth.getUser();
-      if (userError || !user) throw new Error('Usuário não autenticado');
+      
+      if (userError || !user) {
+        throw new Error('Você precisa estar logado para continuar. Por favor, confirme seu email e faça login novamente.');
+      }
 
       // Generate confirmation code
       const { data: code, error: codeError } = await supabase

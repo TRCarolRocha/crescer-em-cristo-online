@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { QRCodeUpload } from './QRCodeUpload';
@@ -17,6 +18,8 @@ import { Info } from 'lucide-react';
 const settingsSchema = z.object({
   pix_key: z.string().min(5, 'Chave PIX é obrigatória'),
   pix_type: z.enum(['cpf', 'cnpj', 'email', 'phone', 'random']),
+  pix_copia_cola: z.string().optional(),
+  external_payment_link: z.string().url('URL inválida').optional().or(z.literal('')),
 });
 
 type SettingsFormData = z.infer<typeof settingsSchema>;
@@ -32,6 +35,8 @@ export const PaymentSettings = () => {
     defaultValues: {
       pix_key: '',
       pix_type: 'email',
+      pix_copia_cola: '',
+      external_payment_link: '',
     },
   });
 
@@ -39,32 +44,36 @@ export const PaymentSettings = () => {
     if (settings) {
       reset({
         pix_key: settings.pix_key,
-        pix_type: settings.pix_type as 'cpf' | 'cnpj' | 'email' | 'phone' | 'random'
+        pix_type: settings.pix_type as 'cpf' | 'cnpj' | 'email' | 'phone' | 'random',
+        pix_copia_cola: settings.pix_copia_cola || '',
+        external_payment_link: settings.external_payment_link || '',
       });
     } else {
       reset({
         pix_key: '',
-        pix_type: 'email'
+        pix_type: 'email',
+        pix_copia_cola: '',
+        external_payment_link: '',
       });
     }
   }, [settings, reset]);
 
   const onSubmit = async (data: SettingsFormData) => {
     try {
+      const settingsData = {
+        pix_key: data.pix_key,
+        pix_type: data.pix_type,
+        pix_copia_cola: data.pix_copia_cola || null,
+        external_payment_link: data.external_payment_link || null,
+        plan_id: selectedPlanId
+      };
+
       if (settings) {
         // Atualizar configuração existente
-        await updateSettings({
-          pix_key: data.pix_key,
-          pix_type: data.pix_type,
-          plan_id: selectedPlanId
-        });
+        await updateSettings(settingsData);
       } else {
         // Criar nova configuração
-        await createSettings({
-          pix_key: data.pix_key,
-          pix_type: data.pix_type,
-          plan_id: selectedPlanId
-        });
+        await createSettings(settingsData);
       }
       
       toast({
@@ -162,6 +171,38 @@ export const PaymentSettings = () => {
               <Input id="pix_key" {...register('pix_key')} />
               {errors.pix_key && (
                 <p className="text-sm text-destructive">{errors.pix_key.message}</p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="pix_copia_cola">Pix Copia e Cola (Opcional)</Label>
+              <Textarea 
+                id="pix_copia_cola" 
+                {...register('pix_copia_cola')}
+                placeholder="00020126... (código gerado pelo banco)"
+                rows={3}
+                className="font-mono text-xs"
+              />
+              <p className="text-xs text-muted-foreground">
+                Código completo gerado pelo seu banco para pagamento instantâneo
+              </p>
+              {errors.pix_copia_cola && (
+                <p className="text-sm text-destructive">{errors.pix_copia_cola.message}</p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="external_payment_link">Link de Pagamento Externo (Opcional)</Label>
+              <Input 
+                id="external_payment_link" 
+                {...register('external_payment_link')}
+                placeholder="https://mercadopago.com.br/..."
+              />
+              <p className="text-xs text-muted-foreground">
+                Link do Mercado Pago, Asaas ou outro gateway
+              </p>
+              {errors.external_payment_link && (
+                <p className="text-sm text-destructive">{errors.external_payment_link.message}</p>
               )}
             </div>
 

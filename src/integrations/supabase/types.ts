@@ -933,8 +933,10 @@ export type Database = {
       payment_settings: {
         Row: {
           created_at: string | null
+          external_payment_link: string | null
           id: string
           is_active: boolean | null
+          pix_copia_cola: string | null
           pix_key: string
           pix_type: string
           plan_id: string | null
@@ -943,8 +945,10 @@ export type Database = {
         }
         Insert: {
           created_at?: string | null
+          external_payment_link?: string | null
           id?: string
           is_active?: boolean | null
+          pix_copia_cola?: string | null
           pix_key: string
           pix_type: string
           plan_id?: string | null
@@ -953,8 +957,10 @@ export type Database = {
         }
         Update: {
           created_at?: string | null
+          external_payment_link?: string | null
           id?: string
           is_active?: boolean | null
+          pix_copia_cola?: string | null
           pix_key?: string
           pix_type?: string
           plan_id?: string | null

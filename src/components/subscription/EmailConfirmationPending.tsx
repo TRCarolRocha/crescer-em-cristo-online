@@ -1,0 +1,73 @@
+import React from 'react';
+import { Mail, Check } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+
+interface EmailConfirmationPendingProps {
+  email: string;
+  onResend: () => void;
+  isResending: boolean;
+  cooldown?: number;
+}
+
+export const EmailConfirmationPending: React.FC<EmailConfirmationPendingProps> = ({
+  email,
+  onResend,
+  isResending,
+  cooldown = 0
+}) => {
+  return (
+    <div className="min-h-screen flex items-center justify-center p-4">
+      <Card className="w-full max-w-md">
+        <CardHeader>
+          <div className="flex justify-center mb-4">
+            <div className="bg-primary/10 p-4 rounded-full">
+              <Mail className="w-16 h-16 text-primary" />
+            </div>
+          </div>
+          <CardTitle className="text-center text-2xl">Confirme seu Email</CardTitle>
+          <CardDescription className="text-center">
+            Enviamos um link de confirmação para <strong className="text-foreground">{email}</strong>
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <Alert>
+            <AlertDescription>
+              <ol className="list-decimal list-inside space-y-2 text-sm">
+                <li>Acesse sua caixa de entrada</li>
+                <li>Clique no link de confirmação</li>
+                <li>Volte aqui e faça login</li>
+              </ol>
+            </AlertDescription>
+          </Alert>
+          
+          <div className="space-y-2">
+            <Button 
+              onClick={onResend} 
+              disabled={isResending || cooldown > 0}
+              variant="outline"
+              className="w-full"
+            >
+              {isResending ? (
+                <>Enviando...</>
+              ) : cooldown > 0 ? (
+                <>Aguarde {cooldown}s</>
+              ) : (
+                <>Reenviar Email</>
+              )}
+            </Button>
+            
+            <Button 
+              onClick={() => window.location.href = '/auth'}
+              className="w-full"
+            >
+              <Check className="mr-2 h-4 w-4" />
+              Já confirmei, fazer Login
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
