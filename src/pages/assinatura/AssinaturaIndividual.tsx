@@ -16,6 +16,7 @@ import { ConfirmationCodeDisplay } from '@/components/subscription/ConfirmationC
 import { EmailConfirmationPending } from '@/components/subscription/EmailConfirmationPending';
 import { useResendConfirmationEmail } from '@/hooks/useResendConfirmationEmail';
 import { supabase } from '@/integrations/supabase/client';
+import { individualSignupSchema, IndividualSignupFormData } from '@/utils/subscriptionSchemas';
 
 const AssinaturaIndividual = () => {
   const navigate = useNavigate();
