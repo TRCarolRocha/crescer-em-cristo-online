@@ -1,4 +1,4 @@
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
 interface ChurchData {
@@ -12,6 +12,8 @@ interface ChurchData {
 }
 
 export const useApprovePayment = () => {
+  const queryClient = useQueryClient();
+  
   const mutation = useMutation({
     mutationFn: async (paymentId: string) => {
       // Get current user (super admin)
@@ -158,14 +160,15 @@ export const useApprovePayment = () => {
 
       if (updateError) throw updateError;
 
-      // Get user email
-      const { data: userData } = await supabase.auth.admin.getUserById(payment.user_id);
-      const userEmail = userData?.user?.email;
+    // Get user email
+    const { data: userData } = await supabase.auth.admin.getUserById(payment.user_id);
+    const userEmail = userData?.user?.email;
 
-      // Send email notification
-      if (userEmail) {
+    // Send email notification with better error handling
+    if (userEmail) {
+      try {
         const churchData = payment.church_data as unknown as ChurchData | null;
-        await supabase.functions.invoke('send-subscription-email', {
+        const { data: invokeData, error: emailError } = await supabase.functions.invoke('send-subscription-email', {
           body: {
             type: payment.plan_type.startsWith('church') ? 'welcome-church' : 'welcome-individual',
             to: userEmail,
@@ -174,9 +177,22 @@ export const useApprovePayment = () => {
             churchSlug: churchId ? (await supabase.from('churches').select('slug').eq('id', churchId).single()).data?.slug : null,
           },
         });
+        
+        if (emailError) {
+          console.error('Erro ao enviar email:', emailError);
+        } else {
+          console.log('Email enviado com sucesso:', invokeData);
+        }
+      } catch (emailErr) {
+        console.error('Erro crítico no envio de email:', emailErr);
       }
+    }
 
       return { success: true };
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['subscription-access'] });
+      queryClient.invalidateQueries({ queryKey: ['pending-payments'] });
     },
   });
 

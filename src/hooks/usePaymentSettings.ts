@@ -42,13 +42,22 @@ export const usePaymentSettings = (planId?: string) => {
   });
 
   const updateSettings = useMutation({
-    mutationFn: async (data: { pix_key: string; pix_type: string; qr_code_url?: string; plan_id?: string }) => {
+    mutationFn: async (data: { 
+      pix_key: string; 
+      pix_type: string; 
+      qr_code_url?: string; 
+      pix_copia_cola?: string; 
+      external_payment_link?: string;
+      plan_id?: string 
+    }) => {
       const { error } = await supabase
         .from('payment_settings')
         .update({
           pix_key: data.pix_key,
           pix_type: data.pix_type,
-          qr_code_url: data.qr_code_url
+          qr_code_url: data.qr_code_url,
+          pix_copia_cola: data.pix_copia_cola,
+          external_payment_link: data.external_payment_link
         })
         .eq('is_active', true)
         .match(data.plan_id ? { plan_id: data.plan_id } : { plan_id: null });
@@ -61,13 +70,22 @@ export const usePaymentSettings = (planId?: string) => {
   });
 
   const createSettings = useMutation({
-    mutationFn: async (data: { pix_key: string; pix_type: string; qr_code_url?: string; plan_id?: string }) => {
+    mutationFn: async (data: { 
+      pix_key: string; 
+      pix_type: string; 
+      qr_code_url?: string; 
+      pix_copia_cola?: string; 
+      external_payment_link?: string;
+      plan_id?: string 
+    }) => {
       const { error } = await supabase
         .from('payment_settings')
         .insert({
           pix_key: data.pix_key,
           pix_type: data.pix_type,
           qr_code_url: data.qr_code_url,
+          pix_copia_cola: data.pix_copia_cola,
+          external_payment_link: data.external_payment_link,
           plan_id: data.plan_id || null,
           is_active: true
         });

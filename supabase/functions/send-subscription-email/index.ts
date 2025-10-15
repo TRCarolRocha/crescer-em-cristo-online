@@ -5,6 +5,7 @@ import { renderAsync } from "npm:@react-email/components@0.0.22";
 import { WelcomeIndividual } from "./_templates/welcome-individual.tsx";
 import { WelcomeChurch } from "./_templates/welcome-church.tsx";
 import { Rejection } from "./_templates/rejection.tsx";
+import { PaymentPending } from "./_templates/payment-pending.tsx";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY") as string);
 
@@ -14,7 +15,7 @@ const corsHeaders = {
 };
 
 interface EmailRequest {
-  type: 'welcome-individual' | 'welcome-church' | 'rejection';
+  type: 'welcome-individual' | 'welcome-church' | 'rejection' | 'payment-pending';
   to: string;
   userName: string;
   planType: string;
@@ -68,6 +69,17 @@ const handler = async (req: Request): Promise<Response> => {
           })
         );
         subject = "ℹ️ Atualização sobre sua assinatura Hodos";
+        break;
+
+      case 'payment-pending':
+        html = await renderAsync(
+          React.createElement(PaymentPending, {
+            userName: emailRequest.userName,
+            planType: emailRequest.planType,
+            confirmationCode: emailRequest.confirmationCode || '',
+          })
+        );
+        subject = "📝 Pagamento Registrado - Hodos";
         break;
 
       default:

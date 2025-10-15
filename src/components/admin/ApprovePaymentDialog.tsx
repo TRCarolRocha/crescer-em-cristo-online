@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { useApprovePayment } from '@/hooks/useApprovePayment';
 import { CheckCircle2, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface ApprovePaymentDialogProps {
   open: boolean;
@@ -26,11 +27,17 @@ export function ApprovePaymentDialog({
   onSuccess,
 }: ApprovePaymentDialogProps) {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const { approvePayment, isLoading } = useApprovePayment();
 
   const handleApprove = async () => {
     try {
       await approvePayment(payment.id);
+      
+      // Invalidate queries to update UI immediately
+      queryClient.invalidateQueries({ queryKey: ['subscription-access'] });
+      queryClient.invalidateQueries({ queryKey: ['pending-payments'] });
+      
       toast({
         title: 'Pagamento aprovado!',
         description: 'O usuário receberá um email de confirmação.',

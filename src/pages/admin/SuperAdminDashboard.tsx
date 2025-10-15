@@ -65,41 +65,58 @@ const SuperAdminDashboard = () => {
 
         {/* Metrics Cards - Mobile: Scroll horizontal / Desktop: Grid */}
         {/* Mobile */}
-        <div className="md:hidden overflow-x-auto snap-x scrollbar-hide -mx-4 px-4">
-          <div className="flex gap-4 pb-4">
-            <div className="min-w-[170px] snap-center flex-shrink-0">
-              <CardMetric
-                title="Igrejas"
-                value={mockSuperAdminStats.totalChurches}
-                icon={Building2}
-                trend={{ value: 12, isPositive: true }}
-              />
-            </div>
-            <div className="min-w-[170px] snap-center flex-shrink-0">
-              <CardMetric
-                title="Usuários"
-                value={mockSuperAdminStats.activeUsers}
-                icon={Users}
-                trend={{ value: 8, isPositive: true }}
-              />
-            </div>
-            <div className="min-w-[170px] snap-center flex-shrink-0">
-              <CardMetric
-                title="Conteúdos"
-                value={mockSuperAdminStats.publicContent}
-                icon={FileText}
-              />
-            </div>
-            <div className="min-w-[170px] snap-center flex-shrink-0">
-              <CardMetric
-                title="Engajamento"
-                value={`${mockSuperAdminStats.engagementRate}%`}
-                icon={TrendingUp}
-                trend={{ value: 5, isPositive: true }}
-              />
-            </div>
+      <div className="md:hidden overflow-x-auto snap-x scrollbar-hide -mx-4 px-4">
+        <div className="flex gap-4 pb-4">
+          <div className="min-w-[170px] snap-center flex-shrink-0">
+            <CardMetric
+              title="Igrejas"
+              value={mockSuperAdminStats.totalChurches}
+              icon={Building2}
+              trend={{ value: 12, isPositive: true }}
+            />
+          </div>
+          <div className="min-w-[170px] snap-center flex-shrink-0">
+            <CardMetric
+              title="Usuários"
+              value={mockSuperAdminStats.activeUsers}
+              icon={Users}
+              trend={{ value: 8, isPositive: true }}
+            />
+          </div>
+          <div 
+            onClick={() => navigate('/admin/hodos/pagamentos')}
+            className="min-w-[170px] snap-center flex-shrink-0 cursor-pointer"
+          >
+            <Card className="p-4 hover:bg-accent/50 transition-colors">
+              <div className="flex items-center gap-2 mb-2">
+                <Clock className="w-4 h-4 text-yellow-600" />
+                <p className="text-xs text-muted-foreground">Pagamentos</p>
+              </div>
+              <p className="text-2xl font-bold">{pendingCount}</p>
+              {pendingCount > 0 && (
+                <Badge variant="outline" className="bg-yellow-500/10 text-yellow-600 text-xs mt-1">
+                  Pendente
+                </Badge>
+              )}
+            </Card>
+          </div>
+          <div className="min-w-[170px] snap-center flex-shrink-0">
+            <CardMetric
+              title="Conteúdos"
+              value={mockSuperAdminStats.publicContent}
+              icon={FileText}
+            />
+          </div>
+          <div className="min-w-[170px] snap-center flex-shrink-0">
+            <CardMetric
+              title="Engajamento"
+              value={`${mockSuperAdminStats.engagementRate}%`}
+              icon={TrendingUp}
+              trend={{ value: 5, isPositive: true }}
+            />
           </div>
         </div>
+      </div>
 
         {/* Desktop - Grid normal */}
         <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-4 gap-6">

@@ -7,9 +7,10 @@ import { useQueryClient } from '@tanstack/react-query';
 
 interface QRCodeUploadProps {
   currentUrl?: string | null;
+  planId?: string | null;
 }
 
-export const QRCodeUpload: React.FC<QRCodeUploadProps> = ({ currentUrl }) => {
+export const QRCodeUpload: React.FC<QRCodeUploadProps> = ({ currentUrl, planId }) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [uploading, setUploading] = React.useState(false);
@@ -25,30 +26,32 @@ export const QRCodeUpload: React.FC<QRCodeUploadProps> = ({ currentUrl }) => {
       const fileExt = file.name.split('.').pop();
       const fileName = `qrcode-${Date.now()}.${fileExt}`;
       const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('payment-qrcodes')
-        .upload(fileName, file);
+        .from('message-images')
+        .upload(`payment-qrcodes/${fileName}`, file);
 
       if (uploadError) throw uploadError;
 
       // Get public URL
       const { data: { publicUrl } } = supabase.storage
-        .from('payment-qrcodes')
-        .getPublicUrl(uploadData.path);
+        .from('message-images')
+        .getPublicUrl(`payment-qrcodes/${uploadData.path}`);
 
       // Update settings
       const { error: updateError } = await supabase
         .from('payment_settings')
         .update({ qr_code_url: publicUrl })
-        .eq('is_active', true);
+        .eq('is_active', true)
+        .match(planId ? { plan_id: planId } : { plan_id: null });
 
       if (updateError) throw updateError;
 
+      // Invalidate payment settings query to refresh UI
+      queryClient.invalidateQueries({ queryKey: ['payment-settings', planId] });
+      
       toast({
-        title: 'QR Code enviado!',
-        description: 'O QR Code foi atualizado com sucesso.',
+        title: 'QR Code salvo!',
+        description: 'A imagem foi atualizada com sucesso.',
       });
-
-      queryClient.invalidateQueries({ queryKey: ['payment-settings'] });
     } catch (error: any) {
       toast({
         title: 'Erro no upload',

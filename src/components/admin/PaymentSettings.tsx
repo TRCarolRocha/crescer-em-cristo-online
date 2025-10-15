@@ -70,10 +70,23 @@ export const PaymentSettings = () => {
 
       if (settings) {
         // Atualizar configuração existente
-        await updateSettings(settingsData);
+        await updateSettings({
+          pix_key: data.pix_key,
+          pix_type: data.pix_type,
+          qr_code_url: settings.qr_code_url,
+          pix_copia_cola: data.pix_copia_cola,
+          external_payment_link: data.external_payment_link,
+          plan_id: selectedPlanId
+        });
       } else {
         // Criar nova configuração
-        await createSettings(settingsData);
+        await createSettings({
+          pix_key: data.pix_key,
+          pix_type: data.pix_type,
+          pix_copia_cola: data.pix_copia_cola,
+          external_payment_link: data.external_payment_link,
+          plan_id: selectedPlanId
+        });
       }
       
       toast({
@@ -222,7 +235,7 @@ export const PaymentSettings = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <QRCodeUpload currentUrl={settings?.qr_code_url} />
+          <QRCodeUpload currentUrl={settings?.qr_code_url} planId={selectedPlanId} />
         </CardContent>
       </Card>
     </div>

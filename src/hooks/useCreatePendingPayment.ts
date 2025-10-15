@@ -39,6 +39,22 @@ export const useCreatePendingPayment = () => {
         .single();
       
       if (error) throw error;
+
+      // Send payment pending confirmation email
+      try {
+        await supabase.functions.invoke('send-subscription-email', {
+          body: {
+            type: 'payment-pending',
+            to: user.email,
+            userName: user.user_metadata?.full_name || 'Usuário',
+            confirmationCode: code,
+            planType: planType,
+          },
+        });
+      } catch (emailErr) {
+        console.error('Erro ao enviar email de confirmação:', emailErr);
+      }
+
       return data;
     }
   });
