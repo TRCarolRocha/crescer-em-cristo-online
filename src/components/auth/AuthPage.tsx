@@ -49,8 +49,14 @@ const AuthPage = () => {
         description: "Bem-vindo ao HODOS"
       });
       
-      // Redirecionamento universal para /meu-espaco
-      navigate('/meu-espaco');
+      // Check for post-login redirect
+      const redirectPath = localStorage.getItem('post_login_redirect');
+      if (redirectPath) {
+        localStorage.removeItem('post_login_redirect');
+        navigate(redirectPath);
+      } else {
+        navigate('/meu-espaco');
+      }
       setLoading(false);
     }
   };

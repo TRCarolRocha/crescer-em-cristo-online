@@ -9,13 +9,15 @@ interface EmailConfirmationPendingProps {
   onResend: () => void;
   isResending: boolean;
   cooldown?: number;
+  redirectPath?: string;
 }
 
 export const EmailConfirmationPending: React.FC<EmailConfirmationPendingProps> = ({
   email,
   onResend,
   isResending,
-  cooldown = 0
+  cooldown = 0,
+  redirectPath
 }) => {
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
@@ -59,7 +61,12 @@ export const EmailConfirmationPending: React.FC<EmailConfirmationPendingProps> =
             </Button>
             
             <Button 
-              onClick={() => window.location.href = '/auth'}
+              onClick={() => {
+                if (redirectPath) {
+                  localStorage.setItem('post_login_redirect', redirectPath);
+                }
+                window.location.href = '/auth';
+              }}
               className="w-full"
             >
               <Check className="mr-2 h-4 w-4" />

@@ -74,8 +74,8 @@ export const PaymentSettings = () => {
           pix_key: data.pix_key,
           pix_type: data.pix_type,
           qr_code_url: settings.qr_code_url,
-          pix_copia_cola: data.pix_copia_cola,
-          external_payment_link: data.external_payment_link,
+          pix_copia_cola: data.pix_copia_cola || undefined,
+          external_payment_link: data.external_payment_link || undefined,
           plan_id: selectedPlanId
         });
       } else {
@@ -83,8 +83,8 @@ export const PaymentSettings = () => {
         await createSettings({
           pix_key: data.pix_key,
           pix_type: data.pix_type,
-          pix_copia_cola: data.pix_copia_cola,
-          external_payment_link: data.external_payment_link,
+          pix_copia_cola: data.pix_copia_cola || undefined,
+          external_payment_link: data.external_payment_link || undefined,
           plan_id: selectedPlanId
         });
       }

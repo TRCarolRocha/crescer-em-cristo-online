@@ -40,6 +40,14 @@ const AssinaturaIndividual = () => {
     }
   }, [user, session]);
 
+  // Detect ?resume=1 to return to payment after email confirmation
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('resume') === '1' && user && session) {
+      setStep('payment');
+    }
+  }, [user, session]);
+
   const form = useForm<IndividualSignupFormData>({
     resolver: zodResolver(individualSignupSchema),
     defaultValues: {
@@ -52,47 +60,74 @@ const AssinaturaIndividual = () => {
 
   const onSubmitForm = (data: IndividualSignupFormData) => {
     setFormData(data);
-    setStep('payment');
+    
+    // If already logged in, go directly to payment
+    if (user && session) {
+      setStep('payment');
+    } else {
+      // New user needs to create account first
+      handleSignUp(data);
+    }
+  };
+
+  const handleSignUp = async (data: IndividualSignupFormData) => {
+    setLoading(true);
+    try {
+      // Create user account
+      const { error: signUpError, data: signUpData } = await supabase.auth.signUp({
+        email: data.email,
+        password: data.password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/`,
+          data: {
+            full_name: data.fullName,
+          }
+        }
+      });
+
+      if (signUpError) {
+        toast({
+          title: 'Erro no cadastro',
+          description: signUpError.message,
+          variant: 'destructive'
+        });
+        return;
+      }
+
+      // Check if email confirmation is needed
+      if (signUpData && !signUpData.session) {
+        setStep('email-confirmation');
+        return;
+      }
+
+      // Email auto-confirmed (rare), proceed to payment
+      setStep('payment');
+
+    } catch (error: any) {
+      toast({
+        title: 'Erro',
+        description: error.message,
+        variant: 'destructive'
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handlePaymentConfirmation = async () => {
     if (!individualPlan) return;
+    if (!user || !session) {
+      toast({
+        title: 'Erro',
+        description: 'Você precisa estar logado para continuar',
+        variant: 'destructive'
+      });
+      return;
+    }
 
     setLoading(true);
     try {
-      // If user is already logged in, skip signup
-      if (!user || !session) {
-        if (!formData) return;
-
-        // Create user account
-        const { error: signUpError, data: signUpData } = await supabase.auth.signUp({
-          email: formData.email,
-          password: formData.password,
-          options: {
-            emailRedirectTo: `${window.location.origin}/`,
-            data: {
-              full_name: formData.fullName,
-            }
-          }
-        });
-
-        if (signUpError) {
-          toast({
-            title: 'Erro no cadastro',
-            description: signUpError.message,
-            variant: 'destructive'
-          });
-          return;
-        }
-
-        // Check if email confirmation is needed
-        if (signUpData && !signUpData.session) {
-          setStep('email-confirmation');
-          return;
-        }
-      }
-
-      // Create pending payment
+      // Create pending payment (user must be logged in)
       const payment = await createPendingPayment({
         planType: 'individual',
         amount: Number(individualPlan.price_monthly)
@@ -124,6 +159,7 @@ const AssinaturaIndividual = () => {
         onResend={() => resendEmail(formData?.email || '')}
         isResending={isResending}
         cooldown={cooldown}
+        redirectPath="/assinatura/individual?resume=1"
       />
     );
   }
