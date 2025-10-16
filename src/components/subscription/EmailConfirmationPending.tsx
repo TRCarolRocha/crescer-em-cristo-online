@@ -39,7 +39,7 @@ export const EmailConfirmationPending: React.FC<EmailConfirmationPendingProps> =
               <ol className="list-decimal list-inside space-y-2 text-sm">
                 <li>Acesse sua caixa de entrada</li>
                 <li>Clique no link de confirmação</li>
-                <li>Volte aqui e faça login</li>
+                <li>Volte à aplicação para continuar o pagamento</li>
               </ol>
             </AlertDescription>
           </Alert>
@@ -64,13 +64,15 @@ export const EmailConfirmationPending: React.FC<EmailConfirmationPendingProps> =
               onClick={() => {
                 if (redirectPath) {
                   localStorage.setItem('post_login_redirect', redirectPath);
+                  window.location.href = redirectPath;
+                } else {
+                  window.location.href = '/auth';
                 }
-                window.location.href = '/auth';
               }}
               className="w-full"
             >
               <Check className="mr-2 h-4 w-4" />
-              Já confirmei, fazer Login
+              Voltar para continuar
             </Button>
           </div>
         </CardContent>

@@ -35,7 +35,9 @@ export const useApprovePayment = () => {
         .from('subscription_plans')
         .select('id')
         .eq('plan_type', payment.plan_type)
-        .single();
+        .order('updated_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
 
       if (planError) throw planError;
 
@@ -160,33 +162,31 @@ export const useApprovePayment = () => {
 
       if (updateError) throw updateError;
 
-    // Get user email
-    const { data: userData } = await supabase.auth.admin.getUserById(payment.user_id);
-    const userEmail = userData?.user?.email;
-
-    // Send email notification with better error handling
-    if (userEmail) {
+      // Send welcome email
       try {
-        const churchData = payment.church_data as unknown as ChurchData | null;
-        const { data: invokeData, error: emailError } = await supabase.functions.invoke('send-subscription-email', {
-          body: {
-            type: payment.plan_type.startsWith('church') ? 'welcome-church' : 'welcome-individual',
-            to: userEmail,
-            userName: churchData?.responsible_name || userData?.user?.user_metadata?.full_name,
-            planType: payment.plan_type,
-            churchSlug: churchId ? (await supabase.from('churches').select('slug').eq('id', churchId).single()).data?.slug : null,
-          },
-        });
+        const isChurchPlan = payment.plan_type.startsWith('church');
+        let churchSlug = null;
         
-        if (emailError) {
-          console.error('Erro ao enviar email:', emailError);
-        } else {
-          console.log('Email enviado com sucesso:', invokeData);
+        if (isChurchPlan && churchId) {
+          const { data: church } = await supabase
+            .from('churches')
+            .select('slug')
+            .eq('id', churchId)
+            .single();
+          churchSlug = church?.slug;
         }
-      } catch (emailErr) {
-        console.error('Erro crítico no envio de email:', emailErr);
+
+        await supabase.functions.invoke('send-subscription-email', {
+          body: {
+            type: isChurchPlan ? 'welcome-church' : 'welcome-individual',
+            userId: payment.user_id,
+            planType: payment.plan_type,
+            churchSlug
+          }
+        });
+      } catch (emailError) {
+        console.error('Erro ao enviar email de boas-vindas:', emailError);
       }
-    }
 
       return { success: true };
     },

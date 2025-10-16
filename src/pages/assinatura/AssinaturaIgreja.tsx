@@ -118,7 +118,7 @@ const AssinaturaIgreja = () => {
           email: formData.loginEmail,
           password: formData.password,
           options: {
-            emailRedirectTo: `${window.location.origin}/`,
+            emailRedirectTo: `${window.location.origin}/assinatura/igreja?resume=1`,
             data: {
               full_name: formData.responsibleName,
             }
@@ -193,6 +193,7 @@ const AssinaturaIgreja = () => {
         onResend={() => resendEmail(formData?.loginEmail || '')}
         isResending={isResending}
         cooldown={cooldown}
+        redirectPath="/assinatura/igreja?resume=1"
       />
     );
   }
@@ -202,7 +203,7 @@ const AssinaturaIgreja = () => {
       <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20 flex items-center justify-center p-4">
         <ConfirmationCodeDisplay
           confirmationCode={confirmationCode}
-          email={formData?.loginEmail || ''}
+          email={formData?.loginEmail || user?.email || ''}
           planType={selectedPlan?.name || 'Igreja'}
           onContinue={() => navigate('/meu-espaco')}
         />

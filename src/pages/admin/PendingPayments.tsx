@@ -68,26 +68,43 @@ export default function PendingPayments() {
       const { data, error } = await query;
       if (error) throw error;
 
-      // Get profiles and emails
-      const paymentsWithDetails = await Promise.all(
+      // Get profiles
+      const paymentsWithProfiles = await Promise.all(
         (data || []).map(async (payment) => {
           const { data: profile } = await supabase
             .from('profiles')
             .select('full_name')
             .eq('id', payment.user_id)
-            .single();
-          
-          const { data: userData } = await supabase.auth.admin.getUserById(payment.user_id);
+            .maybeSingle();
           
           return {
             ...payment,
             profiles: profile,
-            email: userData?.user?.email,
+            email: null, // Will be filled by edge function
           };
         })
       );
 
-      return paymentsWithDetails as PendingPaymentWithDetails[];
+      // Fetch emails via edge function (server-side with service role)
+      const userIds = paymentsWithProfiles.map(p => p.user_id);
+      try {
+        const { data: emailData, error: emailError } = await supabase.functions.invoke('admin-get-user-emails', {
+          body: { userIds }
+        });
+
+        if (!emailError && emailData?.users) {
+          const emailMap = new Map(emailData.users.map((u: any) => [u.user_id, u.email]));
+          
+          return paymentsWithProfiles.map(payment => ({
+            ...payment,
+            email: emailMap.get(payment.user_id) || 'N/A'
+          })) as PendingPaymentWithDetails[];
+        }
+      } catch (err) {
+        console.error('Error fetching emails:', err);
+      }
+
+      return paymentsWithProfiles as PendingPaymentWithDetails[];
     },
     refetchInterval: 30000, // Refetch every 30 seconds
   });

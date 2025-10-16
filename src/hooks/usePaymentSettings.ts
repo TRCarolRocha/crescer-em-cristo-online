@@ -20,7 +20,10 @@ export const usePaymentSettings = (planId?: string) => {
         query = query.is('plan_id', null);
       }
       
-      const { data, error } = await query.maybeSingle();
+      const { data, error } = await query
+        .order('updated_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
       
       if (error) throw error;
       
@@ -31,6 +34,8 @@ export const usePaymentSettings = (planId?: string) => {
           .select('*')
           .eq('is_active', true)
           .is('plan_id', null)
+          .order('updated_at', { ascending: false })
+          .limit(1)
           .maybeSingle();
         
         if (globalError) throw globalError;
@@ -64,7 +69,8 @@ export const usePaymentSettings = (planId?: string) => {
       
       if (error) throw error;
     },
-    onSuccess: () => {
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['payment-settings', variables.plan_id] });
       queryClient.invalidateQueries({ queryKey: ['payment-settings'] });
     }
   });
@@ -92,7 +98,8 @@ export const usePaymentSettings = (planId?: string) => {
       
       if (error) throw error;
     },
-    onSuccess: () => {
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['payment-settings', variables.plan_id] });
       queryClient.invalidateQueries({ queryKey: ['payment-settings'] });
     }
   });

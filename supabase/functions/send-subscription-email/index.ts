@@ -16,9 +16,10 @@ const corsHeaders = {
 
 interface EmailRequest {
   type: 'welcome-individual' | 'welcome-church' | 'rejection' | 'payment-pending';
-  to: string;
-  userName: string;
-  planType: string;
+  to?: string;
+  userId?: string;
+  userName?: string;
+  planType?: string;
   churchSlug?: string;
   rejectionReason?: string;
   confirmationCode?: string;
@@ -32,7 +33,39 @@ const handler = async (req: Request): Promise<Response> => {
 
   try {
     const emailRequest: EmailRequest = await req.json();
-    console.log("Email request received:", emailRequest);
+    let { type, to, userId, userName, planType, confirmationCode, rejectionReason, churchSlug } = emailRequest;
+
+    // If userId is provided and to is not, fetch user email server-side
+    if (userId && !to) {
+      const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2.39.3');
+      const supabaseAdmin = createClient(
+        Deno.env.get('SUPABASE_URL') ?? '',
+        Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+        {
+          auth: {
+            autoRefreshToken: false,
+            persistSession: false
+          }
+        }
+      );
+
+      const { data: userData, error: userError } = await supabaseAdmin.auth.admin.getUserById(userId);
+      if (userError) {
+        console.error('Error fetching user email:', userError);
+        throw new Error('Failed to fetch user email');
+      }
+      
+      to = userData?.user?.email;
+      if (!userName) {
+        userName = userData?.user?.user_metadata?.full_name || 'Usuário';
+      }
+    }
+
+    if (!to) {
+      throw new Error('Recipient email (to) is required');
+    }
+
+    console.log("Email request processed:", { type, to, userName });
 
     let html: string;
     let subject: string;
@@ -41,8 +74,8 @@ const handler = async (req: Request): Promise<Response> => {
       case 'welcome-individual':
         html = await renderAsync(
           React.createElement(WelcomeIndividual, {
-            userName: emailRequest.userName,
-            planType: emailRequest.planType,
+            userName: userName || 'Usuário',
+            planType: planType || 'individual',
           })
         );
         subject = "🎉 Bem-vindo ao Hodos - Assinatura Individual Aprovada!";
@@ -51,9 +84,9 @@ const handler = async (req: Request): Promise<Response> => {
       case 'welcome-church':
         html = await renderAsync(
           React.createElement(WelcomeChurch, {
-            userName: emailRequest.userName,
-            planType: emailRequest.planType,
-            churchSlug: emailRequest.churchSlug || '',
+            userName: userName || 'Usuário',
+            planType: planType || 'church_simple',
+            churchSlug: churchSlug || '',
           })
         );
         subject = "⛪ Bem-vindo ao Hodos - Assinatura Igreja Aprovada!";
@@ -62,10 +95,10 @@ const handler = async (req: Request): Promise<Response> => {
       case 'rejection':
         html = await renderAsync(
           React.createElement(Rejection, {
-            userName: emailRequest.userName,
-            planType: emailRequest.planType,
-            rejectionReason: emailRequest.rejectionReason || '',
-            confirmationCode: emailRequest.confirmationCode || '',
+            userName: userName || 'Usuário',
+            planType: planType || 'individual',
+            rejectionReason: rejectionReason || '',
+            confirmationCode: confirmationCode || '',
           })
         );
         subject = "ℹ️ Atualização sobre sua assinatura Hodos";
@@ -74,21 +107,21 @@ const handler = async (req: Request): Promise<Response> => {
       case 'payment-pending':
         html = await renderAsync(
           React.createElement(PaymentPending, {
-            userName: emailRequest.userName,
-            planType: emailRequest.planType,
-            confirmationCode: emailRequest.confirmationCode || '',
+            userName: userName || 'Usuário',
+            planType: planType || 'individual',
+            confirmationCode: confirmationCode || '',
           })
         );
         subject = "📝 Pagamento Registrado - Hodos";
         break;
 
       default:
-        throw new Error(`Invalid email type: ${emailRequest.type}`);
+        throw new Error(`Invalid email type: ${type}`);
     }
 
     const emailResponse = await resend.emails.send({
       from: "Hodos <onboarding@resend.dev>",
-      to: [emailRequest.to],
+      to: [to],
       subject,
       html,
     });

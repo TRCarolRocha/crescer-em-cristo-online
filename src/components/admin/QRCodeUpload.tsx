@@ -29,7 +29,9 @@ export const QRCodeUpload: React.FC<QRCodeUploadProps> = ({ currentUrl, planId }
         .from('message-images')
         .upload(`payment-qrcodes/${fileName}`, file);
 
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        throw new Error('Erro ao fazer upload. Verifique a permissão de upload do bucket message-images.');
+      }
 
       // Get public URL
       const { data: { publicUrl } } = supabase.storage
@@ -68,7 +70,8 @@ export const QRCodeUpload: React.FC<QRCodeUploadProps> = ({ currentUrl, planId }
       const { error } = await supabase
         .from('payment_settings')
         .update({ qr_code_url: null })
-        .eq('is_active', true);
+        .eq('is_active', true)
+        .match(planId ? { plan_id: planId } : { plan_id: null });
 
       if (error) throw error;
 
@@ -77,6 +80,7 @@ export const QRCodeUpload: React.FC<QRCodeUploadProps> = ({ currentUrl, planId }
         description: 'O QR Code foi removido com sucesso.',
       });
 
+      queryClient.invalidateQueries({ queryKey: ['payment-settings', planId] });
       queryClient.invalidateQueries({ queryKey: ['payment-settings'] });
     } catch (error: any) {
       toast({

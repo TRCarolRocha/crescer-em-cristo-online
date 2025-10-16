@@ -78,7 +78,7 @@ const AssinaturaIndividual = () => {
         email: data.email,
         password: data.password,
         options: {
-          emailRedirectTo: `${window.location.origin}/`,
+          emailRedirectTo: `${window.location.origin}/assinatura/individual?resume=1`,
           data: {
             full_name: data.fullName,
           }
@@ -169,7 +169,7 @@ const AssinaturaIndividual = () => {
       <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20 flex items-center justify-center p-4">
         <ConfirmationCodeDisplay
           confirmationCode={confirmationCode}
-          email={formData?.email || ''}
+          email={formData?.email || user?.email || ''}
           planType="Individual"
           onContinue={() => navigate('/meu-espaco')}
         />
