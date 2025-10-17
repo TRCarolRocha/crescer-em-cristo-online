@@ -19,7 +19,7 @@ const Planos = () => {
   }
 
   const freePlan = plans?.find(p => p.plan_type === 'free');
-  const individualPlan = plans?.find(p => p.plan_type === 'individual');
+  const individualPlans = plans?.filter(p => p.plan_type === 'individual') || [];
   const churchPlans = plans?.filter(p => p.plan_type.startsWith('church_')) || [];
 
   return (
@@ -43,22 +43,47 @@ const Planos = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          {freePlan && (
-            <PlanCard
-              plan={freePlan}
-              onSelect={() => navigate('/assinatura/free')}
-            />
-          )}
-          
-          {individualPlan && (
-            <PlanCard
-              plan={individualPlan}
-              onSelect={() => navigate('/assinatura/individual')}
-              isPopular
-            />
-          )}
-        </div>
+        {freePlan && (
+          <div className="mb-12">
+            <div className="text-center mb-8">
+              <h2 className="text-3xl font-bold mb-2">Plano Gratuito</h2>
+              <p className="text-muted-foreground">
+                Experimente o Hodos gratuitamente
+              </p>
+            </div>
+            <div className="flex justify-center">
+              <div className="w-full max-w-md">
+                <PlanCard
+                  plan={freePlan}
+                  onSelect={() => navigate('/assinatura/free')}
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {individualPlans.length > 0 && (
+          <div className="mb-12">
+            <div className="text-center mb-8">
+              <h2 className="text-3xl font-bold mb-2">Planos Individuais</h2>
+              <p className="text-muted-foreground">
+                Escolha o plano ideal para sua jornada espiritual
+              </p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {individualPlans.map((plan, index) => (
+                <PlanCard
+                  key={plan.id}
+                  plan={plan}
+                  onSelect={() => navigate('/assinatura/individual', { 
+                    state: { selectedPlanId: plan.id } 
+                  })}
+                  isPopular={index === 0}
+                />
+              ))}
+            </div>
+          </div>
+        )}
 
         {churchPlans.length > 0 && (
           <>

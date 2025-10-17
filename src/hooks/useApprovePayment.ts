@@ -23,27 +23,39 @@ export const useApprovePayment = () => {
       // Get payment details
       const { data: payment, error: paymentError } = await supabase
         .from('pending_payments')
-        .select('id, plan_type, user_id, church_data, amount, status, confirmation_code')
+        .select('id, plan_type, plan_id, user_id, church_data, amount, status, confirmation_code')
         .eq('id', paymentId)
         .single();
 
       if (paymentError) throw paymentError;
       if (payment.status !== 'pending') throw new Error('Pagamento já foi processado');
 
-      // Get plan_id from subscription_plans
-      const { data: plan, error: planError } = await supabase
-        .from('subscription_plans')
-        .select('id')
-        .eq('plan_type', payment.plan_type)
-        .order('updated_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-
-      if (planError) throw planError;
-
-      // Calculate expiration date (30 days from now)
-      const expiresAt = new Date();
-      expiresAt.setDate(expiresAt.getDate() + 30);
+      // Get plan details - prioritize plan_id from pending_payment
+      let planId = payment.plan_id;
+      let planDetails = null;
+      
+      if (planId) {
+        // Use specific plan from pending_payment
+        const { data: plan } = await supabase
+          .from('subscription_plans')
+          .select('*')
+          .eq('id', planId)
+          .maybeSingle();
+        planDetails = plan;
+      } else {
+        // Fallback: search by plan_type
+        const { data: plan } = await supabase
+          .from('subscription_plans')
+          .select('*')
+          .eq('plan_type', payment.plan_type)
+          .order('price_monthly', { ascending: true })
+          .limit(1)
+          .maybeSingle();
+        planDetails = plan;
+        planId = plan?.id;
+      }
+      
+      if (!planId || !planDetails) throw new Error('Plano não encontrado');
 
       let churchId = null;
 
@@ -116,10 +128,13 @@ export const useApprovePayment = () => {
       }
 
       // Create subscription
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + 30);
+
       const { data: subscription, error: subscriptionError } = await supabase
         .from('subscriptions')
         .insert({
-          plan_id: plan.id,
+          plan_id: planId,
           user_id: payment.user_id,
           church_id: churchId,
           status: 'active',
@@ -181,6 +196,9 @@ export const useApprovePayment = () => {
             type: isChurchPlan ? 'welcome-church' : 'welcome-individual',
             userId: payment.user_id,
             planType: payment.plan_type,
+            planName: planDetails.name,
+            planPrice: planDetails.price_monthly,
+            planFeatures: planDetails.features,
             churchSlug
           }
         });

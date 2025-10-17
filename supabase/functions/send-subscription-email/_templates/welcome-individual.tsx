@@ -14,11 +14,17 @@ import * as React from 'npm:react@18.3.1';
 interface WelcomeIndividualProps {
   userName: string;
   planType: string;
+  planName?: string;
+  planPrice?: number;
+  planFeatures?: string[];
 }
 
 export const WelcomeIndividual = ({
   userName,
   planType,
+  planName = 'Plano Individual',
+  planPrice = 0,
+  planFeatures = [],
 }: WelcomeIndividualProps) => (
   <Html>
     <Head />
@@ -30,22 +36,43 @@ export const WelcomeIndividual = ({
         <Text style={text}>Olá, {userName}!</Text>
         
         <Text style={text}>
-          Temos ótimas notícias! Sua assinatura do <strong>Plano Individual</strong> foi aprovada com sucesso.
+          Temos ótimas notícias! Sua assinatura do <strong>{planName}</strong> foi aprovada com sucesso.
         </Text>
+
+        {planPrice > 0 && (
+          <Section style={priceBox}>
+            <Text style={priceText}>
+              Plano: <strong>{planName}</strong>
+            </Text>
+            <Text style={priceText}>
+              Valor: <strong>R$ {planPrice.toFixed(2)}/mês</strong>
+            </Text>
+          </Section>
+        )}
 
         <Section style={highlightBox}>
           <Text style={highlightText}>
             ✅ Sua assinatura está ativa por 30 dias
           </Text>
-          <Text style={highlightText}>
-            🎯 Acesso completo a trilhas de discipulado
-          </Text>
-          <Text style={highlightText}>
-            📖 Devocionais personalizados
-          </Text>
-          <Text style={highlightText}>
-            📊 Acompanhamento de progresso
-          </Text>
+          {planFeatures && planFeatures.length > 0 ? (
+            planFeatures.map((feature, index) => (
+              <Text key={index} style={highlightText}>
+                ✨ {feature}
+              </Text>
+            ))
+          ) : (
+            <>
+              <Text style={highlightText}>
+                🎯 Acesso completo a trilhas de discipulado
+              </Text>
+              <Text style={highlightText}>
+                📖 Devocionais personalizados
+              </Text>
+              <Text style={highlightText}>
+                📊 Acompanhamento de progresso
+              </Text>
+            </>
+          )}
         </Section>
 
         <Text style={text}>
@@ -107,6 +134,22 @@ const text = {
   fontSize: '16px',
   lineHeight: '26px',
   margin: '16px 24px',
+};
+
+const priceBox = {
+  backgroundColor: '#fff9e6',
+  borderRadius: '8px',
+  border: '2px solid #ffa500',
+  margin: '24px',
+  padding: '16px',
+};
+
+const priceText = {
+  color: '#333',
+  fontSize: '16px',
+  lineHeight: '24px',
+  margin: '4px 0',
+  textAlign: 'center' as const,
 };
 
 const highlightBox = {

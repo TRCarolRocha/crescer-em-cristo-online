@@ -20,6 +20,9 @@ interface EmailRequest {
   userId?: string;
   userName?: string;
   planType?: string;
+  planName?: string;
+  planPrice?: number;
+  planFeatures?: string[];
   churchSlug?: string;
   rejectionReason?: string;
   confirmationCode?: string;
@@ -33,7 +36,7 @@ const handler = async (req: Request): Promise<Response> => {
 
   try {
     const emailRequest: EmailRequest = await req.json();
-    let { type, to, userId, userName, planType, confirmationCode, rejectionReason, churchSlug } = emailRequest;
+    let { type, to, userId, userName, planType, planName, planPrice, planFeatures, confirmationCode, rejectionReason, churchSlug } = emailRequest;
 
     // If userId is provided and to is not, fetch user email server-side
     if (userId && !to) {
@@ -76,6 +79,9 @@ const handler = async (req: Request): Promise<Response> => {
           React.createElement(WelcomeIndividual, {
             userName: userName || 'Usuário',
             planType: planType || 'individual',
+            planName: planName,
+            planPrice: planPrice,
+            planFeatures: planFeatures,
           })
         );
         subject = "🎉 Bem-vindo ao Hodos - Assinatura Individual Aprovada!";

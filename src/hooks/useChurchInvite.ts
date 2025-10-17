@@ -16,9 +16,21 @@ export const useChurchInvite = () => {
         .from('churches')
         .select('id, name, is_active, subscription_id, subscriptions(status, expires_at, subscription_plans(max_members))')
         .eq('slug', churchSlug)
+        .eq('is_active', true)
         .single();
 
-      if (churchError || !church) throw new Error('Igreja não encontrada');
+      if (churchError) {
+        console.error('Erro ao buscar igreja:', {
+          slug: churchSlug,
+          error: churchError,
+          code: churchError.code,
+          details: churchError.details,
+          message: churchError.message
+        });
+        throw new Error(`Igreja "${churchSlug}" não encontrada`);
+      }
+      
+      if (!church) throw new Error(`Igreja "${churchSlug}" não encontrada`);
       if (!church.is_active) throw new Error('Igreja não está ativa');
 
       const subscription = church.subscriptions as any;

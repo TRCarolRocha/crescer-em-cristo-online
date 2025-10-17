@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowLeft } from 'lucide-react';
@@ -20,6 +20,8 @@ import { individualSignupSchema, IndividualSignupFormData } from '@/utils/subscr
 
 const AssinaturaIndividual = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { selectedPlanId } = location.state || {};
   const { signUp, user, session } = useAuth();
   const { toast } = useToast();
   const { plans } = useSubscriptionPlans();
@@ -31,7 +33,9 @@ const AssinaturaIndividual = () => {
   const [confirmationCode, setConfirmationCode] = useState('');
   const [formData, setFormData] = useState<IndividualSignupFormData | null>(null);
 
-  const individualPlan = plans?.find(p => p.plan_type === 'individual');
+  const individualPlan = selectedPlanId 
+    ? plans?.find(p => p.id === selectedPlanId)
+    : plans?.find(p => p.plan_type === 'individual');
 
   // Skip form if user is already logged in
   useEffect(() => {
@@ -130,6 +134,7 @@ const AssinaturaIndividual = () => {
       // Create pending payment (user must be logged in)
       const payment = await createPendingPayment({
         planType: 'individual',
+        planId: individualPlan.id,
         amount: Number(individualPlan.price_monthly)
       });
 

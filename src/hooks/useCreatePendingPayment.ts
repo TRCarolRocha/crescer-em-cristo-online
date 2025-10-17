@@ -3,13 +3,14 @@ import { supabase } from '@/integrations/supabase/client';
 
 interface PendingPaymentData {
   planType: 'individual' | 'church_simple' | 'church_plus' | 'church_premium';
+  planId?: string;
   amount: number;
   churchData?: any;
 }
 
 export const useCreatePendingPayment = () => {
   const mutation = useMutation({
-    mutationFn: async ({ planType, amount, churchData }: PendingPaymentData) => {
+    mutationFn: async ({ planType, planId, amount, churchData }: PendingPaymentData) => {
       // Get current user
       const { data: { user }, error: userError } = await supabase.auth.getUser();
       
@@ -28,6 +29,7 @@ export const useCreatePendingPayment = () => {
         .from('pending_payments')
         .insert({
           plan_type: planType,
+          plan_id: planId || null,
           user_id: user.id,
           amount,
           church_data: churchData || null,

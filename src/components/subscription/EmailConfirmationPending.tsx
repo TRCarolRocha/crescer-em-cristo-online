@@ -1,5 +1,5 @@
 import React from 'react';
-import { Mail, Check } from 'lucide-react';
+import { Mail } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -39,18 +39,19 @@ export const EmailConfirmationPending: React.FC<EmailConfirmationPendingProps> =
               <ol className="list-decimal list-inside space-y-2 text-sm">
                 <li>Acesse sua caixa de entrada</li>
                 <li>Clique no link de confirmação</li>
-                <li>Volte à aplicação para continuar o pagamento</li>
+                <li>Após confirmar, você será redirecionado automaticamente para continuar o pagamento</li>
               </ol>
             </AlertDescription>
           </Alert>
           
-          <div className="space-y-2">
+          <div className="flex justify-center">
             <Button 
               onClick={onResend} 
               disabled={isResending || cooldown > 0}
               variant="outline"
-              className="w-full"
+              className="w-full max-w-[300px]"
             >
+              <Mail className="w-4 h-4 mr-2" />
               {isResending ? (
                 <>Enviando...</>
               ) : cooldown > 0 ? (
@@ -58,21 +59,6 @@ export const EmailConfirmationPending: React.FC<EmailConfirmationPendingProps> =
               ) : (
                 <>Reenviar Email</>
               )}
-            </Button>
-            
-            <Button 
-              onClick={() => {
-                if (redirectPath) {
-                  localStorage.setItem('post_login_redirect', redirectPath);
-                  window.location.href = redirectPath;
-                } else {
-                  window.location.href = '/auth';
-                }
-              }}
-              className="w-full"
-            >
-              <Check className="mr-2 h-4 w-4" />
-              Voltar para continuar
             </Button>
           </div>
         </CardContent>

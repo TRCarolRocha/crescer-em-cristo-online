@@ -1023,6 +1023,7 @@ export type Database = {
           created_at: string
           id: string
           payment_method: string | null
+          plan_id: string | null
           plan_type: Database["public"]["Enums"]["subscription_plan_type"]
           rejection_reason: string | null
           reviewed_at: string | null
@@ -1038,6 +1039,7 @@ export type Database = {
           created_at?: string
           id?: string
           payment_method?: string | null
+          plan_id?: string | null
           plan_type: Database["public"]["Enums"]["subscription_plan_type"]
           rejection_reason?: string | null
           reviewed_at?: string | null
@@ -1053,6 +1055,7 @@ export type Database = {
           created_at?: string
           id?: string
           payment_method?: string | null
+          plan_id?: string | null
           plan_type?: Database["public"]["Enums"]["subscription_plan_type"]
           rejection_reason?: string | null
           reviewed_at?: string | null
@@ -1061,7 +1064,15 @@ export type Database = {
           updated_at?: string
           user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "pending_payments_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "subscription_plans"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -1070,6 +1081,7 @@ export type Database = {
           birth_date: string | null
           church_id: string | null
           created_at: string | null
+          current_plan: string | null
           department: string | null
           full_name: string | null
           id: string
@@ -1085,6 +1097,7 @@ export type Database = {
           birth_date?: string | null
           church_id?: string | null
           created_at?: string | null
+          current_plan?: string | null
           department?: string | null
           full_name?: string | null
           id: string
@@ -1100,6 +1113,7 @@ export type Database = {
           birth_date?: string | null
           church_id?: string | null
           created_at?: string | null
+          current_plan?: string | null
           department?: string | null
           full_name?: string | null
           id?: string
