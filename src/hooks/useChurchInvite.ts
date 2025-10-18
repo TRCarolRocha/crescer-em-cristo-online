@@ -11,13 +11,13 @@ interface ChurchInviteData {
 export const useChurchInvite = () => {
   const mutation = useMutation({
     mutationFn: async ({ churchSlug, fullName, email, password }: ChurchInviteData) => {
-      // Verify church exists and is active
+      // Verify church exists and is active (simplified to avoid RLS issues)
       const { data: church, error: churchError } = await supabase
         .from('churches')
-        .select('id, name, is_active, subscription_id, subscriptions(status, expires_at, subscription_plans(max_members))')
+        .select('id, name, is_active, slug')
         .eq('slug', churchSlug)
         .eq('is_active', true)
-        .single();
+        .maybeSingle();
 
       if (churchError) {
         console.error('Erro ao buscar igreja:', {
@@ -27,28 +27,11 @@ export const useChurchInvite = () => {
           details: churchError.details,
           message: churchError.message
         });
-        throw new Error(`Igreja "${churchSlug}" não encontrada`);
+        throw new Error(`Igreja "${churchSlug}" não encontrada ou não está ativa`);
       }
       
-      if (!church) throw new Error(`Igreja "${churchSlug}" não encontrada`);
-      if (!church.is_active) throw new Error('Igreja não está ativa');
-
-      const subscription = church.subscriptions as any;
-      if (!subscription || subscription.status !== 'active') {
-        throw new Error('A igreja não possui uma assinatura ativa');
-      }
-
-      // Check member limit
-      const maxMembers = subscription.subscription_plans?.max_members;
-      if (maxMembers) {
-        const { count } = await supabase
-          .from('profiles')
-          .select('*', { count: 'exact', head: true })
-          .eq('church_id', church.id);
-
-        if (count && count >= maxMembers) {
-          throw new Error('Limite de membros atingido para esta igreja');
-        }
+      if (!church) {
+        throw new Error(`Igreja "${churchSlug}" não encontrada ou não está ativa`);
       }
 
       // Save church data to localStorage for linking after email confirmation

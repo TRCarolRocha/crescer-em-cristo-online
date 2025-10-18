@@ -32,6 +32,9 @@ const ChurchInvite = () => {
     resolver: zodResolver(inviteSchema),
   });
 
+  const [signupSuccess, setSignupSuccess] = React.useState(false);
+  const [churchName, setChurchName] = React.useState('');
+
   const onSubmit = async (data: InviteFormData) => {
     if (!churchSlug) return;
 
@@ -43,12 +46,13 @@ const ChurchInvite = () => {
         password: data.password,
       });
 
+      setChurchName(result.church.name);
+      setSignupSuccess(true);
+
       toast({
         title: 'Cadastro realizado!',
-        description: `Bem-vindo(a) à ${result.church.name}!`,
+        description: `Bem-vindo(a) à ${result.church.name}! Verifique seu e-mail para confirmar.`,
       });
-
-      navigate(`/igreja/${churchSlug}`);
     } catch (error: any) {
       toast({
         title: 'Erro no cadastro',
@@ -57,6 +61,31 @@ const ChurchInvite = () => {
       });
     }
   };
+
+  if (signupSuccess) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-background to-secondary/20">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <CardTitle>Cadastro Realizado!</CardTitle>
+            <CardDescription>
+              Bem-vindo(a) à {churchName}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="p-4 bg-primary/10 rounded-lg border border-primary/20">
+              <p className="text-sm text-center">
+                📧 Enviamos um e-mail de confirmação para você. Por favor, verifique sua caixa de entrada e confirme seu cadastro para acessar a plataforma.
+              </p>
+            </div>
+            <Button onClick={() => navigate('/')} className="w-full">
+              Voltar para Início
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-background to-secondary/20">

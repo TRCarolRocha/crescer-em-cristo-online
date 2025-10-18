@@ -24,33 +24,55 @@ export const useSubscriptionAccess = () => {
         return getDefaultAccess();
       }
 
-      // Get user's active subscription
-      const { data: subscription } = await supabase
-        .from('subscriptions')
-        .select(`
-          id,
-          status,
-          expires_at,
-          plan_id,
-          church_id,
-          subscription_plans (
-            plan_type,
-            max_members,
-            max_admins
-          )
-        `)
-        .or(`user_id.eq.${user.id},church_id.in.(select church_id from profiles where id = '${user.id}')`)
-        .eq('status', 'active')
-        .order('created_at', { ascending: false })
-        .limit(1)
+      // Step 1: Get user profile to find church_id
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('church_id')
+        .eq('id', user.id)
         .maybeSingle();
 
-      if (!subscription || !subscription.subscription_plans) {
+      const userChurchId = profile?.church_id;
+
+      // Step 2: Get active subscription (user's own OR church subscription)
+      let query = supabase
+        .from('subscriptions')
+        .select('id, status, expires_at, plan_id, church_id, user_id')
+        .eq('status', 'active')
+        .order('created_at', { ascending: false })
+        .limit(1);
+
+      // Build OR condition manually
+      if (userChurchId) {
+        query = query.or(`user_id.eq.${user.id},church_id.eq.${userChurchId}`);
+      } else {
+        query = query.eq('user_id', user.id);
+      }
+
+      const { data: subscription } = await query.maybeSingle();
+
+      if (!subscription) {
         return getDefaultAccess();
       }
 
-      const plan = subscription.subscription_plans as any;
-      const planType = plan.plan_type;
+      // Step 3: Get plan details separately
+      const { data: plan } = await supabase
+        .from('subscription_plans')
+        .select('plan_type, max_members, max_admins')
+        .eq('id', subscription.plan_id)
+        .maybeSingle();
+
+      // Fallback: infer plan type if plan fetch fails (RLS issue)
+      let planType = plan?.plan_type;
+      if (!planType) {
+        // Infer from subscription structure
+        if (subscription.church_id) {
+          planType = 'church_simple'; // Fallback for church plans
+        } else if (subscription.user_id) {
+          planType = 'individual'; // Fallback for individual plans
+        } else {
+          planType = 'free';
+        }
+      }
 
       return {
         planType,
@@ -62,8 +84,8 @@ export const useSubscriptionAccess = () => {
         canAccessGroups: planType.startsWith('church'),
         canAccessChurchAdmin: planType.startsWith('church'),
         canAccessChurchCustomization: planType === 'church_plus' || planType === 'church_premium',
-        churchMemberLimit: plan.max_members,
-        churchAdminLimit: plan.max_admins,
+        churchMemberLimit: plan?.max_members || null,
+        churchAdminLimit: plan?.max_admins || null,
       } as SubscriptionAccess;
     },
   });

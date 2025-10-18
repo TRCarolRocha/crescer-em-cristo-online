@@ -126,7 +126,7 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     const emailResponse = await resend.emails.send({
-      from: "Hodos <onboarding@resend.dev>",
+      from: "Hodos <onboarding@resend.dev>", // TODO: Update to verified domain after RESEND_API_KEY setup
       to: [to],
       subject,
       html,

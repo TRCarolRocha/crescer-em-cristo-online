@@ -177,7 +177,7 @@ export const useApprovePayment = () => {
 
       if (updateError) throw updateError;
 
-      // Send welcome email
+      // Send welcome email with plan details
       try {
         const isChurchPlan = payment.plan_type.startsWith('church');
         let churchSlug = null;
@@ -191,16 +191,26 @@ export const useApprovePayment = () => {
           churchSlug = church?.slug;
         }
 
+        const emailBody: any = {
+          type: isChurchPlan ? 'welcome-church' : 'welcome-individual',
+          userId: payment.user_id,
+          planType: payment.plan_type,
+        };
+
+        // Add plan details for individual plans
+        if (!isChurchPlan) {
+          emailBody.planName = planDetails.name;
+          emailBody.planPrice = planDetails.price_monthly;
+          emailBody.planFeatures = planDetails.features || [];
+        }
+
+        // Add church slug for church plans
+        if (isChurchPlan) {
+          emailBody.churchSlug = churchSlug;
+        }
+
         await supabase.functions.invoke('send-subscription-email', {
-          body: {
-            type: isChurchPlan ? 'welcome-church' : 'welcome-individual',
-            userId: payment.user_id,
-            planType: payment.plan_type,
-            planName: planDetails.name,
-            planPrice: planDetails.price_monthly,
-            planFeatures: planDetails.features,
-            churchSlug
-          }
+          body: emailBody
         });
       } catch (emailError) {
         console.error('Erro ao enviar email de boas-vindas:', emailError);

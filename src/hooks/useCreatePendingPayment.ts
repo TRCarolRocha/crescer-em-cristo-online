@@ -42,12 +42,12 @@ export const useCreatePendingPayment = () => {
       
       if (error) throw error;
 
-      // Send payment pending confirmation email
+      // Send payment pending confirmation email using userId
       try {
         await supabase.functions.invoke('send-subscription-email', {
           body: {
             type: 'payment-pending',
-            to: user.email,
+            userId: user.id,
             userName: user.user_metadata?.full_name || 'Usuário',
             confirmationCode: code,
             planType: planType,
