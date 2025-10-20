@@ -39,19 +39,25 @@ export const useRejectPayment = () => {
       const { data: userData } = await supabase.auth.admin.getUserById(payment.user_id);
       const userEmail = userData?.user?.email;
 
-      // Send rejection email
-      if (userEmail) {
-        const churchData = payment.church_data as unknown as ChurchData | null;
-        await supabase.functions.invoke('send-subscription-email', {
-          body: {
-            type: 'rejection',
-            to: userEmail,
-            userName: churchData?.responsible_name || userData?.user?.user_metadata?.full_name,
-            planType: payment.plan_type,
-            rejectionReason: reason,
-            confirmationCode: payment.confirmation_code,
-          },
-        });
+      // NOTE: E-mails temporariamente desabilitados (sem domínio verificado)
+      // Admin deve comunicar rejeição por outro canal (WhatsApp, telefone, etc.)
+      try {
+        if (userEmail) {
+          const churchData = payment.church_data as unknown as ChurchData | null;
+          await supabase.functions.invoke('send-subscription-email', {
+            body: {
+              type: 'rejection',
+              to: userEmail,
+              userName: churchData?.responsible_name || userData?.user?.user_metadata?.full_name,
+              planType: payment.plan_type,
+              rejectionReason: reason,
+              confirmationCode: payment.confirmation_code,
+            },
+          });
+        }
+      } catch (emailError) {
+        // Silenciosamente ignora erros de e-mail (esperado sem domínio configurado)
+        console.log('E-mail de rejeição não enviado (configuração pendente):', emailError);
       }
 
       return { success: true };

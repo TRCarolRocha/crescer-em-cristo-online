@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { ArrowLeft, QrCode, ExternalLink } from 'lucide-react';
+import { ArrowLeft, QrCode, ExternalLink, AlertCircle } from 'lucide-react';
 import { PixCopyButton } from './PixCopyButton';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { usePaymentSettings } from '@/hooks/usePaymentSettings';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -107,6 +107,14 @@ export const PaymentConfirmation: React.FC<PaymentConfirmationProps> = ({
               <li>Confirme o pagamento de R$ {amount.toFixed(2)}</li>
               <li>Clique em "Já realizei o pagamento" abaixo</li>
             </ol>
+          </AlertDescription>
+        </Alert>
+
+        <Alert variant="default" className="border-primary/30 bg-primary/5">
+          <AlertCircle className="h-4 w-4 text-primary" />
+          <AlertDescription className="text-sm">
+            <strong>Atenção:</strong> Após confirmar o pagamento, você receberá um <strong>código de confirmação na tela</strong>. 
+            Guarde este código e envie para o administrador junto com o comprovante de pagamento.
           </AlertDescription>
         </Alert>
 

@@ -177,7 +177,8 @@ export const useApprovePayment = () => {
 
       if (updateError) throw updateError;
 
-      // Send welcome email with plan details
+      // NOTE: E-mails temporariamente desabilitados (sem domínio verificado)
+      // O usuário já recebeu o código de confirmação na tela após o pagamento
       try {
         const isChurchPlan = payment.plan_type.startsWith('church');
         let churchSlug = null;
@@ -213,7 +214,8 @@ export const useApprovePayment = () => {
           body: emailBody
         });
       } catch (emailError) {
-        console.error('Erro ao enviar email de boas-vindas:', emailError);
+        // Silenciosamente ignora erros de e-mail (esperado sem domínio configurado)
+        console.log('E-mail de boas-vindas não enviado (configuração pendente):', emailError);
       }
 
       return { success: true };

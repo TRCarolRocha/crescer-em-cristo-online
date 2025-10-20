@@ -42,7 +42,8 @@ export const useCreatePendingPayment = () => {
       
       if (error) throw error;
 
-      // Send payment pending confirmation email using userId
+      // NOTE: E-mails temporariamente desabilitados (sem domínio verificado)
+      // O código de confirmação será exibido na tela para o usuário
       try {
         await supabase.functions.invoke('send-subscription-email', {
           body: {
@@ -54,7 +55,8 @@ export const useCreatePendingPayment = () => {
           },
         });
       } catch (emailErr) {
-        console.error('Erro ao enviar email de confirmação:', emailErr);
+        // Silenciosamente ignora erros de e-mail (esperado sem domínio configurado)
+        console.log('E-mail não enviado (configuração pendente):', emailErr);
       }
 
       return data;
