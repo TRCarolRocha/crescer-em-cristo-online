@@ -264,7 +264,7 @@ const SuperAdminDashboard = () => {
         </div>
 
         {/* Quick Actions - Mobile: Full width / Desktop: Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6">
           <GradientButton
             onClick={() => navigate('/admin/hodos/igrejas')}
             className="h-14 md:h-20"
@@ -282,6 +282,12 @@ const SuperAdminDashboard = () => {
             className="h-14 md:h-20"
           >
             Gerenciar Planos
+          </GradientButton>
+          <GradientButton
+            onClick={() => navigate('/admin/hodos/usuarios')}
+            className="h-14 md:h-20"
+          >
+            Gerenciar Usuários
           </GradientButton>
         </div>
       </div>

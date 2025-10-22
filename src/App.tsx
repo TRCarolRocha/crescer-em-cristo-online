@@ -38,6 +38,7 @@ import AssinaturaIndividual from "./pages/assinatura/AssinaturaIndividual";
 import AssinaturaIgreja from "./pages/assinatura/AssinaturaIgreja";
 import DiagnosticoPublico from "./pages/DiagnosticoPublico";
 import PlansManagement from "./pages/admin/PlansManagement";
+import UserManagement from "./pages/admin/UserManagement";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminRoute from "./components/AdminRoute";
 import SuperAdminRoute from "./components/SuperAdminRoute";
@@ -186,6 +187,18 @@ const App = () => (
                       <AdminSidebar />
                       <main className="flex-1">
                         <PlansManagement />
+                      </main>
+                    </div>
+                  </SidebarProvider>
+                </SuperAdminRoute>
+              } />
+              <Route path="/admin/hodos/usuarios" element={
+                <SuperAdminRoute>
+                  <SidebarProvider>
+                    <div className="flex min-h-screen w-full">
+                      <AdminSidebar />
+                      <main className="flex-1">
+                        <UserManagement />
                       </main>
                     </div>
                   </SidebarProvider>

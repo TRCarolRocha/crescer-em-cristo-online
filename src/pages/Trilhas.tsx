@@ -9,6 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import ConteudoTrilha from '@/components/ConteudoTrilha';
+import { AccessGate } from '@/components/subscription/AccessGate';
 interface Trilha {
   id: string;
   title: string;
@@ -33,6 +34,14 @@ interface UserGroup {
   name: string;
 }
 const Trilhas = () => {
+  return (
+    <AccessGate requiredAccess="canAccessTracks">
+      <TrilhasContent />
+    </AccessGate>
+  );
+};
+
+const TrilhasContent = () => {
   const [trilhas, setTrilhas] = useState<Trilha[]>([]);
   const [filteredTrilhas, setFilteredTrilhas] = useState<Trilha[]>([]);
   const [userProgress, setUserProgress] = useState<UserProgress[]>([]);

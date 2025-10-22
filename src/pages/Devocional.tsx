@@ -11,6 +11,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { getCurrentDateBR, formatDateHeaderBR } from '@/utils/dateUtils';
+import { AccessGate } from '@/components/subscription/AccessGate';
 
 interface Devocional {
   id: string;
@@ -34,6 +35,14 @@ interface UserResponses {
 }
 
 const Devocional = () => {
+  return (
+    <AccessGate requiredAccess="canAccessPersonalDevotionals">
+      <DevocionalContent />
+    </AccessGate>
+  );
+};
+
+const DevocionalContent = () => {
   const [devocional, setDevocional] = useState<Devocional | null>(null);
   const [userResponses, setUserResponses] = useState<UserResponses>({
     resposta_1: '',

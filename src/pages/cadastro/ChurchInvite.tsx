@@ -9,6 +9,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { ResendConfirmationEmail } from '@/components/auth/ResendConfirmationEmail';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Mail, AlertCircle } from 'lucide-react';
 
 const inviteSchema = z.object({
   fullName: z.string().min(3, 'Nome deve ter pelo menos 3 caracteres'),
@@ -34,6 +37,7 @@ const ChurchInvite = () => {
 
   const [signupSuccess, setSignupSuccess] = React.useState(false);
   const [churchName, setChurchName] = React.useState('');
+  const [userEmail, setUserEmail] = React.useState('');
 
   const onSubmit = async (data: InviteFormData) => {
     if (!churchSlug) return;
@@ -47,6 +51,7 @@ const ChurchInvite = () => {
       });
 
       setChurchName(result.church.name);
+      setUserEmail(data.email);
       setSignupSuccess(true);
 
       toast({
@@ -73,12 +78,25 @@ const ChurchInvite = () => {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="p-4 bg-primary/10 rounded-lg border border-primary/20">
-              <p className="text-sm text-center">
-                📧 Enviamos um e-mail de confirmação para você. Por favor, verifique sua caixa de entrada e confirme seu cadastro para acessar a plataforma.
-              </p>
-            </div>
-            <Button onClick={() => navigate('/')} className="w-full">
+            <Alert>
+              <Mail className="h-4 w-4" />
+              <AlertDescription>
+                Enviamos um e-mail de confirmação para <strong>{userEmail}</strong>. 
+                Por favor, verifique sua caixa de entrada (e spam) e confirme seu cadastro.
+              </AlertDescription>
+            </Alert>
+
+            <Alert variant="default">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription className="text-xs">
+                <strong>Importante:</strong> Verifique também sua caixa de spam. 
+                O e-mail pode levar alguns minutos para chegar.
+              </AlertDescription>
+            </Alert>
+
+            <ResendConfirmationEmail email={userEmail} />
+
+            <Button onClick={() => navigate('/')} variant="outline" className="w-full">
               Voltar para Início
             </Button>
           </CardContent>

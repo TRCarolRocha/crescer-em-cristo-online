@@ -24,68 +24,96 @@ export const useSubscriptionAccess = () => {
         return getDefaultAccess();
       }
 
-      // Step 1: Get user profile to find church_id
+      // Step 1: Get user profile with church info
       const { data: profile } = await supabase
         .from('profiles')
-        .select('church_id')
+        .select('church_id, subscription_id')
         .eq('id', user.id)
         .maybeSingle();
 
-      const userChurchId = profile?.church_id;
-
-      // Step 2: Get active subscription (user's own OR church subscription)
-      let query = supabase
-        .from('subscriptions')
-        .select('id, status, expires_at, plan_id, church_id, user_id')
-        .eq('status', 'active')
-        .order('created_at', { ascending: false })
-        .limit(1);
-
-      // Build OR condition manually
-      if (userChurchId) {
-        query = query.or(`user_id.eq.${user.id},church_id.eq.${userChurchId}`);
-      } else {
-        query = query.eq('user_id', user.id);
-      }
-
-      const { data: subscription } = await query.maybeSingle();
-
-      if (!subscription) {
+      if (!profile) {
         return getDefaultAccess();
       }
 
-      // Step 3: Get plan details separately
-      const { data: plan } = await supabase
-        .from('subscription_plans')
-        .select('plan_type, max_members, max_admins')
-        .eq('id', subscription.plan_id)
-        .maybeSingle();
+      // Step 2: Get church subscription if user belongs to a church
+      let churchSubscription = null;
+      let churchPlan = null;
+      
+      if (profile.church_id) {
+        const { data: church } = await supabase
+          .from('churches')
+          .select('subscription_id')
+          .eq('id', profile.church_id)
+          .maybeSingle();
 
-      // Fallback: infer plan type if plan fetch fails (RLS issue)
-      let planType = plan?.plan_type;
-      if (!planType) {
-        // Infer from subscription structure
-        if (subscription.church_id) {
-          planType = 'church_simple'; // Fallback for church plans
-        } else if (subscription.user_id) {
-          planType = 'individual'; // Fallback for individual plans
-        } else {
-          planType = 'free';
+        if (church?.subscription_id) {
+          const { data: sub } = await supabase
+            .from('subscriptions')
+            .select('id, status, expires_at, plan_id')
+            .eq('id', church.subscription_id)
+            .maybeSingle();
+
+          if (sub && sub.status === 'active') {
+            churchSubscription = sub;
+            
+            // Get church plan details
+            const { data: plan } = await supabase
+              .from('subscription_plans')
+              .select('plan_type, max_members, max_admins')
+              .eq('id', sub.plan_id)
+              .maybeSingle();
+            
+            churchPlan = plan;
+          }
         }
       }
 
+      // Step 3: Get individual subscription if exists
+      let individualSubscription = null;
+      let individualPlan = null;
+
+      if (profile.subscription_id) {
+        const { data: sub } = await supabase
+          .from('subscriptions')
+          .select('id, status, expires_at, plan_id')
+          .eq('id', profile.subscription_id)
+          .maybeSingle();
+
+        if (sub && sub.status === 'active') {
+          individualSubscription = sub;
+          
+          const { data: plan } = await supabase
+            .from('subscription_plans')
+            .select('plan_type, max_members, max_admins')
+            .eq('id', sub.plan_id)
+            .maybeSingle();
+          
+          individualPlan = plan;
+        }
+      }
+
+      // Step 4: Prioritize church subscription over individual
+      const activeSubscription = churchSubscription || individualSubscription;
+      const activePlan = churchPlan || individualPlan;
+
+      if (!activeSubscription || !activePlan) {
+        return getDefaultAccess();
+      }
+
+      const planType = activePlan.plan_type;
+
       return {
         planType,
-        isActive: subscription.status === 'active',
-        expiresAt: subscription.expires_at ? new Date(subscription.expires_at) : null,
+        isActive: activeSubscription.status === 'active',
+        expiresAt: activeSubscription.expires_at ? new Date(activeSubscription.expires_at) : null,
         canAccessTracks: planType !== 'free',
         canAccessProgress: planType !== 'free',
         canAccessPersonalDevotionals: planType !== 'free',
         canAccessGroups: planType.startsWith('church'),
         canAccessChurchAdmin: planType.startsWith('church'),
         canAccessChurchCustomization: planType === 'church_plus' || planType === 'church_premium',
-        churchMemberLimit: plan?.max_members || null,
-        churchAdminLimit: plan?.max_admins || null,
+        churchMemberLimit: activePlan.max_members || null,
+        churchAdminLimit: activePlan.max_admins || null,
       } as SubscriptionAccess;
     },
   });

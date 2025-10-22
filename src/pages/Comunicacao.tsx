@@ -11,6 +11,7 @@ import TagBadge from "@/components/TagBadge";
 import CommentSection from "@/components/CommentSection";
 import ImageUpload from "@/components/ImageUpload";
 import { getTagColor } from "@/utils/tagUtils";
+import { AccessGate } from "@/components/subscription/AccessGate";
 
 interface Message {
   id: string;
@@ -36,6 +37,14 @@ interface TagInfo {
 }
 
 const Comunicacao = () => {
+  return (
+    <AccessGate requiredAccess="canAccessGroups">
+      <ComunicacaoContent />
+    </AccessGate>
+  );
+};
+
+const ComunicacaoContent = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
