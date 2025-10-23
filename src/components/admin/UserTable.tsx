@@ -13,18 +13,33 @@ interface UserTableProps {
 }
 
 export const UserTable: React.FC<UserTableProps> = ({ users, onEdit }) => {
-  const getPlanBadgeVariant = (planType: string) => {
+  const getPlanBadgeVariant = (planType: string): "default" | "secondary" | "outline" | "destructive" => {
     switch (planType) {
       case 'church_premium':
         return 'default';
       case 'church_plus':
-        return 'secondary';
+        return 'default';
       case 'church_simple':
-        return 'outline';
+        return 'secondary';
       case 'individual':
         return 'default';
       default:
         return 'outline';
+    }
+  };
+
+  const getPlanBadgeColor = (planType: string) => {
+    switch (planType) {
+      case 'church_premium':
+        return 'bg-gradient-to-r from-yellow-500 to-orange-500 text-white border-0';
+      case 'church_plus':
+        return 'bg-gradient-to-r from-green-500 to-emerald-600 text-white border-0';
+      case 'church_simple':
+        return 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white border-0';
+      case 'individual':
+        return 'bg-gradient-to-r from-purple-500 to-pink-500 text-white border-0';
+      default:
+        return '';
     }
   };
 
@@ -104,9 +119,24 @@ export const UserTable: React.FC<UserTableProps> = ({ users, onEdit }) => {
                   )}
                 </TableCell>
                 <TableCell>
-                  <Badge variant={getPlanBadgeVariant(user.plan_type)}>
-                    {getPlanLabel(user.plan_type)}
-                  </Badge>
+                  <div className="flex flex-col gap-1">
+                    <Badge 
+                      variant={getPlanBadgeVariant(user.plan_type)}
+                      className={getPlanBadgeColor(user.plan_type)}
+                    >
+                      {getPlanLabel(user.plan_type)}
+                    </Badge>
+                    {user.church_name && user.plan_type.startsWith('church') && (
+                      <span className="text-xs text-muted-foreground">
+                        Via {user.church_name}
+                      </span>
+                    )}
+                    {user.subscription_status !== 'active' && user.subscription_status !== 'inactive' && (
+                      <Badge variant="destructive" className="text-xs">
+                        {user.subscription_status}
+                      </Badge>
+                    )}
+                  </div>
                 </TableCell>
                 <TableCell>
                   <div className="flex flex-wrap gap-1">

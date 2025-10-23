@@ -16,6 +16,10 @@ export interface UserData {
   phone: string | null;
   birth_date: string | null;
   address: string | null;
+  individual_subscription_id?: string | null;
+  individual_subscription_status?: string | null;
+  individual_expires_at?: string | null;
+  individual_plan_name?: string | null;
 }
 
 export const useUsers = (filters?: {
@@ -118,6 +122,27 @@ export const useUsers = (filters?: {
             }
           }
 
+          // Get individual subscription info
+          let individualSubId = null;
+          let individualSubStatus = null;
+          let individualExpiresAt = null;
+          let individualPlanName = null;
+
+          if (planType === 'free') {
+            const { data: individualSub } = await supabase
+              .from('subscriptions')
+              .select('id, status, expires_at, subscription_plans(name)')
+              .eq('user_id', profile.id)
+              .maybeSingle();
+
+            if (individualSub) {
+              individualSubId = individualSub.id;
+              individualSubStatus = individualSub.status;
+              individualExpiresAt = individualSub.expires_at;
+              individualPlanName = individualSub.subscription_plans?.name || null;
+            }
+          }
+
           return {
             id: profile.id,
             full_name: profile.full_name,
@@ -133,6 +158,10 @@ export const useUsers = (filters?: {
             phone: profile.phone,
             birth_date: profile.birth_date,
             address: profile.address,
+            individual_subscription_id: individualSubId,
+            individual_subscription_status: individualSubStatus,
+            individual_expires_at: individualExpiresAt,
+            individual_plan_name: individualPlanName,
           };
         })
       );

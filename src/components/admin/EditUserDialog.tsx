@@ -8,7 +8,15 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { useUpdateUser } from '@/hooks/useUpdateUser';
 import { UserData } from '@/hooks/useUsers';
 import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
+import { AlertCircle, Calendar, CreditCard, Plus, Trash2 } from 'lucide-react';
 import { Database } from '@/integrations/supabase/types';
+import { useSubscriptionPlans } from '@/hooks/useSubscriptionPlans';
+import { useCreateSubscription } from '@/hooks/useCreateSubscription';
+import { useCancelSubscription } from '@/hooks/useCancelSubscription';
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 
 type AppRole = Database['public']['Enums']['app_role'];
 
@@ -33,7 +41,17 @@ export const EditUserDialog: React.FC<EditUserDialogProps> = ({
     church_id: '',
   });
   const [selectedRoles, setSelectedRoles] = useState<AppRole[]>([]);
+  const [showSubscriptionForm, setShowSubscriptionForm] = useState(false);
+  const [newSubscription, setNewSubscription] = useState({
+    plan_id: '',
+    expires_at: '',
+    status: 'active' as 'active' | 'pending' | 'expired' | 'cancelled',
+  });
+
   const { mutate: updateUser, isPending } = useUpdateUser();
+  const { plans } = useSubscriptionPlans();
+  const { mutate: createSubscription, isPending: isCreating } = useCreateSubscription();
+  const { mutate: cancelSubscription, isPending: isCanceling } = useCancelSubscription();
 
   useEffect(() => {
     if (user) {
@@ -70,7 +88,37 @@ export const EditUserDialog: React.FC<EditUserDialogProps> = ({
     );
   };
 
+  const handleCreateSubscription = () => {
+    if (!user || !newSubscription.plan_id) return;
+
+    createSubscription(
+      {
+        userId: user.id,
+        planId: newSubscription.plan_id,
+        expiresAt: newSubscription.expires_at || undefined,
+        status: newSubscription.status,
+      },
+      {
+        onSuccess: () => {
+          setShowSubscriptionForm(false);
+          setNewSubscription({ plan_id: '', expires_at: '', status: 'active' });
+        },
+      }
+    );
+  };
+
+  const handleCancelSubscription = () => {
+    if (!user?.individual_subscription_id) return;
+    if (!confirm('Tem certeza que deseja cancelar esta assinatura?')) return;
+
+    cancelSubscription({
+      userId: user.id,
+      subscriptionId: user.individual_subscription_id,
+    });
+  };
+
   const availableRoles: AppRole[] = ['admin', 'lider', 'member'];
+  const individualPlans = plans?.filter(p => p.plan_type === 'individual') || [];
 
   if (!user) return null;
 
@@ -182,6 +230,162 @@ export const EditUserDialog: React.FC<EditUserDialogProps> = ({
               ))}
             </div>
           </div>
+
+          <Separator />
+
+          {/* Subscription Management */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <CreditCard className="h-5 w-5" />
+                Gerenciamento de Plano
+              </CardTitle>
+              <CardDescription>
+                Crie ou gerencie assinaturas individuais para este usuário
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* Current Status */}
+              <div className="space-y-2">
+                <Label>Status Atual</Label>
+                <div className="flex flex-wrap gap-2">
+                  <Badge variant="outline">{user.plan_type}</Badge>
+                  {user.church_name && (
+                    <Badge variant="secondary">Via {user.church_name}</Badge>
+                  )}
+                  <Badge variant={user.subscription_status === 'active' ? 'default' : 'destructive'}>
+                    {user.subscription_status}
+                  </Badge>
+                </div>
+                {user.individual_expires_at && (
+                  <p className="text-sm text-muted-foreground flex items-center gap-2">
+                    <Calendar className="h-4 w-4" />
+                    Expira em: {format(new Date(user.individual_expires_at), 'dd/MM/yyyy', { locale: ptBR })}
+                  </p>
+                )}
+              </div>
+
+              {/* Individual Subscription Info */}
+              {user.individual_subscription_id ? (
+                <div className="space-y-3 p-4 bg-muted rounded-lg">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">Assinatura Individual Ativa</p>
+                      {user.individual_plan_name && (
+                        <p className="text-sm text-muted-foreground">{user.individual_plan_name}</p>
+                      )}
+                      <p className="text-sm text-muted-foreground">
+                        Status: {user.individual_subscription_status}
+                      </p>
+                    </div>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={handleCancelSubscription}
+                      disabled={isCanceling}
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Cancelar
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {!showSubscriptionForm ? (
+                    <Button
+                      variant="outline"
+                      className="w-full"
+                      onClick={() => setShowSubscriptionForm(true)}
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Criar Nova Assinatura Individual
+                    </Button>
+                  ) : (
+                    <div className="space-y-3 p-4 border rounded-lg">
+                      <div className="space-y-2">
+                        <Label>Plano Individual</Label>
+                        <Select
+                          value={newSubscription.plan_id}
+                          onValueChange={(value) => setNewSubscription({ ...newSubscription, plan_id: value })}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecionar plano" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {individualPlans.map((plan) => (
+                              <SelectItem key={plan.id} value={plan.id}>
+                                {plan.name} - R$ {plan.price_monthly}/mês
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label>Data de Expiração (Opcional)</Label>
+                        <Input
+                          type="date"
+                          value={newSubscription.expires_at}
+                          onChange={(e) => setNewSubscription({ ...newSubscription, expires_at: e.target.value })}
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          Deixe em branco para assinatura sem expiração
+                        </p>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label>Status</Label>
+                        <Select
+                          value={newSubscription.status}
+                          onValueChange={(value: any) => setNewSubscription({ ...newSubscription, status: value })}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="active">Ativo</SelectItem>
+                            <SelectItem value="pending">Pendente</SelectItem>
+                            <SelectItem value="expired">Expirado</SelectItem>
+                            <SelectItem value="cancelled">Cancelado</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          className="flex-1"
+                          onClick={() => {
+                            setShowSubscriptionForm(false);
+                            setNewSubscription({ plan_id: '', expires_at: '', status: 'active' });
+                          }}
+                        >
+                          Cancelar
+                        </Button>
+                        <Button
+                          className="flex-1"
+                          onClick={handleCreateSubscription}
+                          disabled={!newSubscription.plan_id || isCreating}
+                        >
+                          {isCreating ? 'Criando...' : 'Criar Assinatura'}
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+
+                  {user.church_name && user.plan_type.startsWith('church') && (
+                    <div className="flex items-start gap-2 p-3 bg-blue-50 dark:bg-blue-950 rounded-lg">
+                      <AlertCircle className="h-5 w-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+                      <p className="text-sm text-blue-900 dark:text-blue-100">
+                        Este usuário já tem acesso através da igreja <strong>{user.church_name}</strong>. 
+                        Criar uma assinatura individual substituirá o acesso da igreja.
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </CardContent>
+          </Card>
 
           {/* Action Buttons */}
           <div className="flex justify-end gap-3">
