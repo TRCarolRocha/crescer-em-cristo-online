@@ -55,7 +55,7 @@ export const EditUserDialog: React.FC<EditUserDialogProps> = ({
     updateUser({
       userId: user.id,
       ...formData,
-      church_id: formData.church_id || null,
+      church_id: formData.church_id === 'none' ? null : (formData.church_id || null),
       roles: selectedRoles,
     });
 
@@ -132,14 +132,14 @@ export const EditUserDialog: React.FC<EditUserDialogProps> = ({
             <div className="space-y-2">
               <Label htmlFor="church_id">Igreja</Label>
               <Select
-                value={formData.church_id}
+                value={formData.church_id || 'none'}
                 onValueChange={(value) => setFormData({ ...formData, church_id: value })}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Selecionar igreja" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Nenhuma</SelectItem>
+                  <SelectItem value="none">Nenhuma</SelectItem>
                   {churches.map((church) => (
                     <SelectItem key={church.id} value={church.id}>
                       {church.name}
