@@ -11,7 +11,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { getCurrentDateBR, formatDateHeaderBR } from '@/utils/dateUtils';
-import { AccessGate } from '@/components/subscription/AccessGate';
+import { useSubscriptionAccess } from '@/hooks/useSubscriptionAccess';
+import { UpgradePrompt } from '@/components/subscription/UpgradePrompt';
 
 interface Devocional {
   id: string;
@@ -35,14 +36,11 @@ interface UserResponses {
 }
 
 const Devocional = () => {
-  return (
-    <AccessGate requiredAccess="canAccessPersonalDevotionals">
-      <DevocionalContent />
-    </AccessGate>
-  );
+  return <DevocionalContent />;
 };
 
 const DevocionalContent = () => {
+  const { access } = useSubscriptionAccess();
   const [devocional, setDevocional] = useState<Devocional | null>(null);
   const [userResponses, setUserResponses] = useState<UserResponses>({
     resposta_1: '',
@@ -69,11 +67,17 @@ const DevocionalContent = () => {
     setLoading(true);
     try {
       // Buscar devocional do dia
-      const { data: devocionalData, error: devocionalError } = await supabase
+      let query = supabase
         .from('devocionais')
         .select('*')
-        .eq('data', today)
-        .maybeSingle();
+        .eq('data', today);
+
+      // Se usuário não tem plano, mostrar apenas públicos
+      if (!access.canAccessPersonalDevotionals) {
+        query = query.eq('is_public', true);
+      }
+
+      const { data: devocionalData, error: devocionalError } = await query.maybeSingle();
 
       if (devocionalError) {
         console.error('Erro ao buscar devocional:', devocionalError);
@@ -205,11 +209,18 @@ const DevocionalContent = () => {
     return (
       <PageContainer maxWidth="2xl">
         <div className="max-w-[600px] mx-auto px-4 sm:px-6 py-6">
-          <div className="flex flex-col items-center justify-center min-h-[40vh] text-center">
+          <div className="flex flex-col items-center justify-center min-h-[40vh] text-center space-y-4">
             <Heart className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
             <p className="text-lg text-muted-foreground">
               Nenhum devocional disponível para hoje.
             </p>
+            {!access.canAccessPersonalDevotionals && (
+              <UpgradePrompt 
+                open={false} 
+                onOpenChange={() => {}}
+                currentPlan={access.planType}
+              />
+            )}
           </div>
         </div>
       </PageContainer>

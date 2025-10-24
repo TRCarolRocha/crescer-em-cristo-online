@@ -55,10 +55,54 @@ const AssinaturaIgreja = () => {
     }
   });
 
-  // Fetch user profile if logged in
+  // Check for existing pending payment on mount
   useEffect(() => {
+    const checkExistingPayment = async () => {
+      if (!user || !session) return;
+
+      const { data: existingPayment } = await supabase
+        .from('pending_payments')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('status', 'pending')
+        .in('plan_type', ['church_simple', 'church_plus', 'church_premium'])
+        .maybeSingle();
+
+      if (existingPayment) {
+        setConfirmationCode(existingPayment.confirmation_code);
+        setStep('confirmation');
+      } else {
+        fetchUserProfile();
+      }
+    };
+
     if (user && session) {
-      fetchUserProfile();
+      checkExistingPayment();
+    }
+  }, [user, session]);
+
+  // Detect ?resume=1 to return to payment after email confirmation
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('resume') === '1' && user && session) {
+      const checkExistingPayment = async () => {
+        const { data: existingPayment } = await supabase
+          .from('pending_payments')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('status', 'pending')
+          .in('plan_type', ['church_simple', 'church_plus', 'church_premium'])
+          .maybeSingle();
+
+        if (existingPayment) {
+          setConfirmationCode(existingPayment.confirmation_code);
+          setStep('confirmation');
+        } else {
+          setStep('payment');
+        }
+      };
+      
+      checkExistingPayment();
     }
   }, [user, session]);
 

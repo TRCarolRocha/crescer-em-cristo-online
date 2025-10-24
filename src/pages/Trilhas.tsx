@@ -9,7 +9,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import ConteudoTrilha from '@/components/ConteudoTrilha';
-import { AccessGate } from '@/components/subscription/AccessGate';
+import { useSubscriptionAccess } from '@/hooks/useSubscriptionAccess';
+import { UpgradePrompt } from '@/components/subscription/UpgradePrompt';
+
 interface Trilha {
   id: string;
   title: string;
@@ -34,14 +36,11 @@ interface UserGroup {
   name: string;
 }
 const Trilhas = () => {
-  return (
-    <AccessGate requiredAccess="canAccessTracks">
-      <TrilhasContent />
-    </AccessGate>
-  );
+  return <TrilhasContent />;
 };
 
 const TrilhasContent = () => {
+  const { access } = useSubscriptionAccess();
   const [trilhas, setTrilhas] = useState<Trilha[]>([]);
   const [filteredTrilhas, setFilteredTrilhas] = useState<Trilha[]>([]);
   const [userProgress, setUserProgress] = useState<UserProgress[]>([]);
@@ -72,12 +71,17 @@ const TrilhasContent = () => {
   }, [user]);
   const fetchTrilhas = async () => {
     try {
-      const {
-        data,
-        error
-      } = await supabase.from('discipleship_tracks').select('*').order('title', {
-        ascending: true
-      });
+      let query = supabase
+        .from('discipleship_tracks')
+        .select('*');
+
+      // Se usuário não tem plano, mostrar apenas públicos
+      if (!access.canAccessTracks) {
+        query = query.eq('is_public', true);
+      }
+
+      const { data, error } = await query.order('title', { ascending: true });
+      
       if (error) throw error;
       setTrilhas(data || []);
     } catch (error) {

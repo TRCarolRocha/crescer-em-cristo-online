@@ -147,7 +147,14 @@ const IndividualDashboard = () => {
       description: isVisitor ? "Seus devocionais" : "Sua jornada",
       color: "from-orange-500 to-red-500",
       action: () => navigate(isVisitor ? '/historico-devocional' : '/progresso')
-    }
+    },
+    ...(!isVisitor ? [{
+      icon: Settings,
+      title: "Planos",
+      description: subscriptionStatus === 'active' ? 'Gerenciar' : 'Ver planos',
+      color: "from-purple-500 to-pink-500",
+      action: () => navigate('/planos')
+    }] : [])
   ];
 
   // Admin cards
@@ -207,34 +214,6 @@ const IndividualDashboard = () => {
           </div>
         )}
 
-        {/* Ver Planos Card */}
-        {!isVisitor && (
-          <section className="pt-4">
-            <Card 
-              className="bg-gradient-to-br from-primary/10 to-secondary/10 border-primary/20 cursor-pointer hover:scale-[1.02] transition-transform"
-              onClick={() => navigate('/planos')}
-            >
-              <CardContent className="p-5">
-                <div className="flex items-center gap-4">
-                  <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center flex-shrink-0">
-                    <TrendingUp className="h-7 w-7 text-white" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="text-lg font-bold text-foreground mb-1">
-                      {subscriptionStatus === 'active' ? 'Gerenciar Plano' : 'Ver Planos'}
-                    </h3>
-                    <p className="text-sm text-muted-foreground truncate">
-                      {subscriptionStatus === 'active' 
-                        ? `Plano Atual: ${planType === 'individual' ? 'Individual' : 'Free'}` 
-                        : 'Escolha o melhor plano para você'}
-                    </p>
-                  </div>
-                  <ArrowRight className="h-5 w-5 text-muted-foreground flex-shrink-0" />
-                </div>
-              </CardContent>
-            </Card>
-          </section>
-        )}
 
         {/* Welcome Section - Compact for mobile */}
         <section className="text-center space-y-3 py-6">

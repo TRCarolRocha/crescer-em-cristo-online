@@ -133,6 +133,8 @@ export const useUsers = (filters?: {
               .from('subscriptions')
               .select('id, status, expires_at, subscription_plans(name)')
               .eq('user_id', profile.id)
+              .order('created_at', { ascending: false })
+              .limit(1)
               .maybeSingle();
 
             if (individualSub) {

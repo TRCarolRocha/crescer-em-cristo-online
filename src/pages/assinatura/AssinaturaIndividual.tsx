@@ -37,10 +37,29 @@ const AssinaturaIndividual = () => {
     ? plans?.find(p => p.id === selectedPlanId)
     : plans?.find(p => p.plan_type === 'individual');
 
-  // Skip form if user is already logged in
+  // Check for existing pending payment on mount
   useEffect(() => {
+    const checkExistingPayment = async () => {
+      if (!user || !session) return;
+
+      const { data: existingPayment } = await supabase
+        .from('pending_payments')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('status', 'pending')
+        .eq('plan_type', 'individual')
+        .maybeSingle();
+
+      if (existingPayment) {
+        setConfirmationCode(existingPayment.confirmation_code);
+        setStep('confirmation');
+      } else {
+        setStep('payment');
+      }
+    };
+
     if (user && session) {
-      setStep('payment');
+      checkExistingPayment();
     }
   }, [user, session]);
 
@@ -48,7 +67,24 @@ const AssinaturaIndividual = () => {
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('resume') === '1' && user && session) {
-      setStep('payment');
+      const checkExistingPayment = async () => {
+        const { data: existingPayment } = await supabase
+          .from('pending_payments')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('status', 'pending')
+          .eq('plan_type', 'individual')
+          .maybeSingle();
+
+        if (existingPayment) {
+          setConfirmationCode(existingPayment.confirmation_code);
+          setStep('confirmation');
+        } else {
+          setStep('payment');
+        }
+      };
+      
+      checkExistingPayment();
     }
   }, [user, session]);
 

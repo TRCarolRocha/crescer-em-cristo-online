@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Mail } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
 
 interface EmailConfirmationPendingProps {
   email: string;
@@ -19,6 +21,25 @@ export const EmailConfirmationPending: React.FC<EmailConfirmationPendingProps> =
   cooldown = 0,
   redirectPath
 }) => {
+  const navigate = useNavigate();
+
+  // Observer para detectar confirmação de email
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' && session && redirectPath) {
+        navigate(redirectPath);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [redirectPath, navigate]);
+
+  const handleContinue = () => {
+    if (redirectPath) {
+      navigate(redirectPath);
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
@@ -44,12 +65,19 @@ export const EmailConfirmationPending: React.FC<EmailConfirmationPendingProps> =
             </AlertDescription>
           </Alert>
           
-          <div className="flex justify-center">
+          <div className="flex flex-col gap-3">
+            <Button 
+              onClick={handleContinue}
+              className="w-full"
+            >
+              Já confirmei, continuar
+            </Button>
+            
             <Button 
               onClick={onResend} 
               disabled={isResending || cooldown > 0}
               variant="outline"
-              className="w-full max-w-[300px]"
+              className="w-full"
             >
               <Mail className="w-4 h-4 mr-2" />
               {isResending ? (

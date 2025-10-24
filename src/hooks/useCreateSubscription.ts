@@ -17,6 +17,26 @@ export const useCreateSubscription = () => {
     mutationFn: async (data: CreateSubscriptionData) => {
       console.log('🔄 Criando nova subscription:', data);
 
+      // Cancel any existing active individual subscription for this user
+      const { data: existingSub } = await supabase
+        .from('subscriptions')
+        .select('id')
+        .eq('user_id', data.userId)
+        .eq('status', 'active')
+        .is('church_id', null)
+        .maybeSingle();
+
+      if (existingSub) {
+        console.log('🔄 Cancelando subscription anterior:', existingSub.id);
+        await supabase
+          .from('subscriptions')
+          .update({ 
+            status: 'cancelled', 
+            cancelled_at: new Date().toISOString() 
+          })
+          .eq('id', existingSub.id);
+      }
+
       // Create subscription
       const { data: subscription, error: subscriptionError } = await supabase
         .from('subscriptions')

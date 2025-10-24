@@ -8,6 +8,7 @@ export interface SubscriptionAccess {
   canAccessTracks: boolean;
   canAccessProgress: boolean;
   canAccessPersonalDevotionals: boolean;
+  canAccessPublicContent: boolean;
   canAccessGroups: boolean;
   canAccessChurchAdmin: boolean;
   canAccessChurchCustomization: boolean;
@@ -109,6 +110,7 @@ export const useSubscriptionAccess = () => {
         canAccessTracks: planType !== 'free',
         canAccessProgress: planType !== 'free',
         canAccessPersonalDevotionals: planType !== 'free',
+        canAccessPublicContent: true,
         canAccessGroups: planType.startsWith('church'),
         canAccessChurchAdmin: planType.startsWith('church'),
         canAccessChurchCustomization: planType === 'church_plus' || planType === 'church_premium',
@@ -129,6 +131,7 @@ function getDefaultAccess(): SubscriptionAccess {
     canAccessTracks: false,
     canAccessProgress: false,
     canAccessPersonalDevotionals: false,
+    canAccessPublicContent: true,
     canAccessGroups: false,
     canAccessChurchAdmin: false,
     canAccessChurchCustomization: false,

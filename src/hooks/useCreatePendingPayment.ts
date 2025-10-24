@@ -18,6 +18,20 @@ export const useCreatePendingPayment = () => {
         throw new Error('Você precisa estar logado para continuar. Por favor, confirme seu email e faça login novamente.');
       }
 
+      // Check for existing pending payment
+      const { data: existingPayment } = await supabase
+        .from('pending_payments')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('status', 'pending')
+        .eq('plan_type', planType)
+        .maybeSingle();
+
+      // If exists, return it instead of creating a new one
+      if (existingPayment) {
+        return existingPayment;
+      }
+
       // Generate confirmation code
       const { data: code, error: codeError } = await supabase
         .rpc('generate_confirmation_code');
