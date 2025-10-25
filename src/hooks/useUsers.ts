@@ -40,6 +40,7 @@ export const useUsers = (filters?: {
           full_name,
           avatar_url,
           church_id,
+          subscription_id,
           phone,
           birth_date,
           address,
@@ -107,12 +108,12 @@ export const useUsers = (filters?: {
             }
           }
 
-          // If no church subscription, check individual
-          if (planType === 'free') {
+          // If no church subscription, check individual via profile.subscription_id FIRST
+          if (planType === 'free' && profile.subscription_id) {
             const { data: individualSub } = await supabase
               .from('subscriptions')
               .select('status, plan_id, subscription_plans(plan_type)')
-              .eq('user_id', profile.id)
+              .eq('id', profile.subscription_id)
               .eq('status', 'active')
               .maybeSingle();
 
@@ -128,13 +129,12 @@ export const useUsers = (filters?: {
           let individualExpiresAt = null;
           let individualPlanName = null;
 
-          if (planType === 'free') {
+          // Always fetch individual subscription info via profile.subscription_id
+          if (profile.subscription_id) {
             const { data: individualSub } = await supabase
               .from('subscriptions')
-              .select('id, status, expires_at, subscription_plans(name)')
-              .eq('user_id', profile.id)
-              .order('created_at', { ascending: false })
-              .limit(1)
+              .select('id, status, expires_at, subscription_plans(name, plan_type)')
+              .eq('id', profile.subscription_id)
               .maybeSingle();
 
             if (individualSub) {
@@ -142,6 +142,12 @@ export const useUsers = (filters?: {
               individualSubStatus = individualSub.status;
               individualExpiresAt = individualSub.expires_at;
               individualPlanName = individualSub.subscription_plans?.name || null;
+              
+              // If still 'free', update with actual plan
+              if (planType === 'free' && individualSub.status === 'active') {
+                planType = individualSub.subscription_plans?.plan_type || 'free';
+                subscriptionStatus = individualSub.status;
+              }
             }
           }
 
