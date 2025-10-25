@@ -38,9 +38,50 @@ export const usePermissions = (): UsePermissionsReturn => {
       try {
         const roles = await getUserRoles(user.id);
         
-        // Usuário sem role = visitor
+        // Verificar se tem subscription ativa (individual ou igreja)
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('church_id, subscription_id')
+          .eq('id', user.id)
+          .maybeSingle();
+
+        let hasActiveSubscription = false;
+
+        // Check individual subscription
+        if (profile?.subscription_id) {
+          const { data: sub } = await supabase
+            .from('subscriptions')
+            .select('status')
+            .eq('id', profile.subscription_id)
+            .eq('status', 'active')
+            .maybeSingle();
+          
+          if (sub) hasActiveSubscription = true;
+        }
+
+        // Check church subscription
+        if (!hasActiveSubscription && profile?.church_id) {
+          const { data: church } = await supabase
+            .from('churches')
+            .select('subscription_id')
+            .eq('id', profile.church_id)
+            .maybeSingle();
+
+          if (church?.subscription_id) {
+            const { data: sub } = await supabase
+              .from('subscriptions')
+              .select('status')
+              .eq('id', church.subscription_id)
+              .eq('status', 'active')
+              .maybeSingle();
+            
+            if (sub) hasActiveSubscription = true;
+          }
+        }
+        
+        // Usuário sem role MAS com subscription ativa = member (não visitor)
         if (roles.length === 0) {
-          setIsVisitor(true);
+          setIsVisitor(!hasActiveSubscription); // visitor só se NÃO tiver subscription
           setIsSuperAdmin(false);
           setIsChurchAdmin(false);
           setIsLider(false);
