@@ -2,7 +2,7 @@ import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { BookOpen, Users, Compass, ArrowRight, Home, Settings, MessageCircle, Info, Search, Calendar, TrendingUp } from "lucide-react";
+import { BookOpen, Users, Compass, ArrowRight, Home, Settings, MessageCircle, Info, Search, Calendar, TrendingUp, CreditCard } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useChurch } from "@/contexts/ChurchContext";
@@ -149,7 +149,7 @@ const IndividualDashboard = () => {
       action: () => navigate(isVisitor ? '/historico-devocional' : '/progresso')
     },
     ...(!isVisitor ? [{
-      icon: Settings,
+      icon: CreditCard,
       title: "Planos",
       description: subscriptionStatus === 'active' ? 'Gerenciar' : 'Ver planos',
       color: "from-purple-500 to-pink-500",
