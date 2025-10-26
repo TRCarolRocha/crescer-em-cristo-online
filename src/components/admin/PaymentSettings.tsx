@@ -12,8 +12,12 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { QRCodeUpload } from './QRCodeUpload';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Info } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Info, CheckCircle2, AlertCircle, XCircle, Eye } from 'lucide-react';
+import { PaymentConfirmation } from '@/components/subscription/PaymentConfirmation';
+import { cn } from '@/lib/utils';
 
 const settingsSchema = z.object({
   pix_key: z.string().min(5, 'Chave PIX é obrigatória'),
@@ -26,9 +30,39 @@ type SettingsFormData = z.infer<typeof settingsSchema>;
 
 export const PaymentSettings = () => {
   const [selectedPlanId, setSelectedPlanId] = useState<string | undefined>(undefined);
+  const [previewOpen, setPreviewOpen] = useState(false);
   const { settings, isLoading, updateSettings, createSettings } = usePaymentSettings(selectedPlanId);
   const { plans } = useSubscriptionPlans();
   const { toast } = useToast();
+
+  // Verificar se a chave PIX é placeholder
+  const isPlaceholderKey = (key: string) => {
+    const placeholders = ['exemplo', 'seu-pix', 'placeholder', 'teste', 'seu_email', 'seuemail'];
+    return placeholders.some(p => key.toLowerCase().includes(p));
+  };
+
+  // Verificar completude da configuração
+  const getConfigStatus = () => {
+    if (!settings?.pix_key) return { complete: false, percentage: 0 };
+    
+    const checks = {
+      hasPixKey: !!settings.pix_key && !isPlaceholderKey(settings.pix_key),
+      hasQrCode: !!settings.qr_code_url,
+      hasPixCopiaCola: !!settings.pix_copia_cola,
+      hasExternalLink: !!settings.external_payment_link,
+    };
+
+    const completed = Object.values(checks).filter(Boolean).length;
+    const total = 4;
+    
+    return {
+      complete: checks.hasPixKey && (checks.hasQrCode || checks.hasPixCopiaCola),
+      percentage: (completed / total) * 100,
+      checks
+    };
+  };
+
+  const configStatus = getConfigStatus();
   
   const { register, handleSubmit, formState: { errors }, setValue, watch, reset } = useForm<SettingsFormData>({
     resolver: zodResolver(settingsSchema),
@@ -112,10 +146,23 @@ export const PaymentSettings = () => {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Configurações de PIX por Plano</CardTitle>
-          <CardDescription>
-            Configure chaves PIX específicas para cada plano de assinatura
-          </CardDescription>
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <CardTitle>Configurações de PIX por Plano</CardTitle>
+              <CardDescription>
+                Configure chaves PIX específicas para cada plano de assinatura
+              </CardDescription>
+            </div>
+            {settings && (
+              <Badge variant={configStatus.complete ? "default" : "destructive"} className="h-fit">
+                {configStatus.complete ? (
+                  <><CheckCircle2 className="w-3 h-3 mr-1" /> Completa</>
+                ) : (
+                  <><AlertCircle className="w-3 h-3 mr-1" /> Incompleta</>
+                )}
+              </Badge>
+            )}
+          </div>
         </CardHeader>
         <CardContent>
           <div className="space-y-6">
@@ -159,6 +206,67 @@ export const PaymentSettings = () => {
               </Alert>
             )}
 
+            {/* Checklist de Configuração */}
+            {settings && (
+              <Card className="border-dashed">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base">Status da Configuração</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <div className="flex items-center gap-2 text-sm">
+                    {configStatus.checks.hasPixKey ? (
+                      <CheckCircle2 className="w-4 h-4 text-green-600" />
+                    ) : (
+                      <XCircle className="w-4 h-4 text-destructive" />
+                    )}
+                    <span className={cn(!configStatus.checks.hasPixKey && "text-muted-foreground")}>
+                      Chave PIX válida configurada
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    {configStatus.checks.hasQrCode ? (
+                      <CheckCircle2 className="w-4 h-4 text-green-600" />
+                    ) : (
+                      <AlertCircle className="w-4 h-4 text-amber-600" />
+                    )}
+                    <span className={cn(!configStatus.checks.hasQrCode && "text-muted-foreground")}>
+                      QR Code enviado
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    {configStatus.checks.hasPixCopiaCola ? (
+                      <CheckCircle2 className="w-4 h-4 text-green-600" />
+                    ) : (
+                      <AlertCircle className="w-4 h-4 text-amber-600" />
+                    )}
+                    <span className={cn(!configStatus.checks.hasPixCopiaCola && "text-muted-foreground")}>
+                      Pix Copia e Cola configurado
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    {configStatus.checks.hasExternalLink ? (
+                      <CheckCircle2 className="w-4 h-4 text-green-600" />
+                    ) : (
+                      <Info className="w-4 h-4 text-muted-foreground" />
+                    )}
+                    <span className={cn(!configStatus.checks.hasExternalLink && "text-muted-foreground")}>
+                      Link de pagamento externo (opcional)
+                    </span>
+                  </div>
+                  
+                  {!configStatus.complete && (
+                    <Alert variant="destructive" className="mt-4">
+                      <AlertCircle className="h-4 w-4" />
+                      <AlertTitle>Atenção</AlertTitle>
+                      <AlertDescription>
+                        Configure pelo menos a chave PIX válida e um QR Code ou Pix Copia e Cola para que os clientes possam realizar pagamentos.
+                      </AlertDescription>
+                    </Alert>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="pix_type">Tipo de Chave</Label>
@@ -184,6 +292,14 @@ export const PaymentSettings = () => {
               <Input id="pix_key" {...register('pix_key')} />
               {errors.pix_key && (
                 <p className="text-sm text-destructive">{errors.pix_key.message}</p>
+              )}
+              {watch('pix_key') && isPlaceholderKey(watch('pix_key')) && (
+                <Alert variant="destructive">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>
+                    ⚠️ Esta chave PIX parece ser um exemplo. Configure uma chave real!
+                  </AlertDescription>
+                </Alert>
               )}
             </div>
 
@@ -219,9 +335,35 @@ export const PaymentSettings = () => {
               )}
             </div>
 
-              <Button type="submit" disabled={isLoading}>
-                {settings ? 'Atualizar Configuração' : 'Criar Configuração'}
-              </Button>
+              <div className="flex gap-2">
+                <Button type="submit" disabled={isLoading}>
+                  {settings ? 'Atualizar Configuração' : 'Criar Configuração'}
+                </Button>
+
+                {settings && (
+                  <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
+                    <DialogTrigger asChild>
+                      <Button type="button" variant="outline">
+                        <Eye className="w-4 h-4 mr-2" />
+                        Visualizar Pagamento
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-lg">
+                      <DialogHeader>
+                        <DialogTitle>Preview - Tela de Pagamento</DialogTitle>
+                      </DialogHeader>
+                      <div className="mt-4">
+                        <PaymentConfirmation
+                          amount={99.90}
+                          planId={selectedPlanId}
+                          onConfirm={() => setPreviewOpen(false)}
+                          onBack={() => setPreviewOpen(false)}
+                        />
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                )}
+              </div>
             </form>
           </div>
         </CardContent>
