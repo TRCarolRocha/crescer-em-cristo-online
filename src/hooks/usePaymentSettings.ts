@@ -127,25 +127,29 @@ export const usePaymentSettings = (planId?: string) => {
     }) => {
       console.log('[CREATE] Dados recebidos:', data);
       
-      // 1. DESATIVAR CONFIGS ANTIGAS DO MESMO TIPO
-      let deactivateQuery = supabase
-        .from('payment_settings')
-        .update({ is_active: false });
-      
-      if (data.plan_id) {
-        deactivateQuery = deactivateQuery.eq('plan_id', data.plan_id);
-      } else {
-        deactivateQuery = deactivateQuery.is('plan_id', null);
-      }
-      
-      const { error: deactivateError } = await deactivateQuery;
-      
-      if (deactivateError) {
-        console.error('[CREATE] Erro ao desativar configs antigas:', deactivateError);
-        // Não bloquear criação se falhar
-      } else {
-        console.log('[CREATE] Configs antigas desativadas');
-      }
+    // 1. DESATIVAR CONFIGS ANTIGAS DO MESMO TIPO
+    let deactivateQuery = supabase
+      .from('payment_settings')
+      .update({ is_active: false });
+    
+    if (data.plan_id) {
+      deactivateQuery = deactivateQuery.eq('plan_id', data.plan_id);
+    } else {
+      deactivateQuery = deactivateQuery.is('plan_id', null);
+    }
+    
+    const { data: deactivatedRows, error: deactivateError } = await deactivateQuery
+      .select();
+    
+    if (deactivateError) {
+      console.error('[CREATE] Erro ao desativar configs antigas:', deactivateError);
+      // Não bloquear criação se falhar
+    } else {
+      console.log('[CREATE] Configs antigas desativadas:', { 
+        count: deactivatedRows?.length || 0,
+        rows: deactivatedRows 
+      });
+    }
       
       // 2. INSERIR NOVA CONFIG
       const payload = {

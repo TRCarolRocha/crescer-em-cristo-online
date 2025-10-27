@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { supabase } from '@/integrations/supabase/client';
 import { usePaymentSettings } from '@/hooks/usePaymentSettings';
 import { useSubscriptionPlans } from '@/hooks/useSubscriptionPlans';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -94,26 +95,52 @@ export const PaymentSettings = () => {
 
   const onSubmit = async (data: SettingsFormData) => {
     try {
-      console.log('[FORM] Submissão iniciada:', { 
-        plan_id: selectedPlanId, 
-        has_settings: !!settings,
-        settings_id: settings?.id 
+      console.log('[FORM] Iniciando submissão...', { 
+        selectedPlanId, 
+        form_data: data 
       });
 
-      if (settings) {
+      // BUSCA EXPLÍCITA PARA DECIDIR UPDATE OU CREATE
+      let searchQuery = supabase
+        .from('payment_settings')
+        .select('id, pix_key, qr_code_url')
+        .eq('is_active', true);
+      
+      if (selectedPlanId) {
+        searchQuery = searchQuery.eq('plan_id', selectedPlanId);
+      } else {
+        searchQuery = searchQuery.is('plan_id', null);
+      }
+      
+      const { data: existingConfig, error: searchError } = await searchQuery
+        .order('updated_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      
+      if (searchError) {
+        console.error('[FORM] Erro na busca:', searchError);
+        throw searchError;
+      }
+
+      console.log('[FORM] Config encontrada?', { 
+        exists: !!existingConfig, 
+        config_id: existingConfig?.id 
+      });
+
+      if (existingConfig) {
+        // ATUALIZAR CONFIGURAÇÃO EXISTENTE
         console.log('[FORM] Chamando updateSettings...');
-        // Atualizar configuração existente
         await updateSettings({
           pix_key: data.pix_key,
           pix_type: data.pix_type,
-          qr_code_url: settings.qr_code_url,
+          qr_code_url: existingConfig.qr_code_url, // manter QR Code existente
           pix_copia_cola: data.pix_copia_cola || undefined,
           external_payment_link: data.external_payment_link || undefined,
           plan_id: selectedPlanId
         });
       } else {
+        // CRIAR NOVA CONFIGURAÇÃO
         console.log('[FORM] Chamando createSettings...');
-        // Criar nova configuração
         await createSettings({
           pix_key: data.pix_key,
           pix_type: data.pix_type,
@@ -135,7 +162,7 @@ export const PaymentSettings = () => {
       console.error('[FORM] Erro ao salvar:', error);
       toast({
         title: 'Erro ao salvar configurações',
-        description: error.message || 'Tente novamente ou contate o suporte.',
+        description: error.message || 'Tente novamente. Verifique o console para mais detalhes.',
         variant: 'destructive',
       });
     }
