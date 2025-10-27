@@ -38,23 +38,54 @@ export const QRCodeUpload: React.FC<QRCodeUploadProps> = ({ currentUrl, planId }
         .from('message-images')
         .getPublicUrl(`payment-qrcodes/${uploadData.path}`);
 
-      // Update settings
+      console.log('[QR UPLOAD] URL gerada:', publicUrl);
+
+      // BUSCAR CONFIG EXISTENTE
+      let query = supabase
+        .from('payment_settings')
+        .select('id')
+        .eq('is_active', true);
+      
+      if (planId) {
+        query = query.eq('plan_id', planId);
+      } else {
+        query = query.is('plan_id', null);
+      }
+      
+      const { data: existing, error: searchError } = await query
+        .order('updated_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      
+      if (searchError) throw searchError;
+      
+      if (!existing) {
+        throw new Error('Configuração de pagamento não encontrada. Configure a chave PIX primeiro.');
+      }
+
+      console.log('[QR UPLOAD] Atualizando config ID:', existing.id);
+
+      // UPDATE DIRETO PELO ID
       const { error: updateError } = await supabase
         .from('payment_settings')
-        .update({ qr_code_url: publicUrl })
-        .eq('is_active', true)
-        .match(planId ? { plan_id: planId } : { plan_id: null });
+        .update({ 
+          qr_code_url: publicUrl,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', existing.id);
 
       if (updateError) throw updateError;
 
       // Invalidate payment settings query to refresh UI
       queryClient.invalidateQueries({ queryKey: ['payment-settings', planId] });
+      queryClient.invalidateQueries({ queryKey: ['payment-settings'] });
       
       toast({
         title: 'QR Code salvo!',
         description: 'A imagem foi atualizada com sucesso.',
       });
     } catch (error: any) {
+      console.error('[QR UPLOAD] Erro:', error);
       toast({
         title: 'Erro no upload',
         description: error.message,
@@ -67,11 +98,36 @@ export const QRCodeUpload: React.FC<QRCodeUploadProps> = ({ currentUrl, planId }
 
   const handleRemove = async () => {
     try {
+      // BUSCAR CONFIG EXISTENTE
+      let query = supabase
+        .from('payment_settings')
+        .select('id')
+        .eq('is_active', true);
+      
+      if (planId) {
+        query = query.eq('plan_id', planId);
+      } else {
+        query = query.is('plan_id', null);
+      }
+      
+      const { data: existing, error: searchError } = await query
+        .limit(1)
+        .maybeSingle();
+      
+      if (searchError) throw searchError;
+      
+      if (!existing) {
+        throw new Error('Configuração não encontrada.');
+      }
+
+      // UPDATE PELO ID
       const { error } = await supabase
         .from('payment_settings')
-        .update({ qr_code_url: null })
-        .eq('is_active', true)
-        .match(planId ? { plan_id: planId } : { plan_id: null });
+        .update({ 
+          qr_code_url: null,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', existing.id);
 
       if (error) throw error;
 
@@ -83,6 +139,7 @@ export const QRCodeUpload: React.FC<QRCodeUploadProps> = ({ currentUrl, planId }
       queryClient.invalidateQueries({ queryKey: ['payment-settings', planId] });
       queryClient.invalidateQueries({ queryKey: ['payment-settings'] });
     } catch (error: any) {
+      console.error('[QR REMOVE] Erro:', error);
       toast({
         title: 'Erro',
         description: error.message,

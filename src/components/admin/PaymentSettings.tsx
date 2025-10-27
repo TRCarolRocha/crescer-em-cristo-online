@@ -94,15 +94,14 @@ export const PaymentSettings = () => {
 
   const onSubmit = async (data: SettingsFormData) => {
     try {
-      const settingsData = {
-        pix_key: data.pix_key,
-        pix_type: data.pix_type,
-        pix_copia_cola: data.pix_copia_cola || null,
-        external_payment_link: data.external_payment_link || null,
-        plan_id: selectedPlanId
-      };
+      console.log('[FORM] Submissão iniciada:', { 
+        plan_id: selectedPlanId, 
+        has_settings: !!settings,
+        settings_id: settings?.id 
+      });
 
       if (settings) {
+        console.log('[FORM] Chamando updateSettings...');
         // Atualizar configuração existente
         await updateSettings({
           pix_key: data.pix_key,
@@ -113,6 +112,7 @@ export const PaymentSettings = () => {
           plan_id: selectedPlanId
         });
       } else {
+        console.log('[FORM] Chamando createSettings...');
         // Criar nova configuração
         await createSettings({
           pix_key: data.pix_key,
@@ -123,6 +123,8 @@ export const PaymentSettings = () => {
         });
       }
       
+      console.log('[FORM] Sucesso!');
+      
       toast({
         title: 'Configurações salvas!',
         description: selectedPlanId 
@@ -130,9 +132,10 @@ export const PaymentSettings = () => {
           : 'Configuração global (padrão) foi atualizada.',
       });
     } catch (error: any) {
+      console.error('[FORM] Erro ao salvar:', error);
       toast({
-        title: 'Erro',
-        description: error.message,
+        title: 'Erro ao salvar configurações',
+        description: error.message || 'Tente novamente ou contate o suporte.',
         variant: 'destructive',
       });
     }
