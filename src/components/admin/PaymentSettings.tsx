@@ -384,7 +384,11 @@ export const PaymentSettings = () => {
                       </DialogHeader>
                       <div className="mt-4">
                         <PaymentConfirmation
-                          amount={99.90}
+                          amount={
+                            selectedPlanId 
+                              ? Number(plans?.find(p => p.id === selectedPlanId)?.price_monthly || 0)
+                              : 99.90
+                          }
                           planId={selectedPlanId}
                           onConfirm={() => setPreviewOpen(false)}
                           onBack={() => setPreviewOpen(false)}

@@ -36,7 +36,7 @@ export const QRCodeUpload: React.FC<QRCodeUploadProps> = ({ currentUrl, planId }
       // Get public URL
       const { data: { publicUrl } } = supabase.storage
         .from('message-images')
-        .getPublicUrl(`payment-qrcodes/${uploadData.path}`);
+        .getPublicUrl(uploadData.path);
 
       console.log('[QR UPLOAD] URL gerada:', publicUrl);
 
