@@ -21,6 +21,7 @@ import Agenda from "./pages/Agenda";
 import Devocional from "./pages/Devocional";
 import HistoricoDevocional from "./pages/HistoricoDevocional";
 import Trilhas from "./pages/Trilhas";
+import MinhasTrilhas from "./pages/MinhasTrilhas";
 import Diagnostico from "./pages/Diagnostico";
 import Progresso from "./pages/Progresso";
 import Membros from "./pages/Membros";
@@ -274,6 +275,11 @@ const App = () => (
             <Route path="/trilhas" element={
               <ProtectedRoute>
                 <Trilhas />
+              </ProtectedRoute>
+            } />
+            <Route path="/trilhas/minhas-trilhas" element={
+              <ProtectedRoute>
+                <MinhasTrilhas />
               </ProtectedRoute>
             } />
             <Route path="/progresso" element={

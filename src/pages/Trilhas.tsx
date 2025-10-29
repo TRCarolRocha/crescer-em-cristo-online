@@ -4,13 +4,14 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
-import { BookOpen, Clock, Users, ChevronRight, Trophy, Target, Award, Star } from 'lucide-react';
+import { BookOpen, Clock, Users, ChevronRight, Trophy, Target, Award, Star, Plus } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import ConteudoTrilha from '@/components/ConteudoTrilha';
 import { useSubscriptionAccess } from '@/hooks/useSubscriptionAccess';
 import { UpgradePrompt } from '@/components/subscription/UpgradePrompt';
+import { AccessGate } from '@/components/subscription/AccessGate';
 
 interface Trilha {
   id: string;
@@ -79,6 +80,9 @@ const TrilhasContent = () => {
       if (!access.canAccessTracks) {
         query = query.eq('is_public', true);
       }
+
+      // Não mostrar trilhas customizadas de outros usuários (a menos que sejam públicas)
+      query = query.or(`is_custom.is.null,is_custom.eq.false,and(is_custom.eq.true,visibility.eq.public)`);
 
       const { data, error } = await query.order('title', { ascending: true });
       
@@ -226,6 +230,12 @@ const TrilhasContent = () => {
           <Button variant="outline" onClick={() => navigate('/')} className="flex items-center gap-2">
             🏠 Voltar ao Início
           </Button>
+          <AccessGate requiredAccess="canCreateOwnTracks">
+            <Button onClick={() => navigate('/trilhas/minhas-trilhas')}>
+              <Plus className="h-4 w-4 mr-2" />
+              Minhas Trilhas
+            </Button>
+          </AccessGate>
         </div>
 
         {/* Header */}

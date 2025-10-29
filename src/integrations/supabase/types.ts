@@ -488,45 +488,54 @@ export type Database = {
           allowed_levels: string[] | null
           church_id: string | null
           created_at: string | null
+          created_by: string | null
           description: string | null
           difficulty: string | null
           duration: string | null
           id: string
+          is_custom: boolean | null
           is_public: boolean | null
           lessons: number | null
           level: string
           title: string
           topics: string[] | null
+          visibility: string | null
         }
         Insert: {
           allowed_groups?: string[] | null
           allowed_levels?: string[] | null
           church_id?: string | null
           created_at?: string | null
+          created_by?: string | null
           description?: string | null
           difficulty?: string | null
           duration?: string | null
           id?: string
+          is_custom?: boolean | null
           is_public?: boolean | null
           lessons?: number | null
           level: string
           title: string
           topics?: string[] | null
+          visibility?: string | null
         }
         Update: {
           allowed_groups?: string[] | null
           allowed_levels?: string[] | null
           church_id?: string | null
           created_at?: string | null
+          created_by?: string | null
           description?: string | null
           difficulty?: string | null
           duration?: string | null
           id?: string
+          is_custom?: boolean | null
           is_public?: boolean | null
           lessons?: number | null
           level?: string
           title?: string
           topics?: string[] | null
+          visibility?: string | null
         }
         Relationships: [
           {
@@ -1666,14 +1675,8 @@ export type Database = {
         Args: { p_target_level: string; p_user_id: string }
         Returns: boolean
       }
-      generate_confirmation_code: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
-      get_user_church_id: {
-        Args: { p_user_id?: string }
-        Returns: string
-      }
+      generate_confirmation_code: { Args: never; Returns: string }
+      get_user_church_id: { Args: { p_user_id?: string }; Returns: string }
       get_user_roles: {
         Args: { _user_id?: string }
         Returns: {
@@ -1691,30 +1694,12 @@ export type Database = {
         }
         Returns: boolean
       }
-      is_admin: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
-      is_church_admin: {
-        Args: { p_church_id: string }
-        Returns: boolean
-      }
-      is_group_leader: {
-        Args: { p_user_id?: string }
-        Returns: boolean
-      }
-      is_lider: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
-      is_super_admin: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
-      is_user_super_admin: {
-        Args: { check_user_id: string }
-        Returns: boolean
-      }
+      is_admin: { Args: never; Returns: boolean }
+      is_church_admin: { Args: { p_church_id: string }; Returns: boolean }
+      is_group_leader: { Args: { p_user_id?: string }; Returns: boolean }
+      is_lider: { Args: never; Returns: boolean }
+      is_super_admin: { Args: never; Returns: boolean }
+      is_user_super_admin: { Args: { check_user_id: string }; Returns: boolean }
     }
     Enums: {
       app_role: "admin" | "lider" | "member" | "super_admin" | "visitor"
