@@ -22,6 +22,8 @@ import Devocional from "./pages/Devocional";
 import HistoricoDevocional from "./pages/HistoricoDevocional";
 import Trilhas from "./pages/Trilhas";
 import MinhasTrilhas from "./pages/MinhasTrilhas";
+import MeuGrupo from "./pages/MeuGrupo";
+import JoinGroup from "./pages/JoinGroup";
 import Diagnostico from "./pages/Diagnostico";
 import Progresso from "./pages/Progresso";
 import Membros from "./pages/Membros";
@@ -32,6 +34,7 @@ import ChurchAdminDashboard from "./pages/admin/ChurchAdminDashboard";
 import ChurchList from "./pages/admin/ChurchList";
 import PublicContent from "./pages/admin/PublicContent";
 import PendingPayments from "./pages/admin/PendingPayments";
+import SupportInbox from "./pages/admin/SupportInbox";
 import AuthPage from "./components/auth/AuthPage";
 import Planos from "./pages/Planos";
 import AssinaturaFree from "./pages/assinatura/AssinaturaFree";
@@ -205,6 +208,18 @@ const App = () => (
                   </SidebarProvider>
                 </SuperAdminRoute>
               } />
+              <Route path="/admin/hodos/mensagens" element={
+                <SuperAdminRoute>
+                  <SidebarProvider>
+                    <div className="flex min-h-screen w-full">
+                      <AdminSidebar />
+                      <main className="flex-1">
+                        <SupportInbox />
+                      </main>
+                    </div>
+                  </SidebarProvider>
+                </SuperAdminRoute>
+              } />
               
               {/* Church Admin Routes */}
               <Route path="/admin/igrejas/:churchSlug" element={
@@ -282,6 +297,12 @@ const App = () => (
                 <MinhasTrilhas />
               </ProtectedRoute>
             } />
+            <Route path="/meu-grupo" element={
+              <ProtectedRoute>
+                <MeuGrupo />
+              </ProtectedRoute>
+            } />
+            <Route path="/entrar-grupo/:inviteCode" element={<JoinGroup />} />
             <Route path="/progresso" element={
               <ProtectedRoute>
                 <Progresso />

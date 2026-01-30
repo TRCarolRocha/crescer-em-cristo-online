@@ -10,13 +10,15 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { LayoutDashboard, Building2, FileText, Home, Church, ArrowLeft } from 'lucide-react';
+import { LayoutDashboard, Building2, FileText, Home, Church, ArrowLeft, MessageCircle } from 'lucide-react';
 import { usePermissions } from '@/hooks/usePermissions';
 import { HeaderLogo } from '@/components/common/HeaderLogo';
 import { useChurches } from '@/hooks/useChurches';
 import { useChurch } from '@/contexts/ChurchContext';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { useSupportMessages } from '@/hooks/useSupportMessages';
 
 export function AdminSidebar() {
   const navigate = useNavigate();
@@ -24,6 +26,7 @@ export function AdminSidebar() {
   const { isSuperAdmin, isChurchAdmin } = usePermissions();
   const { churches, loading: churchesLoading } = useChurches();
   const { church: userChurch } = useChurch();
+  const { unreadCount } = useSupportMessages();
 
   // Determinar quais igrejas exibir
   const displayChurches = isSuperAdmin 
@@ -37,6 +40,7 @@ export function AdminSidebar() {
     { title: 'Gerenciar Igrejas', url: '/admin/hodos/igrejas', icon: Building2 },
     { title: 'Conteúdos Públicos', url: '/admin/hodos/conteudos', icon: FileText },
     { title: 'Gerenciar Planos', url: '/admin/hodos/planos', icon: LayoutDashboard },
+    { title: 'Suporte', url: '/admin/hodos/mensagens', icon: MessageCircle, badge: unreadCount },
   ];
 
 
@@ -71,7 +75,12 @@ export function AdminSidebar() {
                       className="w-full justify-start"
                     >
                       <item.icon className="mr-2 h-4 w-4" />
-                      <span>{item.title}</span>
+                      <span className="flex-1">{item.title}</span>
+                      {item.badge && item.badge > 0 && (
+                        <Badge variant="destructive" className="ml-auto h-5 min-w-5 flex items-center justify-center text-xs">
+                          {item.badge}
+                        </Badge>
+                      )}
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 ))}

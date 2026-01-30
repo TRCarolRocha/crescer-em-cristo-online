@@ -744,7 +744,12 @@ export type Database = {
           enviada_em: string | null
           id: string
           lida: boolean | null
+          message_type: string | null
+          parent_message_id: string | null
+          read_at: string | null
           remetente_id: string
+          replied_at: string | null
+          subject: string | null
         }
         Insert: {
           conteudo: string
@@ -752,7 +757,12 @@ export type Database = {
           enviada_em?: string | null
           id?: string
           lida?: boolean | null
+          message_type?: string | null
+          parent_message_id?: string | null
+          read_at?: string | null
           remetente_id: string
+          replied_at?: string | null
+          subject?: string | null
         }
         Update: {
           conteudo?: string
@@ -760,9 +770,22 @@ export type Database = {
           enviada_em?: string | null
           id?: string
           lida?: boolean | null
+          message_type?: string | null
+          parent_message_id?: string | null
+          read_at?: string | null
           remetente_id?: string
+          replied_at?: string | null
+          subject?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "mensagens_parent_message_id_fkey"
+            columns: ["parent_message_id"]
+            isOneToOne: false
+            referencedRelation: "mensagens"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       message_comments: {
         Row: {
@@ -1195,6 +1218,113 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      small_group_members: {
+        Row: {
+          group_id: string
+          id: string
+          joined_at: string | null
+          role: string | null
+          user_id: string
+        }
+        Insert: {
+          group_id: string
+          id?: string
+          joined_at?: string | null
+          role?: string | null
+          user_id: string
+        }
+        Update: {
+          group_id?: string
+          id?: string
+          joined_at?: string | null
+          role?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "small_group_members_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "small_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      small_group_tracks: {
+        Row: {
+          assigned_at: string | null
+          due_date: string | null
+          group_id: string
+          id: string
+          track_id: string
+        }
+        Insert: {
+          assigned_at?: string | null
+          due_date?: string | null
+          group_id: string
+          id?: string
+          track_id: string
+        }
+        Update: {
+          assigned_at?: string | null
+          due_date?: string | null
+          group_id?: string
+          id?: string
+          track_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "small_group_tracks_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "small_groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "small_group_tracks_track_id_fkey"
+            columns: ["track_id"]
+            isOneToOne: false
+            referencedRelation: "discipleship_tracks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      small_groups: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          invite_code: string | null
+          is_active: boolean | null
+          leader_id: string
+          max_members: number | null
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          invite_code?: string | null
+          is_active?: boolean | null
+          leader_id: string
+          max_members?: number | null
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          invite_code?: string | null
+          is_active?: boolean | null
+          leader_id?: string
+          max_members?: number | null
+          name?: string
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       spiritual_levels: {
         Row: {
